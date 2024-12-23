@@ -21,7 +21,6 @@ def set_preferences():
     
     # Delete existing preferences if any
     TenantPreference.query.filter_by(tenant_id=current_user_id).delete()
-    
     preference = TenantPreference(
         tenant_id=current_user_id,
         max_price=data.get('max_price'),
