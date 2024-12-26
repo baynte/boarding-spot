@@ -101,5 +101,6 @@ def search_rooms():
         'cleanliness_score': room.cleanliness_score,
         'accessibility_score': room.accessibility_score,
         'noise_level': room.noise_level,
+        'image_url': room.image_url,
         'topsis_score': float(score)
     } for room, score in ranked_rooms]) 

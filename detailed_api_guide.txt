@@ -80,30 +80,25 @@ Description:
 - Adds new room listing
 - All scores must be between 1-10
 - Requires landlord authentication
+- Supports image upload
 
 Headers:
-Content-Type: application/json
+Content-Type: multipart/form-data
 Authorization: Bearer {{TOKEN}}
 
 Example Request:
-{
-    "title": "Modern Downtown Studio",
-    "description": "Newly renovated studio apartment in the heart of downtown",
-    "price": 1200.00,
-    "size": 35.5,
-    "location": "123 Downtown Street",
-    "amenities": [
-        "wifi",
-        "air_conditioning",
-        "washing_machine",
-        "parking",
-        "gym_access"
-    ],
-    "safety_score": 9.0,
-    "cleanliness_score": 9.5,
-    "accessibility_score": 8.5,
-    "noise_level": 3.0
-}
+Form Data:
+- title: "Modern Downtown Studio"
+- description: "Newly renovated studio apartment in the heart of downtown"
+- price: 1200.00
+- size: 35.5
+- location: "123 Downtown Street"
+- amenities: ["wifi", "air_conditioning", "washing_machine", "parking", "gym_access"]
+- safety_score: 9.0
+- cleanliness_score: 9.5
+- accessibility_score: 8.5
+- noise_level: 3.0
+- image: [file upload]
 
 Field Explanations:
 - price: Monthly rent in currency units
@@ -112,6 +107,14 @@ Field Explanations:
 - cleanliness_score: Property cleanliness rating (1-10)
 - accessibility_score: Public transport/amenities accessibility (1-10)
 - noise_level: Ambient noise level (1-10, lower is better)
+- image: Room photo (jpg, jpeg, png, or gif)
+
+Testing Steps:
+1. Use Postman's form-data input type
+2. Add all text fields as normal
+3. For image, select 'File' type and choose an image
+4. Send request and verify image_url in response
+5. Try accessing image_url in browser to confirm it works
 
 2. GET LANDLORD'S ROOMS
 ----------------------
@@ -140,21 +143,31 @@ Description:
 - Only room owner can update
 
 Headers:
-Content-Type: application/json
+Content-Type: multipart/form-data
 Authorization: Bearer {{TOKEN}}
 
 Example Request:
-{
-    "price": 1300.00,
-    "availability": false,
-    "cleanliness_score": 9.8,
-    "amenities": ["wifi", "air_conditioning", "parking", "gym_access", "pool"]
-}
+Form Data:
+- price: 1300.00
+- availability: false
+- cleanliness_score: 9.8
+- amenities: ["wifi", "air_conditioning", "parking", "gym_access", "pool"]
+- image: [file upload]
+
+Notes on Image Upload:
+- Previous image will be automatically deleted when new one is uploaded
+- Image filename is prefixed with user_id and timestamp for uniqueness
+- Supported formats: jpg, jpeg, png, gif
+- Images are stored in static/room_images directory
+- Image URLs are relative to API base URL
 
 Testing Steps:
 1. Get room_id from previous GET request
-2. Send update request
-3. Verify with GET request that changes were applied
+2. Use Postman's form-data for request
+3. Add fields to update
+4. Optionally add new image file
+5. Send request and verify changes
+6. Check if old image was removed and new one saved
 
 TENANT OPERATIONS
 ----------------
@@ -249,4 +262,11 @@ BEST PRACTICES
 3. Use consistent score range (1-10) for room attributes
 4. Include all required headers
 5. Handle token refresh when expired
-6. Validate data before sending requests 
+6. Validate data before sending requests
+7. Handle image uploads properly:
+   - Use appropriate content-type header
+   - Keep images under reasonable size
+   - Use supported image formats only
+   - Verify image URLs work after upload
+8. Clean up unused images periodically
+9. Consider image backup strategy 
