@@ -21,7 +21,7 @@
         variant="elevated"
       >
         <v-icon start :icon="getMatchIcon(match_score)"></v-icon>
-        {{ Math.round(match_score) }}% Match
+        {{ Math.round(match_score) }}%
       </v-chip>
       <v-chip
         class="rank-chip"
@@ -268,7 +268,7 @@
       </div>
     </v-card-text>
 
-    <v-card-actions>
+    <!-- <v-card-actions>
       <v-btn
         block
         color="primary"
@@ -277,7 +277,7 @@
       >
         View Details
       </v-btn>
-    </v-card-actions>
+    </v-card-actions> -->
   </v-card>
 </template>
 
@@ -356,7 +356,7 @@ const formatPrice = (price) => {
 const getMatchColor = (score) => {
   if (score >= 90) return 'success'
   if (score >= 85) return 'info'
-  if (score >= 75) return 'success-darken-1'
+  if (score >= 75) return 'green-darken-1'
   if (score >= 60) return 'warning'
   return 'grey'
 }

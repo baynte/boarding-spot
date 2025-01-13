@@ -12,7 +12,7 @@
                   v-model="preferences.max_price"
                   label="Maximum Price"
                   type="number"
-                  prefix="$"
+                  prefix="₱"
                   :rules="[rules.required, rules.positive]"
                   hint="Your maximum budget for rent"
                   persistent-hint
