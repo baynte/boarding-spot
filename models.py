@@ -37,13 +37,24 @@ class Room(db.Model):
 class TenantPreference(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     tenant_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    max_price = db.Column(db.Float)
-    min_size = db.Column(db.Float)
-    preferred_location = db.Column(db.String(200))
-    required_amenities = db.Column(db.Text)  # JSON string of required amenities
+    max_price = db.Column(db.Float, nullable=False)
+    min_size = db.Column(db.Float, nullable=False)
+    preferred_location = db.Column(db.String(200), nullable=False)
+    required_amenities = db.Column(db.Text, nullable=False)  # JSON string of required amenities
     
     # Weights for TOPSIS criteria (0-1)
-    safety_weight = db.Column(db.Float, default=0.25)
-    cleanliness_weight = db.Column(db.Float, default=0.25)
-    accessibility_weight = db.Column(db.Float, default=0.25)
-    noise_level_weight = db.Column(db.Float, default=0.25)
+    safety_weight = db.Column(db.Float, nullable=False, default=0.25)
+    cleanliness_weight = db.Column(db.Float, nullable=False, default=0.25)
+    accessibility_weight = db.Column(db.Float, nullable=False, default=0.25)
+    noise_level_weight = db.Column(db.Float, nullable=False, default=0.25)
+
+    # Add constraints to ensure weights are between 0 and 1
+    __table_args__ = (
+        db.CheckConstraint('safety_weight >= 0 AND safety_weight <= 1', name='safety_weight_range'),
+        db.CheckConstraint('cleanliness_weight >= 0 AND cleanliness_weight <= 1', name='cleanliness_weight_range'),
+        db.CheckConstraint('accessibility_weight >= 0 AND accessibility_weight <= 1', name='accessibility_weight_range'),
+        db.CheckConstraint('noise_level_weight >= 0 AND noise_level_weight <= 1', name='noise_weight_range'),
+        db.CheckConstraint('safety_weight + cleanliness_weight + accessibility_weight + noise_level_weight = 1', name='weights_sum'),
+        db.CheckConstraint('max_price > 0', name='positive_price'),
+        db.CheckConstraint('min_size > 0', name='positive_size'),
+    )

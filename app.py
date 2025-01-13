@@ -2,6 +2,7 @@ from flask import Flask
 from datetime import timedelta
 import os
 from extensions import db, jwt, cors
+from flask_migrate import Migrate
 from routes import auth_routes, landlord_routes, tenant_routes
 
 def create_app():
@@ -18,6 +19,7 @@ def create_app():
     db.init_app(app)
     jwt.init_app(app)
     cors.init_app(app)
+    migrate = Migrate(app, db)
 
     # Register blueprints
     app.register_blueprint(auth_routes.bp)
