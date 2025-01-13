@@ -1,102 +1,129 @@
-# Boarding Spot API
+# Boarding Spot
 
-A Flask-based API server for matching tenants with rental rooms using TOPSIS algorithm for preference-based recommendations.
+A web application for matching tenants with available rooms based on preferences and criteria using the TOPSIS algorithm.
 
 ## Features
 
-- JWT Authentication
-- Landlord and Tenant user types
-- Room management for landlords
-- Preference-based room search for tenants
-- TOPSIS algorithm for room ranking based on multiple criteria
+- Tenant preference management
+- Room listing and management for landlords
+- Advanced room search with TOPSIS-based matching
+- Image upload for room listings
+- Score-based filtering (safety, cleanliness, accessibility, noise level)
+- Match percentage calculation for room recommendations
 
-## Setup
+## Prerequisites
 
-1. Create a virtual environment and activate it:
+- Python 3.8 or higher
+- Node.js 14 or higher
+- npm or yarn
+- PostgreSQL database
+
+## Installation
+
+### Backend Setup
+
+1. Clone the repository:
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+git clone [repository-url]
+cd boarding-spot
 ```
 
-2. Install dependencies:
+2. Create and activate a virtual environment:
+```bash
+python -m venv venv
+# On Windows
+.\venv\Scripts\activate
+# On Unix or MacOS
+source venv/bin/activate
+```
+
+3. Install Python dependencies:
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Set environment variables (optional):
+4. Set up environment variables:
+Create a `.env` file in the root directory with the following variables:
+```
+FLASK_APP=app.py
+FLASK_ENV=development
+DATABASE_URL=postgresql://[username]:[password]@localhost/boarding_spot
+JWT_SECRET_KEY=[your-secret-key]
+```
+
+5. Initialize the database:
 ```bash
-export SECRET_KEY=your-secret-key
-export JWT_SECRET_KEY=your-jwt-secret
-export DATABASE_URL=your-database-url
+flask db upgrade
 ```
 
-4. Run the server:
+### Frontend Setup
+
+1. Navigate to the frontend directory:
 ```bash
-python app.py
+cd frontend
 ```
 
-## API Endpoints
-
-### Authentication
-- POST `/auth/register` - Register new user (landlord/tenant)
-- POST `/auth/login` - Login and get JWT token
-
-### Landlord Routes
-- POST `/landlord/rooms` - Create a new room
-- GET `/landlord/rooms` - Get all rooms owned by landlord
-- PUT `/landlord/rooms/<room_id>` - Update room details
-
-### Tenant Routes
-- POST `/tenant/preferences` - Set room preferences
-- GET `/tenant/search` - Search and rank rooms based on preferences
-
-## Testing with Postman
-
-1. Register a user (landlord/tenant)
-2. Login to get the JWT token
-3. Use the JWT token in the Authorization header for all protected routes:
-   `Authorization: Bearer <your-token>`
-
-### Example Requests
-
-#### Register User
-```json
-POST /auth/register
-{
-    "email": "user@example.com",
-    "password": "password123",
-    "user_type": "landlord"
-}
+2. Install dependencies:
+```bash
+npm install
+# or
+yarn install
 ```
 
-#### Create Room (Landlord)
-```json
-POST /landlord/rooms
-{
-    "title": "Cozy Studio",
-    "description": "Modern studio apartment",
-    "price": 1000,
-    "size": 30,
-    "location": "Downtown",
-    "amenities": ["wifi", "ac", "parking"],
-    "safety_score": 8.5,
-    "cleanliness_score": 9.0,
-    "accessibility_score": 7.5,
-    "noise_level": 3.0
-}
+3. Create a `.env` file in the frontend directory:
+```
+VITE_API_URL=http://localhost:5000
 ```
 
-#### Set Preferences (Tenant)
-```json
-POST /tenant/preferences
-{
-    "max_price": 1200,
-    "min_size": 25,
-    "preferred_location": "Downtown",
-    "required_amenities": ["wifi"],
-    "safety_weight": 0.3,
-    "cleanliness_weight": 0.3,
-    "accessibility_weight": 0.2,
-    "noise_level_weight": 0.2
-}
-``` 
+## Running the Application
+
+1. Start the backend server:
+```bash
+# From the root directory
+flask run
+```
+
+2. Start the frontend development server:
+```bash
+# From the frontend directory
+npm run dev
+# or
+yarn dev
+```
+
+The application will be available at:
+- Frontend: http://localhost:5174
+- Backend API: http://localhost:5000
+
+## Project Structure
+
+```
+boarding-spot/
+├── frontend/               # Vue.js frontend
+│   ├── src/
+│   │   ├── views/         # Vue components
+│   │   ├── stores/        # Pinia stores
+│   │   └── router/        # Vue Router
+├── static/                 # Static files
+│   └── room_images/       # Uploaded room images
+├── routes/                 # Flask route handlers
+├── models.py              # Database models
+├── app.py                 # Flask application
+└── requirements.txt       # Python dependencies
+```
+
+## API Documentation
+
+The API documentation is available at `/api/docs` when running the backend server.
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details. 
