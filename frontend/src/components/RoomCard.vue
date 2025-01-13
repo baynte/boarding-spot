@@ -222,7 +222,7 @@
           </v-col>
 
           <!-- Location Match -->
-          <v-col cols="12" class="mb-2">
+          <!-- <v-col cols="12" class="mb-2">
             <div class="d-flex align-center mb-1">
               <v-icon size="small" :color="getScoreColor(locationScore / 10)" class="me-1">mdi-map-marker-check</v-icon>
               <span class="text-body-2">Location Match</span>
@@ -241,7 +241,7 @@
               height="8"
               rounded
             ></v-progress-linear>
-          </v-col>
+          </v-col> -->
 
           <!-- Price Value -->
           <v-col cols="12">
