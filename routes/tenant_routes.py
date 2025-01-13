@@ -255,13 +255,13 @@ def search_rooms():
         
         # Get weights from tenant preferences and normalize
         weights = np.array([
-            float(preference.safety_weight),
-            float(preference.cleanliness_weight),
-            float(preference.accessibility_weight),
-            float(preference.noise_level_weight),
-            0.25,  # amenity weight
-            0.25,  # price weight
-            0.25   # size weight
+            float(preference.safety_weight) * 1.5,      # Increased weight for safety
+            float(preference.cleanliness_weight) * 1.5, # Increased weight for cleanliness
+            float(preference.accessibility_weight) * 1.5, # Increased weight for accessibility
+            float(preference.noise_level_weight) * 1.5,  # Increased weight for noise
+            0.4,  # Increased amenity weight
+            0.5,  # Increased price weight
+            0.4   # Increased size weight
         ], dtype=np.float64)
         
         # Normalize weights to sum to 1
@@ -281,29 +281,42 @@ def search_rooms():
         raw_scores = np.array(raw_scores, dtype=np.float64)
         percentage_scores = raw_scores * 100
         
-        # Apply preference-based adjustments
+        # Apply preference-based adjustments with stronger bonuses/penalties
         for i, (room, score) in enumerate(zip(rooms, percentage_scores)):
-            # Preference match bonuses
+            # Price preference bonus/penalty
             if room.price <= preference.max_price:
-                percentage_scores[i] += 5  # 5% bonus for meeting price preference
-            if room.size >= preference.min_size:
-                percentage_scores[i] += 5  # 5% bonus for meeting size preference
-            if preference.preferred_location.lower() in room.location.lower():
-                percentage_scores[i] += 5  # 5% bonus for location match
+                percentage_scores[i] += 10  # Increased bonus for meeting price preference
+            else:
+                price_diff_ratio = (room.price - preference.max_price) / preference.max_price
+                percentage_scores[i] -= min(20, price_diff_ratio * 100)  # Penalty for exceeding max price
             
-            # Required amenities penalty
+            # Size preference bonus
+            if room.size >= preference.min_size:
+                size_ratio = room.size / preference.min_size
+                percentage_scores[i] += min(10, size_ratio * 5)  # Bonus scales with size
+            
+            # Location match bonus
+            if preference.preferred_location.lower() in room.location.lower():
+                percentage_scores[i] += 10  # Increased location match bonus
+            
+            # Required amenities handling
             if required_amenities:
                 room_amenities = json.loads(room.amenities) if room.amenities else []
-                missing_amenities = sum(1 for amenity in required_amenities if amenity not in room_amenities)
-                if missing_amenities > 0:
-                    percentage_scores[i] -= missing_amenities * 10  # 10% penalty per missing amenity
+                matched_amenities = sum(1 for amenity in required_amenities if amenity in room_amenities)
+                match_ratio = matched_amenities / len(required_amenities)
+                
+                # Apply scaled bonus/penalty based on amenity match ratio
+                if match_ratio == 1:
+                    percentage_scores[i] += 15  # Full match bonus
+                else:
+                    percentage_scores[i] -= (1 - match_ratio) * 20  # Scaled penalty for missing amenities
             
             # Clip scores to 0-100 range
-            percentage_scores = np.clip(percentage_scores, 0, 100)
+            percentage_scores[i] = max(0, min(100, percentage_scores[i]))
         
-        # Rank rooms
+        # Rank rooms with updated scores
         ranked_rooms = sorted(zip(rooms, percentage_scores, range(1, len(rooms) + 1)), 
-                            key=lambda x: x[1], reverse=True)
+                            key=lambda x: (x[1], -x[0].price), reverse=True)  # Secondary sort by price if scores are equal
         
         current_app.logger.info(f"Final number of ranked rooms: {len(ranked_rooms)}")
         current_app.logger.info("Top 3 rooms scores and ranks:")
@@ -314,8 +327,10 @@ def search_rooms():
         total_rooms = len(ranked_rooms)
         
         # Group rooms by match category
-        best_matches = []
+        perfect_matches = []
+        excellent_matches = []
         good_matches = []
+        fair_matches = []
         other_matches = []
         
         for room, score, rank in ranked_rooms:
@@ -329,6 +344,29 @@ def search_rooms():
                 amenity_match_percentage = (matched_amenities / len(required_amenities)) * 100
             else:
                 amenity_match_percentage = 100.0
+
+            # Calculate location match score
+            location_match_score = 0
+            if preference.preferred_location.lower() in room.location.lower():
+                # Exact neighborhood match
+                location_match_score = 100
+            elif any(loc in room.location.lower() for loc in preference.preferred_location.lower().split()):
+                # Partial area match
+                location_match_score = 70
+
+            # Calculate price value score
+            price_value_score = 100
+            if room.price > preference.max_price:
+                price_diff_percentage = ((room.price - preference.max_price) / preference.max_price) * 100
+                price_value_score = max(0, 100 - price_diff_percentage)
+
+            # Calculate comprehensive match score
+            comprehensive_score = (
+                match_percentage * 0.4 +  # TOPSIS score weight
+                amenity_match_percentage * 0.2 +  # Amenities weight
+                location_match_score * 0.2 +  # Location weight
+                price_value_score * 0.2  # Price value weight
+            )
             
             room_data = {
                 'id': room.id,
@@ -352,6 +390,7 @@ def search_rooms():
                 'topsis_score': score,
                 'rank': rank,
                 'percentile': int(round(percentile)),
+                'comprehensive_score': round(comprehensive_score, 1),
                 'match_details': {
                     'safety': {
                         'score': float(room.safety_score) if room.safety_score is not None else None,
@@ -379,36 +418,60 @@ def search_rooms():
                         'weighted_score': float(round(amenity_match_percentage * float(weights[4]) / 10, 1)),
                         'matched': [amenity for amenity in required_amenities if amenity in room_amenities],
                         'missing': [amenity for amenity in required_amenities if amenity not in room_amenities]
+                    },
+                    'location': {
+                        'score': float(location_match_score),
+                        'preferred_location': preference.preferred_location,
+                        'actual_location': room.location
+                    },
+                    'price_value': {
+                        'score': float(price_value_score),
+                        'preferred_max': float(preference.max_price),
+                        'actual_price': float(room.price)
                     }
                 }
             }
             
-            # Categorize based on match percentage
-            if match_percentage >= 80:  # 80% or better
-                best_matches.append(room_data)
-            elif match_percentage >= 60:  # 60-79%
+            # Categorize based on comprehensive match percentage
+            if comprehensive_score >= 90 and amenity_match_percentage == 100 and price_value_score >= 90:
+                perfect_matches.append(room_data)
+            elif comprehensive_score >= 85:
+                excellent_matches.append(room_data)
+            elif comprehensive_score >= 75:
                 good_matches.append(room_data)
-            else:  # Below 60%
+            elif comprehensive_score >= 60:
+                fair_matches.append(room_data)
+            else:
                 other_matches.append(room_data)
         
         return jsonify({
             'summary': {
                 'total_rooms': total_rooms,
-                'best_matches_count': len(best_matches),
+                'perfect_matches_count': len(perfect_matches),
+                'excellent_matches_count': len(excellent_matches),
                 'good_matches_count': len(good_matches),
+                'fair_matches_count': len(fair_matches),
                 'other_matches_count': len(other_matches),
                 'categories': {
-                    'best_match': '80% or higher',
-                    'good_match': '60-79%',
+                    'perfect_match': '90% or higher with all amenities and within budget',
+                    'excellent_match': '85-89%',
+                    'good_match': '75-84%',
+                    'fair_match': '60-74%',
                     'other_match': 'Below 60%'
                 }
             },
             'suggestions': {
-                'best_matches': sorted(best_matches, key=lambda x: x['topsis_score'], reverse=True)[:5],  # Sort and limit to top 5
-                'good_matches': sorted(good_matches, key=lambda x: x['topsis_score'], reverse=True)[:5],  # Sort and limit to top 5
-                'other_matches': sorted(other_matches, key=lambda x: x['topsis_score'], reverse=True)[:5]  # Sort and limit to top 5
+                'perfect_matches': sorted(perfect_matches, key=lambda x: x['comprehensive_score'], reverse=True)[:5],
+                'excellent_matches': sorted(excellent_matches, key=lambda x: x['comprehensive_score'], reverse=True)[:5],
+                'good_matches': sorted(good_matches, key=lambda x: x['comprehensive_score'], reverse=True)[:5],
+                'fair_matches': sorted(fair_matches, key=lambda x: x['comprehensive_score'], reverse=True)[:5],
+                'other_matches': sorted(other_matches, key=lambda x: x['comprehensive_score'], reverse=True)[:5]
             },
-            'all_rooms': sorted(best_matches + good_matches + other_matches, key=lambda x: x['topsis_score'], reverse=True)  # Full sorted list
+            'all_rooms': sorted(
+                perfect_matches + excellent_matches + good_matches + fair_matches + other_matches,
+                key=lambda x: x['comprehensive_score'],
+                reverse=True
+            )
         })
         
     except Exception as e:
