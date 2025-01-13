@@ -14,6 +14,10 @@ def create_app():
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'jwt-secret-key')
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
+    
+    # CORS Configuration
+    app.config['CORS_HEADERS'] = 'Content-Type'
+    app.config['CORS_RESOURCES'] = {r"/*": {"origins": ["http://localhost:5173", "http://localhost:5174"]}}
 
     # Initialize extensions
     db.init_app(app)

@@ -2,18 +2,47 @@
   <div>
     <h1 class="text-h4 mb-4">Landlord Dashboard</h1>
 
-    <!-- Add Room Dialog -->
-    <v-dialog v-model="dialog" max-width="800px">
-      <template v-slot:activator="{ props }">
-        <v-btn
-          color="primary"
-          v-bind="props"
-          class="mb-4"
-        >
-          Add New Room
-        </v-btn>
-      </template>
+    <!-- Quick Stats -->
+    <v-row class="mb-6">
+      <v-col cols="12" sm="4">
+        <v-card>
+          <v-card-text class="text-center">
+            <div class="text-h4 mb-2">{{ rooms.length }}</div>
+            <div class="text-subtitle-1">Total Rooms</div>
+          </v-card-text>
+        </v-card>
+      </v-col>
+      <v-col cols="12" sm="4">
+        <v-card>
+          <v-card-text class="text-center">
+            <div class="text-h4 mb-2">{{ availableRooms }}</div>
+            <div class="text-subtitle-1">Available Rooms</div>
+          </v-card-text>
+        </v-card>
+      </v-col>
+      <v-col cols="12" sm="4">
+        <v-card>
+          <v-card-text class="text-center">
+            <div class="text-h4 mb-2">${{ averagePrice }}</div>
+            <div class="text-subtitle-1">Average Price</div>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
 
+    <!-- Add Room Button -->
+    <div class="d-flex justify-end mb-4">
+      <v-btn
+        color="primary"
+        prepend-icon="mdi-plus"
+        @click="dialog = true"
+      >
+        Add New Room
+      </v-btn>
+    </div>
+
+    <!-- Add/Edit Room Dialog -->
+    <v-dialog v-model="dialog" max-width="800px">
       <v-card>
         <v-card-title>
           <span class="text-h5">{{ formTitle }}</span>
@@ -22,36 +51,27 @@
         <v-card-text>
           <v-form ref="form">
             <v-container>
+              <!-- Basic Information -->
+              <div class="text-h6 mb-2">Basic Information</div>
               <v-row>
                 <v-col cols="12" sm="6">
                   <v-text-field
                     v-model="editedItem.title"
                     label="Title"
                     :rules="[rules.required]"
+                    hint="A descriptive title for your room"
+                    persistent-hint
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6">
                   <v-text-field
                     v-model="editedItem.price"
-                    label="Price"
+                    label="Monthly Rent"
                     type="number"
                     prefix="$"
                     :rules="[rules.required, rules.positive]"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6">
-                  <v-text-field
-                    v-model="editedItem.size"
-                    label="Size (sq ft)"
-                    type="number"
-                    :rules="[rules.required, rules.positive]"
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6">
-                  <v-text-field
-                    v-model="editedItem.location"
-                    label="Location"
-                    :rules="[rules.required]"
+                    hint="Monthly rent amount"
+                    persistent-hint
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12">
@@ -59,18 +79,52 @@
                     v-model="editedItem.description"
                     label="Description"
                     :rules="[rules.required]"
+                    hint="Detailed description of the room"
+                    persistent-hint
+                    rows="3"
                   ></v-textarea>
                 </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    v-model="editedItem.size"
+                    label="Size (sq ft)"
+                    type="number"
+                    :rules="[rules.required, rules.positive]"
+                    hint="Room size in square feet"
+                    persistent-hint
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    v-model="editedItem.location"
+                    label="Location"
+                    :rules="[rules.required]"
+                    hint="Room location or neighborhood"
+                    persistent-hint
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+
+              <!-- Amenities -->
+              <div class="text-h6 mb-2">Amenities</div>
+              <v-row>
                 <v-col cols="12">
                   <v-combobox
                     v-model="editedItem.amenities"
                     :items="commonAmenities"
-                    label="Amenities"
+                    label="Available Amenities"
                     multiple
                     chips
                     :rules="[rules.required]"
+                    hint="Select or type amenities available in the room"
+                    persistent-hint
                   ></v-combobox>
                 </v-col>
+              </v-row>
+
+              <!-- Ratings -->
+              <div class="text-h6 mb-2">Property Ratings</div>
+              <v-row>
                 <v-col cols="12" sm="6">
                   <v-slider
                     v-model="editedItem.safety_score"
@@ -79,7 +133,19 @@
                     max="10"
                     step="0.5"
                     thumb-label
-                  ></v-slider>
+                    hint="Rate the safety of the neighborhood (1-10)"
+                    persistent-hint
+                  >
+                    <template v-slot:append>
+                      <v-text-field
+                        v-model="editedItem.safety_score"
+                        type="number"
+                        style="width: 70px"
+                        density="compact"
+                        hide-details
+                      ></v-text-field>
+                    </template>
+                  </v-slider>
                 </v-col>
                 <v-col cols="12" sm="6">
                   <v-slider
@@ -89,7 +155,19 @@
                     max="10"
                     step="0.5"
                     thumb-label
-                  ></v-slider>
+                    hint="Rate the cleanliness of the property (1-10)"
+                    persistent-hint
+                  >
+                    <template v-slot:append>
+                      <v-text-field
+                        v-model="editedItem.cleanliness_score"
+                        type="number"
+                        style="width: 70px"
+                        density="compact"
+                        hide-details
+                      ></v-text-field>
+                    </template>
+                  </v-slider>
                 </v-col>
                 <v-col cols="12" sm="6">
                   <v-slider
@@ -99,7 +177,19 @@
                     max="10"
                     step="0.5"
                     thumb-label
-                  ></v-slider>
+                    hint="Rate the accessibility to public transport/amenities (1-10)"
+                    persistent-hint
+                  >
+                    <template v-slot:append>
+                      <v-text-field
+                        v-model="editedItem.accessibility_score"
+                        type="number"
+                        style="width: 70px"
+                        density="compact"
+                        hide-details
+                      ></v-text-field>
+                    </template>
+                  </v-slider>
                 </v-col>
                 <v-col cols="12" sm="6">
                   <v-slider
@@ -109,8 +199,25 @@
                     max="10"
                     step="0.5"
                     thumb-label
-                  ></v-slider>
+                    hint="Rate the noise level (1=quiet, 10=noisy)"
+                    persistent-hint
+                  >
+                    <template v-slot:append>
+                      <v-text-field
+                        v-model="editedItem.noise_level"
+                        type="number"
+                        style="width: 70px"
+                        density="compact"
+                        hide-details
+                      ></v-text-field>
+                    </template>
+                  </v-slider>
                 </v-col>
+              </v-row>
+
+              <!-- Image Upload -->
+              <div class="text-h6 mb-2">Room Image</div>
+              <v-row>
                 <v-col cols="12">
                   <v-file-input
                     v-model="roomImage"
@@ -118,7 +225,32 @@
                     label="Room Image"
                     prepend-icon="mdi-camera"
                     :rules="[editedItem.id ? undefined : rules.required]"
-                  ></v-file-input>
+                    hint="Upload a clear image of the room"
+                    persistent-hint
+                    show-size
+                  >
+                    <template v-slot:selection="{ fileNames }">
+                      <template v-for="fileName in fileNames" :key="fileName">
+                        <v-chip
+                          size="small"
+                          label
+                          color="primary"
+                          class="me-2"
+                        >
+                          {{ fileName }}
+                        </v-chip>
+                      </template>
+                    </template>
+                  </v-file-input>
+                </v-col>
+                <v-col cols="12" v-if="editedItem.image_url">
+                  <div class="text-subtitle-2 mb-2">Current Image:</div>
+                  <v-img
+                    :src="editedItem.image_url"
+                    max-height="200"
+                    contain
+                    class="bg-grey-lighten-2"
+                  ></v-img>
                 </v-col>
               </v-row>
             </v-container>
@@ -127,61 +259,112 @@
 
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn color="error" variant="text" @click="close">Cancel</v-btn>
-          <v-btn color="success" variant="text" @click="save">Save</v-btn>
+          <v-btn
+            color="error"
+            variant="text"
+            @click="close"
+          >
+            Cancel
+          </v-btn>
+          <v-btn
+            color="success"
+            variant="text"
+            @click="save"
+            :loading="loading"
+            :disabled="loading"
+          >
+            Save
+          </v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
 
     <!-- Rooms Table -->
-    <v-data-table
-      :headers="headers"
-      :items="rooms"
-      class="elevation-1"
-    >
-      <template v-slot:item.image_url="{ item }">
-        <v-img
-          :src="item.image_url"
-          height="100"
-          width="150"
-          cover
-          class="bg-grey-lighten-2"
-        >
-          <template v-slot:placeholder>
-            <v-row class="fill-height ma-0" align="center" justify="center">
-              <v-progress-circular indeterminate color="grey-lighten-5"></v-progress-circular>
-            </v-row>
-          </template>
-        </v-img>
-      </template>
+    <v-card>
+      <v-card-title>
+        <v-text-field
+          v-model="search"
+          prepend-icon="mdi-magnify"
+          label="Search"
+          single-line
+          hide-details
+          density="compact"
+        ></v-text-field>
+      </v-card-title>
 
-      <template v-slot:item.price="{ item }">
-        ${{ item.price }}
-      </template>
+      <v-data-table
+        :headers="headers"
+        :items="rooms"
+        :search="search"
+        class="elevation-1"
+      >
+        <template v-slot:item.image_url="{ item }">
+          <v-img
+            :src="item.image_url"
+            height="100"
+            width="150"
+            cover
+            class="bg-grey-lighten-2"
+          >
+            <template v-slot:placeholder>
+              <v-row class="fill-height ma-0" align="center" justify="center">
+                <v-progress-circular indeterminate color="grey-lighten-5"></v-progress-circular>
+              </v-row>
+            </template>
+          </v-img>
+        </template>
 
-      <template v-slot:item.availability="{ item }">
-        <v-chip
-          :color="item.availability ? 'success' : 'error'"
-          :text="item.availability ? 'Available' : 'Occupied'"
-        ></v-chip>
-      </template>
+        <template v-slot:item.price="{ item }">
+          ${{ item.price }}
+        </template>
 
-      <template v-slot:item.actions="{ item }">
-        <v-icon
-          size="small"
-          class="me-2"
-          @click="editItem(item)"
-        >
-          mdi-pencil
-        </v-icon>
-        <v-icon
-          size="small"
-          @click="deleteItem(item)"
-        >
-          mdi-delete
-        </v-icon>
-      </template>
-    </v-data-table>
+        <template v-slot:item.availability="{ item }">
+          <v-chip
+            :color="item.availability ? 'success' : 'error'"
+            :text="item.availability ? 'Available' : 'Occupied'"
+            size="small"
+          ></v-chip>
+        </template>
+
+        <template v-slot:item.actions="{ item }">
+          <v-tooltip text="Edit Room">
+            <template v-slot:activator="{ props }">
+              <v-btn
+                icon="mdi-pencil"
+                size="small"
+                color="primary"
+                v-bind="props"
+                @click="editItem(item)"
+                class="mr-2"
+              ></v-btn>
+            </template>
+          </v-tooltip>
+          <v-tooltip text="Toggle Availability">
+            <template v-slot:activator="{ props }">
+              <v-btn
+                :icon="item.availability ? 'mdi-close' : 'mdi-check'"
+                size="small"
+                :color="item.availability ? 'error' : 'success'"
+                v-bind="props"
+                @click="toggleAvailability(item)"
+                class="mr-2"
+              ></v-btn>
+            </template>
+          </v-tooltip>
+          <v-tooltip text="Delete Room">
+            <template v-slot:activator="{ props }">
+              <v-btn
+                icon="mdi-delete"
+                size="small"
+                color="error"
+                v-bind="props"
+                @click="deleteItem(item)"
+              ></v-btn>
+            </template>
+          </v-tooltip>
+        </template>
+      </v-data-table>
+    </v-card>
 
     <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="3000">
       {{ snackbarText }}
@@ -190,26 +373,43 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import axios from 'axios'
 
-const dialog = ref(false)
 const form = ref(null)
+const dialog = ref(false)
+const loading = ref(false)
 const rooms = ref([])
 const roomImage = ref(null)
+const search = ref('')
 const snackbar = ref(false)
 const snackbarText = ref('')
 const snackbarColor = ref('success')
 
-const headers = [
-  { title: 'Image', key: 'image_url', sortable: false },
-  { title: 'Title', key: 'title' },
-  { title: 'Price', key: 'price' },
-  { title: 'Location', key: 'location' },
-  { title: 'Size', key: 'size' },
-  { title: 'Status', key: 'availability' },
-  { title: 'Actions', key: 'actions', sortable: false }
-]
+const editedItem = ref({
+  id: null,
+  title: '',
+  description: '',
+  price: 0,
+  size: 0,
+  location: '',
+  amenities: [],
+  safety_score: 5,
+  cleanliness_score: 5,
+  accessibility_score: 5,
+  noise_level: 5,
+  image_url: null,
+  availability: true
+})
+
+const formTitle = computed(() => editedItem.value.id ? 'Edit Room' : 'Add Room')
+
+const availableRooms = computed(() => rooms.value.filter(room => room.availability).length)
+const averagePrice = computed(() => {
+  if (rooms.value.length === 0) return 0
+  const total = rooms.value.reduce((sum, room) => sum + room.price, 0)
+  return Math.round(total / rooms.value.length)
+})
 
 const commonAmenities = [
   'WiFi',
@@ -224,31 +424,21 @@ const commonAmenities = [
   'Closet'
 ]
 
-const defaultItem = {
-  title: '',
-  description: '',
-  price: 0,
-  size: 0,
-  location: '',
-  amenities: [],
-  safety_score: 5,
-  cleanliness_score: 5,
-  accessibility_score: 5,
-  noise_level: 5,
-  availability: true
-}
-
-const editedItem = ref({ ...defaultItem })
-const editedIndex = ref(-1)
-
-const formTitle = computed(() => {
-  return editedIndex.value === -1 ? 'New Room' : 'Edit Room'
-})
-
 const rules = {
   required: v => !!v || 'Field is required',
-  positive: v => v > 0 || 'Must be greater than 0'
+  positive: v => v > 0 || 'Must be greater than 0',
+  amenities: v => v && v.length > 0 || 'At least one amenity is required'
 }
+
+const headers = [
+  { title: 'Image', key: 'image_url', sortable: false },
+  { title: 'Title', key: 'title' },
+  { title: 'Price', key: 'price' },
+  { title: 'Size (sq ft)', key: 'size' },
+  { title: 'Location', key: 'location' },
+  { title: 'Availability', key: 'availability' },
+  { title: 'Actions', key: 'actions', sortable: false }
+]
 
 onMounted(async () => {
   await fetchRooms()
@@ -259,76 +449,148 @@ const fetchRooms = async () => {
     const response = await axios.get('http://localhost:5000/landlord/rooms')
     rooms.value = response.data
   } catch (error) {
-    snackbarText.value = 'Error fetching rooms'
+    console.error('Error fetching rooms:', error)
+    snackbarText.value = error.response?.data?.error || 'Error fetching rooms'
     snackbarColor.value = 'error'
     snackbar.value = true
   }
 }
 
-const editItem = (item) => {
-  editedIndex.value = rooms.value.indexOf(item)
-  editedItem.value = Object.assign({}, item)
-  dialog.value = true
-}
-
-const deleteItem = async (item) => {
-  if (!confirm('Are you sure you want to delete this room?')) return
-  
-  try {
-    await axios.delete(`http://localhost:5000/landlord/rooms/${item.id}`)
-    const index = rooms.value.indexOf(item)
-    rooms.value.splice(index, 1)
-    snackbarText.value = 'Room deleted successfully'
-    snackbarColor.value = 'success'
-    snackbar.value = true
-  } catch (error) {
-    snackbarText.value = 'Error deleting room'
+const save = async () => {
+  const { valid } = await form.value.validate()
+  if (!valid) {
+    snackbarText.value = 'Please fill in all required fields correctly'
     snackbarColor.value = 'error'
     snackbar.value = true
+    return
+  }
+
+  loading.value = true
+
+  try {
+    const formData = new FormData()
+    formData.append('title', editedItem.value.title)
+    formData.append('description', editedItem.value.description)
+    formData.append('price', editedItem.value.price)
+    formData.append('size', editedItem.value.size)
+    formData.append('location', editedItem.value.location)
+    formData.append('amenities', JSON.stringify(editedItem.value.amenities))
+    formData.append('safety_score', editedItem.value.safety_score)
+    formData.append('cleanliness_score', editedItem.value.cleanliness_score)
+    formData.append('accessibility_score', editedItem.value.accessibility_score)
+    formData.append('noise_level', editedItem.value.noise_level)
+    formData.append('availability', editedItem.value.availability)
+
+    if (roomImage.value) {
+      formData.append('image', roomImage.value)
+    }
+
+    if (editedItem.value.id) {
+      await axios.put(`http://localhost:5000/landlord/rooms/${editedItem.value.id}`, formData)
+      snackbarText.value = 'Room updated successfully'
+    } else {
+      await axios.post('http://localhost:5000/landlord/rooms', formData)
+      snackbarText.value = 'Room added successfully'
+    }
+
+    snackbarColor.value = 'success'
+    snackbar.value = true
+    await fetchRooms()
+    close()
+  } catch (error) {
+    console.error('Error saving room:', error)
+    snackbarText.value = error.response?.data?.error || 'Error saving room'
+    snackbarColor.value = 'error'
+    snackbar.value = true
+  } finally {
+    loading.value = false
   }
 }
 
 const close = () => {
   dialog.value = false
-  editedIndex.value = -1
-  editedItem.value = Object.assign({}, defaultItem)
   roomImage.value = null
-  form.value?.reset()
+  editedItem.value = {
+    id: null,
+    title: '',
+    description: '',
+    price: 0,
+    size: 0,
+    location: '',
+    amenities: [],
+    safety_score: 5,
+    cleanliness_score: 5,
+    accessibility_score: 5,
+    noise_level: 5,
+    image_url: null,
+    availability: true
+  }
 }
 
-const save = async () => {
-  const { valid } = await form.value.validate()
-  if (!valid) return
+const editItem = (item) => {
+  editedItem.value = { ...item }
+  dialog.value = true
+}
 
-  const formData = new FormData()
-  Object.keys(editedItem.value).forEach(key => {
-    if (key === 'amenities') {
-      formData.append(key, JSON.stringify(editedItem.value[key]))
-    } else {
-      formData.append(key, editedItem.value[key])
-    }
-  })
-
-  if (roomImage.value) {
-    formData.append('image', roomImage.value)
-  }
-
+const toggleAvailability = async (item) => {
   try {
-    if (editedIndex.value > -1) {
-      await axios.put(`http://localhost:5000/landlord/rooms/${editedItem.value.id}`, formData)
-      Object.assign(rooms.value[editedIndex.value], editedItem.value)
-      snackbarText.value = 'Room updated successfully'
-    } else {
-      const response = await axios.post('http://localhost:5000/landlord/rooms', formData)
-      rooms.value.push(response.data)
-      snackbarText.value = 'Room created successfully'
-    }
+    console.log('Toggling availability for room:', item)
+    const formData = new FormData()
+    formData.append('title', item.title)
+    formData.append('description', item.description)
+    formData.append('price', item.price)
+    formData.append('size', item.size)
+    formData.append('location', item.location)
+    formData.append('amenities', JSON.stringify(item.amenities))
+    formData.append('safety_score', item.safety_score)
+    formData.append('cleanliness_score', item.cleanliness_score)
+    formData.append('accessibility_score', item.accessibility_score)
+    formData.append('noise_level', item.noise_level)
+    formData.append('availability', !item.availability)
+    
+    console.log('Authorization header:', axios.defaults.headers.common['Authorization'])
+    console.log('Sending form data:', Object.fromEntries(formData))
+    
+    await axios.put(`http://localhost:5000/landlord/rooms/${item.id}`, formData)
+    item.availability = !item.availability
+    
+    snackbarText.value = `Room marked as ${item.availability ? 'available' : 'occupied'}`
     snackbarColor.value = 'success'
-    close()
+    snackbar.value = true
+    await fetchRooms()
   } catch (error) {
-    snackbarText.value = 'Error saving room'
+    console.error('Error updating room availability:', error.response || error)
+    snackbarText.value = error.response?.data?.error || 'Error updating room availability'
     snackbarColor.value = 'error'
+    snackbar.value = true
   }
-  snackbar.value = true
 }
-</script> 
+
+const deleteItem = async (item) => {
+  const confirmed = window.confirm('Are you sure you want to delete this room?')
+  if (!confirmed) return
+  
+  try {
+    await axios.delete(`http://localhost:5000/landlord/rooms/${item.id}`)
+    snackbarText.value = 'Room deleted successfully'
+    snackbarColor.value = 'success'
+    snackbar.value = true
+    await fetchRooms()
+  } catch (error) {
+    console.error('Error deleting room:', error)
+    snackbarText.value = error.response?.data?.error || 'Error deleting room'
+    snackbarColor.value = 'error'
+    snackbar.value = true
+  }
+}
+</script>
+
+<style scoped>
+.v-card {
+  transition: transform 0.2s;
+}
+
+.v-card:hover {
+  transform: translateY(-2px);
+}
+</style> 

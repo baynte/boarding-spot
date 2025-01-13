@@ -5,6 +5,7 @@ from app import db
 from models import User, Room
 import json
 import os
+from datetime import datetime
 
 bp = Blueprint('landlord', __name__, url_prefix='/landlord')
 
@@ -94,10 +95,26 @@ def get_rooms():
 @jwt_required()
 def update_room(room_id):
     current_user_id = get_jwt_identity()
-    room = Room.query.get_or_404(room_id)
+    print(f"Received request to update room {room_id} from user {current_user_id}")  # Debug print
     
-    if room.landlord_id != current_user_id:
-        return jsonify({'error': 'Unauthorized'}), 403
+    user = User.query.get(current_user_id)
+    print(f"User type: {user.user_type}")  # Debug print
+    
+    if user.user_type != 'landlord':
+        print(f"User {current_user_id} is not a landlord")  # Debug print
+        return jsonify({'error': 'Unauthorized - User is not a landlord'}), 403
+    
+    room = Room.query.get_or_404(room_id)
+    print(f"Room landlord_id: {room.landlord_id}, Current user_id: {current_user_id}")  # Debug print
+    print(f"Types - Room landlord_id: {type(room.landlord_id)}, Current user_id: {type(current_user_id)}")  # Debug print
+    
+    # Convert both IDs to integers for comparison
+    landlord_id = int(room.landlord_id)
+    user_id = int(current_user_id)
+    
+    if landlord_id != user_id:
+        print(f"User {current_user_id} does not own room {room_id}")  # Debug print
+        return jsonify({'error': 'Unauthorized - User does not own this room'}), 403
     
     # Handle image upload
     if 'image' in request.files:
@@ -114,14 +131,28 @@ def update_room(room_id):
     
     # Handle other form data
     data = request.form.to_dict()
+    print(f"Received form data: {data}")  # Debug print
+    
     if 'amenities' in data:
         data['amenities'] = json.dumps(json.loads(data['amenities']))
     
-    for key, value in data.items():
-        if hasattr(room, key):
-            if key in ['price', 'size', 'safety_score', 'cleanliness_score', 'accessibility_score', 'noise_level']:
-                value = float(value)
-            setattr(room, key, value)
+    # Handle boolean values
+    if 'availability' in data:
+        data['availability'] = str(data['availability']).lower() == 'true'
+        print(f"Setting availability to: {data['availability']}")  # Debug print
     
-    db.session.commit()
-    return jsonify({'message': 'Room updated successfully'}) 
+    try:
+        for key, value in data.items():
+            if hasattr(room, key):
+                if key in ['price', 'size', 'safety_score', 'cleanliness_score', 'accessibility_score', 'noise_level']:
+                    value = float(value)
+                print(f"Setting {key} to {value}")  # Debug print
+                setattr(room, key, value)
+        
+        db.session.commit()
+        print(f"Successfully updated room {room_id}")  # Debug print
+        return jsonify({'message': 'Room updated successfully'})
+    except Exception as e:
+        print(f"Error updating room: {str(e)}")  # Debug print
+        db.session.rollback()
+        return jsonify({'error': 'Failed to update room'}), 500 
