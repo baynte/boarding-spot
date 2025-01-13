@@ -6,7 +6,7 @@ from flask_migrate import Migrate
 from routes import auth_routes, landlord_routes, tenant_routes
 
 def create_app():
-    app = Flask(__name__)
+    app = Flask(__name__, static_url_path='/static', static_folder='static')
 
     # Configuration
     app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'your-secret-key')

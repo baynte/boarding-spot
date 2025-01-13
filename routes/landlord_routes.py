@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify, current_app, url_for
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
 from app import db
@@ -20,6 +20,12 @@ def ensure_upload_folder():
     if not os.path.exists(UPLOAD_FOLDER):
         os.makedirs(UPLOAD_FOLDER)
 
+def get_image_url(filename):
+    if not filename:
+        return None
+    # Return the URL with /static prefix
+    return f'http://localhost:5000/static/room_images/{filename}'
+
 @bp.route('/rooms', methods=['POST'])
 @jwt_required()
 def create_room():
@@ -38,7 +44,7 @@ def create_room():
         if file and allowed_file(file.filename):
             filename = secure_filename(f"{current_user_id}_{int(datetime.utcnow().timestamp())}_{file.filename}")
             file.save(os.path.join(UPLOAD_FOLDER, filename))
-            image_url = f"/{UPLOAD_FOLDER}/{filename}"
+            image_url = get_image_url(filename)
     
     data = request.form.to_dict()
     # Convert amenities from string to list if present
@@ -88,32 +94,32 @@ def get_rooms():
         'cleanliness_score': room.cleanliness_score,
         'accessibility_score': room.accessibility_score,
         'noise_level': room.noise_level,
-        'image_url': room.image_url
+        'image_url': get_image_url(os.path.basename(room.image_url)) if room.image_url else None
     } for room in rooms])
 
 @bp.route('/rooms/<int:room_id>', methods=['PUT'])
 @jwt_required()
 def update_room(room_id):
     current_user_id = get_jwt_identity()
-    print(f"Received request to update room {room_id} from user {current_user_id}")  # Debug print
+    print(f"Received request to update room {room_id} from user {current_user_id}")
     
     user = User.query.get(current_user_id)
-    print(f"User type: {user.user_type}")  # Debug print
+    print(f"User type: {user.user_type}")
     
     if user.user_type != 'landlord':
-        print(f"User {current_user_id} is not a landlord")  # Debug print
+        print(f"User {current_user_id} is not a landlord")
         return jsonify({'error': 'Unauthorized - User is not a landlord'}), 403
     
     room = Room.query.get_or_404(room_id)
-    print(f"Room landlord_id: {room.landlord_id}, Current user_id: {current_user_id}")  # Debug print
-    print(f"Types - Room landlord_id: {type(room.landlord_id)}, Current user_id: {type(current_user_id)}")  # Debug print
+    print(f"Room landlord_id: {room.landlord_id}, Current user_id: {current_user_id}")
+    print(f"Types - Room landlord_id: {type(room.landlord_id)}, Current user_id: {type(current_user_id)}")
     
     # Convert both IDs to integers for comparison
     landlord_id = int(room.landlord_id)
     user_id = int(current_user_id)
     
     if landlord_id != user_id:
-        print(f"User {current_user_id} does not own room {room_id}")  # Debug print
+        print(f"User {current_user_id} does not own room {room_id}")
         return jsonify({'error': 'Unauthorized - User does not own this room'}), 403
     
     # Handle image upload
@@ -121,17 +127,20 @@ def update_room(room_id):
         file = request.files['image']
         if file and allowed_file(file.filename):
             # Delete old image if it exists
-            if room.image_url and os.path.exists(room.image_url.lstrip('/')):
-                os.remove(room.image_url.lstrip('/'))
+            if room.image_url:
+                old_filename = os.path.basename(room.image_url)
+                old_path = os.path.join(UPLOAD_FOLDER, old_filename)
+                if os.path.exists(old_path):
+                    os.remove(old_path)
             
             filename = secure_filename(f"{current_user_id}_{int(datetime.utcnow().timestamp())}_{file.filename}")
             ensure_upload_folder()
             file.save(os.path.join(UPLOAD_FOLDER, filename))
-            room.image_url = f"/{UPLOAD_FOLDER}/{filename}"
+            room.image_url = get_image_url(filename)
     
     # Handle other form data
     data = request.form.to_dict()
-    print(f"Received form data: {data}")  # Debug print
+    print(f"Received form data: {data}")
     
     if 'amenities' in data:
         data['amenities'] = json.dumps(json.loads(data['amenities']))
@@ -139,20 +148,56 @@ def update_room(room_id):
     # Handle boolean values
     if 'availability' in data:
         data['availability'] = str(data['availability']).lower() == 'true'
-        print(f"Setting availability to: {data['availability']}")  # Debug print
+        print(f"Setting availability to: {data['availability']}")
     
     try:
         for key, value in data.items():
             if hasattr(room, key):
                 if key in ['price', 'size', 'safety_score', 'cleanliness_score', 'accessibility_score', 'noise_level']:
                     value = float(value)
-                print(f"Setting {key} to {value}")  # Debug print
+                print(f"Setting {key} to {value}")
                 setattr(room, key, value)
         
         db.session.commit()
-        print(f"Successfully updated room {room_id}")  # Debug print
+        print(f"Successfully updated room {room_id}")
         return jsonify({'message': 'Room updated successfully'})
     except Exception as e:
-        print(f"Error updating room: {str(e)}")  # Debug print
+        print(f"Error updating room: {str(e)}")
         db.session.rollback()
         return jsonify({'error': 'Failed to update room'}), 500 
+
+@bp.route('/rooms/<int:room_id>', methods=['DELETE'])
+@jwt_required()
+def delete_room(room_id):
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    
+    if user.user_type != 'landlord':
+        return jsonify({'error': 'Unauthorized - User is not a landlord'}), 403
+    
+    room = Room.query.get_or_404(room_id)
+    
+    # Convert both IDs to integers for comparison
+    landlord_id = int(room.landlord_id)
+    user_id = int(current_user_id)
+    
+    if landlord_id != user_id:
+        return jsonify({'error': 'Unauthorized - User does not own this room'}), 403
+    
+    try:
+        # Delete the room image if it exists
+        if room.image_url:
+            old_filename = os.path.basename(room.image_url)
+            old_path = os.path.join(UPLOAD_FOLDER, old_filename)
+            if os.path.exists(old_path):
+                os.remove(old_path)
+        
+        # Delete the room from database
+        db.session.delete(room)
+        db.session.commit()
+        
+        return jsonify({'message': 'Room deleted successfully'})
+    except Exception as e:
+        print(f"Error deleting room: {str(e)}")
+        db.session.rollback()
+        return jsonify({'error': 'Failed to delete room'}), 500 
