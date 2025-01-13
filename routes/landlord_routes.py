@@ -6,6 +6,7 @@ from models import User, Room
 import json
 import os
 from datetime import datetime
+from werkzeug.security import check_password_hash
 
 bp = Blueprint('landlord', __name__, url_prefix='/landlord')
 
@@ -201,3 +202,51 @@ def delete_room(room_id):
         print(f"Error deleting room: {str(e)}")
         db.session.rollback()
         return jsonify({'error': 'Failed to delete room'}), 500 
+
+@bp.route('/profile', methods=['GET'])
+@jwt_required()
+def get_profile():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    
+    if user.user_type != 'landlord':
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    return jsonify({
+        'email': user.email,
+        'contact_number': user.contact_number
+    })
+
+@bp.route('/profile', methods=['PUT'])
+@jwt_required()
+def update_profile():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    
+    if user.user_type != 'landlord':
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    try:
+        data = request.get_json()
+        
+        # Verify current password
+        if not data.get('current_password'):
+            return jsonify({'error': 'Current password is required'}), 400
+            
+        if not user.check_password(data['current_password']):
+            return jsonify({'error': 'Current password is incorrect'}), 400
+        
+        # Update contact number
+        if 'contact_number' in data:
+            user.contact_number = data['contact_number']
+        
+        # Update password if provided
+        if data.get('new_password'):
+            user.set_password(data['new_password'])
+        
+        db.session.commit()
+        return jsonify({'message': 'Profile updated successfully'})
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Failed to update profile'}), 500 

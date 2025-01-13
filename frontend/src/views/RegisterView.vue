@@ -38,6 +38,14 @@
                 required
               ></v-text-field>
 
+              <v-text-field
+                v-model="contactNumber"
+                label="Contact Number"
+                :rules="contactNumberRules"
+                persistent-hint
+                hint="Enter your contact number (required for landlords)"
+              ></v-text-field>
+
               <v-select
                 v-model="userType"
                 :items="userTypes"
@@ -105,6 +113,11 @@ const rules = {
   min: v => v.length >= 6 || 'Min 6 characters',
   passwordMatch: v => v === password.value || 'Passwords must match'
 }
+
+const contactNumberRules = [
+  v => !v || /^\+?[\d\s-]+$/.test(v) || 'Contact number must be valid',
+  v => !userType.value || userType.value !== 'landlord' || !!v || 'Contact number is required for landlords'
+]
 
 const handleSubmit = async () => {
   const { valid } = await form.value.validate()

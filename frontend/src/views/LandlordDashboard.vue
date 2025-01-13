@@ -1,6 +1,16 @@
 <template>
   <div>
-    <h1 class="text-h4 mb-4">Landlord Dashboard</h1>
+    <div class="d-flex align-center justify-space-between mb-4">
+      <h1 class="text-h4">Landlord Dashboard</h1>
+      <v-btn
+        color="primary"
+        variant="text"
+        prepend-icon="mdi-account-cog"
+        to="/landlord/profile"
+      >
+        Profile Settings
+      </v-btn>
+    </div>
 
     <!-- Quick Stats -->
     <v-row class="mb-6">
@@ -374,7 +384,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import axios from 'axios'
+import axios from '@/utils/axios'
 
 const form = ref(null)
 const dialog = ref(false)
@@ -446,7 +456,7 @@ onMounted(async () => {
 
 const fetchRooms = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/landlord/rooms')
+    const response = await axios.get('/landlord/rooms')
     rooms.value = response.data
   } catch (error) {
     console.error('Error fetching rooms:', error)
@@ -486,10 +496,10 @@ const save = async () => {
     }
 
     if (editedItem.value.id) {
-      await axios.put(`http://localhost:5000/landlord/rooms/${editedItem.value.id}`, formData)
+      await axios.put(`/landlord/rooms/${editedItem.value.id}`, formData)
       snackbarText.value = 'Room updated successfully'
     } else {
-      await axios.post('http://localhost:5000/landlord/rooms', formData)
+      await axios.post('/landlord/rooms', formData)
       snackbarText.value = 'Room added successfully'
     }
 
@@ -548,10 +558,7 @@ const toggleAvailability = async (item) => {
     formData.append('noise_level', item.noise_level)
     formData.append('availability', !item.availability)
     
-    console.log('Authorization header:', axios.defaults.headers.common['Authorization'])
-    console.log('Sending form data:', Object.fromEntries(formData))
-    
-    await axios.put(`http://localhost:5000/landlord/rooms/${item.id}`, formData)
+    await axios.put(`/landlord/rooms/${item.id}`, formData)
     item.availability = !item.availability
     
     snackbarText.value = `Room marked as ${item.availability ? 'available' : 'occupied'}`
@@ -571,7 +578,7 @@ const deleteItem = async (item) => {
   if (!confirmed) return
   
   try {
-    await axios.delete(`http://localhost:5000/landlord/rooms/${item.id}`)
+    await axios.delete(`/landlord/rooms/${item.id}`)
     snackbarText.value = 'Room deleted successfully'
     snackbarColor.value = 'success'
     snackbar.value = true

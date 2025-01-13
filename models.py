@@ -7,7 +7,10 @@ class User(db.Model):
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
     user_type = db.Column(db.String(20), nullable=False)  # 'tenant' or 'landlord'
+    contact_number = db.Column(db.String(20))  # New field for contact number
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    # Add rooms relationship
+    rooms = db.relationship('Room', backref='landlord', lazy=True)
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

@@ -8,20 +8,39 @@ bp = Blueprint('auth', __name__, url_prefix='/auth')
 @bp.route('/register', methods=['POST'])
 def register():
     data = request.get_json()
-    
-    if User.query.filter_by(email=data['email']).first():
+    email = data.get('email')
+    password = data.get('password')
+    user_type = data.get('user_type')
+    contact_number = data.get('contact_number')
+
+    if not all([email, password, user_type]):
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    if user_type not in ['tenant', 'landlord']:
+        return jsonify({'error': 'Invalid user type'}), 400
+
+    if User.query.filter_by(email=email).first():
         return jsonify({'error': 'Email already registered'}), 400
-    
+
     user = User(
-        email=data['email'],
-        user_type=data['user_type']
+        email=email,
+        user_type=user_type,
+        contact_number=contact_number
     )
-    user.set_password(data['password'])
-    
+    user.set_password(password)
+
     db.session.add(user)
     db.session.commit()
-    
-    return jsonify({'message': 'User registered successfully'}), 201
+
+    return jsonify({
+        'message': 'User registered successfully',
+        'user': {
+            'id': user.id,
+            'email': user.email,
+            'user_type': user.user_type,
+            'contact_number': user.contact_number
+        }
+    }), 201
 
 @bp.route('/login', methods=['POST'])
 def login():

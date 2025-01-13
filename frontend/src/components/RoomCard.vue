@@ -53,6 +53,16 @@
         <span class="text-body-2">{{ formatSize(room.size) }}</span>
       </div>
 
+      <div class="d-flex align-center mb-2">
+        <v-icon size="small" class="me-1">mdi-account</v-icon>
+        <span class="text-body-2">Contact: {{ room.landlord.contact_number || 'Not available' }}</span>
+      </div>
+
+      <div class="d-flex align-center mb-2">
+        <v-icon size="small" class="me-1">mdi-email</v-icon>
+        <span class="text-body-2">{{ room.landlord.email || 'Email not available' }}</span>
+      </div>
+
       <div class="text-body-2 text-truncate-2 mb-3">{{ room.description }}</div>
 
       <v-chip-group class="mb-3">
@@ -150,17 +160,49 @@
         block
         color="primary"
         variant="elevated"
-        @click="contactLandlord"
+        @click="showContactDialog = true"
       >
         Contact Landlord
       </v-btn>
     </v-card-actions>
+
+    <!-- Contact Dialog -->
+    <v-dialog v-model="showContactDialog" max-width="400">
+      <v-card>
+        <v-card-title>Contact Landlord</v-card-title>
+        <v-card-text>
+          <v-list>
+            <v-list-item>
+              <template v-slot:prepend>
+                <v-icon color="primary">mdi-phone</v-icon>
+              </template>
+              <v-list-item-title>Phone</v-list-item-title>
+              <v-list-item-subtitle>{{ room.landlord.contact_number || 'Not available' }}</v-list-item-subtitle>
+            </v-list-item>
+
+            <v-list-item>
+              <template v-slot:prepend>
+                <v-icon color="primary">mdi-email</v-icon>
+              </template>
+              <v-list-item-title>Email</v-list-item-title>
+              <v-list-item-subtitle>{{ room.landlord.email || 'Not available' }}</v-list-item-subtitle>
+            </v-list-item>
+          </v-list>
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn color="primary" variant="text" @click="showContactDialog = false">Close</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </v-card>
 </template>
 
 <script setup>
-import { defineProps } from 'vue'
+import { defineProps, ref } from 'vue'
 import { useRouter } from 'vue-router'
+
+const showContactDialog = ref(false)
 
 const props = defineProps({
   room: {
@@ -199,8 +241,7 @@ const getMatchIcon = (percentage) => {
 }
 
 const contactLandlord = () => {
-  // TODO: Implement contact functionality
-  console.log('Contact landlord for room:', props.room.id)
+  showContactDialog.value = true
 }
 </script>
 

@@ -356,22 +356,27 @@ def search_rooms():
         match_percentage = round(score, 1)  # Round to 1 decimal place
         
         room_data = {
-            'id': int(room.id),
+            'id': room.id,
             'title': room.title,
             'description': room.description,
             'price': float(room.price),
             'size': float(room.size),
             'location': room.location,
-            'amenities': json.loads(room.amenities),
+            'amenities': json.loads(room.amenities) if room.amenities else [],
+            'availability': room.availability,
+            'image_url': room.image_url,
             'safety_score': float(room.safety_score) if room.safety_score is not None else None,
             'cleanliness_score': float(room.cleanliness_score) if room.cleanliness_score is not None else None,
             'accessibility_score': float(room.accessibility_score) if room.accessibility_score is not None else None,
             'noise_level': float(room.noise_level) if room.noise_level is not None else None,
-            'image_url': room.image_url,
-            'match_percentage': float(match_percentage),
-            'rank': int(rank),
+            'landlord': {
+                'id': room.landlord.id if room.landlord else None,
+                'email': room.landlord.email if room.landlord else None,
+                'contact_number': room.landlord.contact_number if room.landlord else None
+            },
+            'topsis_score': score,
+            'rank': rank,
             'percentile': int(round(percentile)),
-            'match_category': 'Best Match' if match_percentage >= 80 else 'Good Match' if match_percentage >= 60 else 'Other Match',
             'match_details': {
                 'safety': {
                     'score': float(room.safety_score) if room.safety_score is not None else None,
