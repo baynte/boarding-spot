@@ -15,13 +15,13 @@
       </v-img>
       <v-chip
         class="match-chip"
-        :color="getMatchColor(room.match_percentage)"
+        :color="getMatchColor(room.percentile)"
         size="large"
         label
         variant="elevated"
       >
-        <v-icon start :icon="getMatchIcon(room.match_percentage)"></v-icon>
-        {{ room.match_percentage }}% Match
+        <v-icon start :icon="getMatchIcon(room.percentile)"></v-icon>
+        {{ room.percentile }}% Match
       </v-chip>
       <v-chip
         class="rank-chip"
