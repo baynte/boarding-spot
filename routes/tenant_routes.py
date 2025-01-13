@@ -210,141 +210,96 @@ def search_rooms():
         decision_matrix = []
         required_amenities = json.loads(preference.required_amenities) if preference.required_amenities else []
         
-        # Define ideal values based on preferences
-        ideal_safety = 10.0
-        ideal_cleanliness = 10.0
-        ideal_accessibility = 10.0
-        ideal_noise = 0.0  # Lower is better for noise
-        ideal_amenity = 10.0
+        # Define criteria ranges for normalization
+        max_price = max(room.price for room in rooms)
+        min_price = min(room.price for room in rooms)
+        max_size = max(room.size for room in rooms)
+        min_size = min(room.size for room in rooms)
         
         for room in rooms:
-            # Ensure all values are float type and handle None values
-            safety = 5.0 if room.safety_score is None else float(room.safety_score)
-            cleanliness = 5.0 if room.cleanliness_score is None else float(room.cleanliness_score)
-            accessibility = 5.0 if room.accessibility_score is None else float(room.accessibility_score)
-            noise = 5.0 if room.noise_level is None else float(room.noise_level)
+            # Normalize scores to 0-1 range and handle None values
+            safety = (float(room.safety_score) if room.safety_score is not None else 5.0) / 10.0
+            cleanliness = (float(room.cleanliness_score) if room.cleanliness_score is not None else 5.0) / 10.0
+            accessibility = (float(room.accessibility_score) if room.accessibility_score is not None else 5.0) / 10.0
+            noise = 1 - ((float(room.noise_level) if room.noise_level is not None else 5.0) / 10.0)  # Invert noise so higher is better
+            
+            # Normalize price and size (lower price and higher size are better)
+            price_norm = 1 - ((float(room.price) - min_price) / (max_price - min_price) if max_price != min_price else 0)
+            size_norm = (float(room.size) - min_size) / (max_size - min_size) if max_size != min_size else 1
             
             # Calculate amenity match score
-            room_amenities = json.loads(room.amenities) if room.amenities else []
-            if required_amenities:
-                matched_amenities = sum(1 for amenity in required_amenities if amenity in room_amenities)
-                amenity_score = (matched_amenities / len(required_amenities)) * 10.0  # Scale to 0-10 range
-            else:
-                amenity_score = 10.0  # Perfect score if no amenities required
-            
-            # Calculate distance from ideal values
-            safety_diff = abs(safety - ideal_safety) / 10.0
-            cleanliness_diff = abs(cleanliness - ideal_cleanliness) / 10.0
-            accessibility_diff = abs(accessibility - ideal_accessibility) / 10.0
-            noise_diff = abs(noise - ideal_noise) / 10.0
-            amenity_diff = abs(amenity_score - ideal_amenity) / 10.0
-            
-            # Create row with normalized differences (0 means perfect match, 1 means maximum difference)
-            row = [
-                1.0 - safety_diff,
-                1.0 - cleanliness_diff,
-                1.0 - accessibility_diff,
-                1.0 - noise_diff,
-                1.0 - amenity_diff
-            ]
-            decision_matrix.append(row)
-        
-        # Convert to numpy array with explicit float type
-        decision_matrix = np.array(decision_matrix, dtype=np.float64)
-        
-        if len(decision_matrix) == 0:
-            return jsonify({'message': 'No rooms available for ranking'})
-        
-        current_app.logger.debug(f"Decision matrix shape: {decision_matrix.shape}")
-        current_app.logger.debug(f"Decision matrix:\n{decision_matrix}")
-
-        # Get weights from tenant preferences and normalize
-        weights = np.array([
-            float(preference.safety_weight),
-            float(preference.cleanliness_weight),
-            float(preference.accessibility_weight),
-            float(preference.noise_level_weight)
-        ], dtype=np.float64)
-        
-        # Add amenity weight (equal to average of other weights)
-        amenity_weight = np.mean(weights)
-        weights = np.append(weights, amenity_weight)
-        
-        # Ensure weights are positive and sum to 1
-        weights = np.maximum(weights, 0.001)  # Minimum weight of 0.001
-        weights = weights / np.sum(weights)
-        
-        current_app.logger.debug(f"Normalized weights: {weights}")
-        
-        # All criteria are beneficial (1 for beneficial)
-        impacts = np.array([1, 1, 1, 1, 1], dtype=np.float64)  # Include impact for amenity score
-        
-        # Validate matrix dimensions
-        if decision_matrix.shape[1] != len(weights):
-            raise ValueError(f"Decision matrix columns ({decision_matrix.shape[1]}) don't match number of weights ({len(weights)})")
-        
-        # Calculate TOPSIS scores using topsispy
-        topsis_scores = topsis(decision_matrix.tolist(), weights.tolist(), impacts.tolist())
-        
-        # Convert scores to percentages and ensure they're floats
-        # Scale the scores to better reflect the match quality
-        raw_scores = np.array([float(score) for score in topsis_scores])
-        
-        # Apply a more stringent scaling to the scores
-        # This will make it harder to get very high scores
-        percentage_scores = np.clip(raw_scores * 80, 0, 100)  # Max score is 80% unless perfect match
-        
-        # Adjust scores based on how well they meet minimum requirements
-        for i, (room, score) in enumerate(zip(rooms, percentage_scores)):
-            # Check if room meets minimum requirements
-            meets_min_safety = room.safety_score >= min_safety_score if room.safety_score is not None else False
-            meets_max_noise = room.noise_level <= max_noise_level if room.noise_level is not None else False
-            meets_min_accessibility = room.accessibility_score >= min_accessibility_score if room.accessibility_score is not None else False
-            meets_min_cleanliness = room.cleanliness_score >= min_cleanliness_score if room.cleanliness_score is not None else False
-            
-            # Calculate penalty for not meeting minimum requirements
-            requirements_met = sum([meets_min_safety, meets_max_noise, meets_min_accessibility, meets_min_cleanliness])
-            if requirements_met < 4:
-                penalty = (4 - requirements_met) * 15  # 15% penalty for each unmet requirement
-                percentage_scores[i] = max(0, percentage_scores[i] - penalty)
-            
-            # Additional penalty for missing required amenities
-            if required_amenities:
-                room_amenities = json.loads(room.amenities) if room.amenities else []
-                missing_amenities = sum(1 for amenity in required_amenities if amenity not in room_amenities)
-                if missing_amenities > 0:
-                    amenity_penalty = missing_amenities * 10  # 10% penalty for each missing amenity
-                    percentage_scores[i] = max(0, percentage_scores[i] - amenity_penalty)
-            
-        # Special case for single room
-        if len(rooms) == 1:
-            room = rooms[0]
-            # Calculate a more nuanced single room score based on how well it meets criteria
-            criteria_scores = []
-            if room.safety_score is not None:
-                criteria_scores.append(min(room.safety_score / min_safety_score, 1.0))
-            if room.noise_level is not None:
-                criteria_scores.append(min(max_noise_level / max(room.noise_level, 1e-10), 1.0))
-            if room.accessibility_score is not None:
-                criteria_scores.append(min(room.accessibility_score / min_accessibility_score, 1.0))
-            if room.cleanliness_score is not None:
-                criteria_scores.append(min(room.cleanliness_score / min_cleanliness_score, 1.0))
-            
-            # Add amenity score
             room_amenities = json.loads(room.amenities) if room.amenities else []
             if required_amenities:
                 matched_amenities = sum(1 for amenity in required_amenities if amenity in room_amenities)
                 amenity_score = matched_amenities / len(required_amenities)
             else:
                 amenity_score = 1.0
-            criteria_scores.append(amenity_score)
             
-            if criteria_scores:
-                # Weight the criteria scores
-                weighted_score = sum(score * w for score, w in zip(criteria_scores, weights[:len(criteria_scores)]))
-                percentage_scores = np.array([weighted_score * 100])
-            else:
-                percentage_scores = np.array([50.0])  # Default score if no criteria available
+            # Create row with normalized values
+            row = [
+                safety,
+                cleanliness,
+                accessibility,
+                noise,
+                amenity_score,
+                price_norm,
+                size_norm
+            ]
+            decision_matrix.append(row)
+        
+        # Convert to numpy array
+        decision_matrix = np.array(decision_matrix, dtype=np.float64)
+        
+        if len(decision_matrix) == 0:
+            return jsonify({'message': 'No rooms available for ranking'})
+        
+        # Get weights from tenant preferences and normalize
+        weights = np.array([
+            float(preference.safety_weight),
+            float(preference.cleanliness_weight),
+            float(preference.accessibility_weight),
+            float(preference.noise_level_weight),
+            0.25,  # amenity weight
+            0.25,  # price weight
+            0.25   # size weight
+        ], dtype=np.float64)
+        
+        # Normalize weights to sum to 1
+        weights = weights / np.sum(weights)
+        
+        # All criteria are beneficial (1 for beneficial)
+        impacts = np.array([1, 1, 1, 1, 1, 1, 1], dtype=np.float64)
+        
+        # Calculate TOPSIS scores
+        raw_scores = []
+        for i in range(len(decision_matrix)):
+            room_scores = topsis([decision_matrix[i].tolist()], weights.tolist(), impacts.tolist())
+            # Extract the first value from the TOPSIS result tuple
+            raw_scores.append(float(room_scores[0]))
+        
+        # Convert to numpy array and scale to percentages
+        raw_scores = np.array(raw_scores, dtype=np.float64)
+        percentage_scores = raw_scores * 100
+        
+        # Apply preference-based adjustments
+        for i, (room, score) in enumerate(zip(rooms, percentage_scores)):
+            # Preference match bonuses
+            if room.price <= preference.max_price:
+                percentage_scores[i] += 5  # 5% bonus for meeting price preference
+            if room.size >= preference.min_size:
+                percentage_scores[i] += 5  # 5% bonus for meeting size preference
+            if preference.preferred_location.lower() in room.location.lower():
+                percentage_scores[i] += 5  # 5% bonus for location match
+            
+            # Required amenities penalty
+            if required_amenities:
+                room_amenities = json.loads(room.amenities) if room.amenities else []
+                missing_amenities = sum(1 for amenity in required_amenities if amenity not in room_amenities)
+                if missing_amenities > 0:
+                    percentage_scores[i] -= missing_amenities * 10  # 10% penalty per missing amenity
+            
+            # Clip scores to 0-100 range
+            percentage_scores = np.clip(percentage_scores, 0, 100)
         
         # Rank rooms
         ranked_rooms = sorted(zip(rooms, percentage_scores, range(1, len(rooms) + 1)), 
@@ -449,11 +404,11 @@ def search_rooms():
                 }
             },
             'suggestions': {
-                'best_matches': best_matches[:5],  # Limit to top 5 in each category
-                'good_matches': good_matches[:5],
-                'other_matches': other_matches[:5]
+                'best_matches': sorted(best_matches, key=lambda x: x['topsis_score'], reverse=True)[:5],  # Sort and limit to top 5
+                'good_matches': sorted(good_matches, key=lambda x: x['topsis_score'], reverse=True)[:5],  # Sort and limit to top 5
+                'other_matches': sorted(other_matches, key=lambda x: x['topsis_score'], reverse=True)[:5]  # Sort and limit to top 5
             },
-            'all_rooms': best_matches + good_matches + other_matches  # Full list for reference
+            'all_rooms': sorted(best_matches + good_matches + other_matches, key=lambda x: x['topsis_score'], reverse=True)  # Full sorted list
         })
         
     except Exception as e:
