@@ -377,7 +377,7 @@ def search_rooms():
                 'location': room.location,
                 'amenities': json.loads(room.amenities) if room.amenities else [],
                 'availability': room.availability,
-                'image_url': room.image_url,
+                'image_urls': json.loads(room.image_urls) if room.image_urls else [],
                 'safety_score': float(room.safety_score) if room.safety_score is not None else None,
                 'cleanliness_score': float(room.cleanliness_score) if room.cleanliness_score is not None else None,
                 'accessibility_score': float(room.accessibility_score) if room.accessibility_score is not None else None,

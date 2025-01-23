@@ -38,14 +38,15 @@ def create_room():
     
     ensure_upload_folder()
     
-    # Handle image upload
-    image_url = None
-    if 'image' in request.files:
-        file = request.files['image']
-        if file and allowed_file(file.filename):
-            filename = secure_filename(f"{current_user_id}_{int(datetime.utcnow().timestamp())}_{file.filename}")
-            file.save(os.path.join(UPLOAD_FOLDER, filename))
-            image_url = get_image_url(filename)
+    # Handle multiple image uploads
+    image_urls = []
+    if 'images' in request.files:
+        files = request.files.getlist('images')
+        for file in files:
+            if file and allowed_file(file.filename):
+                filename = secure_filename(f"{current_user_id}_{int(datetime.utcnow().timestamp())}_{file.filename}")
+                file.save(os.path.join(UPLOAD_FOLDER, filename))
+                image_urls.append(get_image_url(filename))
     
     data = request.form.to_dict()
     # Convert amenities from string to list if present
@@ -64,7 +65,7 @@ def create_room():
         cleanliness_score=float(data.get('cleanliness_score', 5.0)),
         accessibility_score=float(data.get('accessibility_score', 5.0)),
         noise_level=float(data.get('noise_level', 5.0)),
-        image_url=image_url
+        image_urls=json.dumps(image_urls)
     )
     
     db.session.add(room)
@@ -95,7 +96,7 @@ def get_rooms():
         'cleanliness_score': room.cleanliness_score,
         'accessibility_score': room.accessibility_score,
         'noise_level': room.noise_level,
-        'image_url': get_image_url(os.path.basename(room.image_url)) if room.image_url else None
+        'image_urls': json.loads(room.image_urls) if room.image_urls else []
     } for room in rooms])
 
 @bp.route('/rooms/<int:room_id>', methods=['PUT'])
@@ -123,21 +124,28 @@ def update_room(room_id):
         print(f"User {current_user_id} does not own room {room_id}")
         return jsonify({'error': 'Unauthorized - User does not own this room'}), 403
     
-    # Handle image upload
-    if 'image' in request.files:
-        file = request.files['image']
-        if file and allowed_file(file.filename):
-            # Delete old image if it exists
-            if room.image_url:
-                old_filename = os.path.basename(room.image_url)
-                old_path = os.path.join(UPLOAD_FOLDER, old_filename)
-                if os.path.exists(old_path):
-                    os.remove(old_path)
+    # Handle multiple image uploads
+    if 'images' in request.files:
+        files = request.files.getlist('images')
+        if any(file and allowed_file(file.filename) for file in files):
+            # Delete old images if they exist
+            if room.image_urls:
+                old_urls = json.loads(room.image_urls)
+                for old_url in old_urls:
+                    old_filename = os.path.basename(old_url)
+                    old_path = os.path.join(UPLOAD_FOLDER, old_filename)
+                    if os.path.exists(old_path):
+                        os.remove(old_path)
             
-            filename = secure_filename(f"{current_user_id}_{int(datetime.utcnow().timestamp())}_{file.filename}")
-            ensure_upload_folder()
-            file.save(os.path.join(UPLOAD_FOLDER, filename))
-            room.image_url = get_image_url(filename)
+            # Save new images
+            new_image_urls = []
+            for file in files:
+                if file and allowed_file(file.filename):
+                    filename = secure_filename(f"{current_user_id}_{int(datetime.utcnow().timestamp())}_{file.filename}")
+                    ensure_upload_folder()
+                    file.save(os.path.join(UPLOAD_FOLDER, filename))
+                    new_image_urls.append(get_image_url(filename))
+            room.image_urls = json.dumps(new_image_urls)
     
     # Handle other form data
     data = request.form.to_dict()
@@ -186,12 +194,14 @@ def delete_room(room_id):
         return jsonify({'error': 'Unauthorized - User does not own this room'}), 403
     
     try:
-        # Delete the room image if it exists
-        if room.image_url:
-            old_filename = os.path.basename(room.image_url)
-            old_path = os.path.join(UPLOAD_FOLDER, old_filename)
-            if os.path.exists(old_path):
-                os.remove(old_path)
+        # Delete the room images if they exist
+        if room.image_urls:
+            old_urls = json.loads(room.image_urls)
+            for old_url in old_urls:
+                old_filename = os.path.basename(old_url)
+                old_path = os.path.join(UPLOAD_FOLDER, old_filename)
+                if os.path.exists(old_path):
+                    os.remove(old_path)
         
         # Delete the room from database
         db.session.delete(room)

@@ -226,18 +226,19 @@
               </v-row>
 
               <!-- Image Upload -->
-              <div class="text-h6 mb-2">Room Image</div>
+              <div class="text-h6 mb-2">Room Images</div>
               <v-row>
                 <v-col cols="12">
                   <v-file-input
-                    v-model="roomImage"
+                    v-model="roomImages"
                     accept="image/*"
-                    label="Room Image"
+                    label="Room Images"
                     prepend-icon="mdi-camera"
                     :rules="[editedItem.id ? undefined : rules.required]"
-                    hint="Upload a clear image of the room"
+                    hint="Upload clear images of the room (you can select multiple)"
                     persistent-hint
                     show-size
+                    multiple
                   >
                     <template v-slot:selection="{ fileNames }">
                       <template v-for="fileName in fileNames" :key="fileName">
@@ -253,14 +254,18 @@
                     </template>
                   </v-file-input>
                 </v-col>
-                <v-col cols="12" v-if="editedItem.image_url">
-                  <div class="text-subtitle-2 mb-2">Current Image:</div>
-                  <v-img
-                    :src="editedItem.image_url"
-                    max-height="200"
-                    contain
-                    class="bg-grey-lighten-2"
-                  ></v-img>
+                <v-col cols="12" v-if="editedItem.image_urls && editedItem.image_urls.length > 0">
+                  <div class="text-subtitle-2 mb-2">Current Images:</div>
+                  <v-row>
+                    <v-col v-for="(url, index) in parseImageUrls(editedItem.image_urls)" :key="index" cols="12" sm="6" md="4">
+                      <v-img
+                        :src="url"
+                        max-height="200"
+                        contain
+                        class="bg-grey-lighten-2"
+                      ></v-img>
+                    </v-col>
+                  </v-row>
                 </v-col>
               </v-row>
             </v-container>
@@ -308,9 +313,9 @@
         :search="search"
         class="elevation-1"
       >
-        <template v-slot:item.image_url="{ item }">
+        <template v-slot:item.image_urls="{ item }">
           <v-img
-            :src="item.image_url"
+            :src="parseImageUrls(item.image_urls)?.[0]"
             height="100"
             width="150"
             cover
@@ -390,7 +395,7 @@ const form = ref(null)
 const dialog = ref(false)
 const loading = ref(false)
 const rooms = ref([])
-const roomImage = ref(null)
+const roomImages = ref(null)
 const search = ref('')
 const snackbar = ref(false)
 const snackbarText = ref('')
@@ -408,7 +413,7 @@ const editedItem = ref({
   cleanliness_score: 5,
   accessibility_score: 5,
   noise_level: 5,
-  image_url: null,
+  image_urls: null,
   availability: true
 })
 
@@ -440,8 +445,23 @@ const rules = {
   amenities: v => v && v.length > 0 || 'At least one amenity is required'
 }
 
+const parseImageUrls = (urls) => {
+  if (!urls) return [];
+  try {
+    return typeof urls === 'string' ? JSON.parse(urls) : urls;
+  } catch (error) {
+    console.error('Error parsing image URLs:', error);
+    return [];
+  }
+}
+
 const headers = [
-  { title: 'Image', key: 'image_url', sortable: false },
+  { 
+    title: 'Images', 
+    key: 'image_urls', 
+    sortable: false,
+    align: 'center',
+  },
   { title: 'Title', key: 'title' },
   { title: 'Price', key: 'price' },
   { title: 'Size (sq ft)', key: 'size' },
@@ -491,8 +511,11 @@ const save = async () => {
     formData.append('noise_level', editedItem.value.noise_level)
     formData.append('availability', editedItem.value.availability)
 
-    if (roomImage.value) {
-      formData.append('image', roomImage.value)
+    // Handle multiple images
+    if (roomImages.value) {
+      for (const file of roomImages.value) {
+        formData.append('images', file)
+      }
     }
 
     if (editedItem.value.id) {
@@ -519,7 +542,7 @@ const save = async () => {
 
 const close = () => {
   dialog.value = false
-  roomImage.value = null
+  roomImages.value = null
   editedItem.value = {
     id: null,
     title: '',
@@ -532,7 +555,7 @@ const close = () => {
     cleanliness_score: 5,
     accessibility_score: 5,
     noise_level: 5,
-    image_url: null,
+    image_urls: null,
     availability: true
   }
 }
