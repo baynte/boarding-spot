@@ -33,7 +33,7 @@
       <v-col cols="12" sm="4">
         <v-card>
           <v-card-text class="text-center">
-            <div class="text-h4 mb-2">${{ averagePrice }}</div>
+            <div class="text-h4 mb-2">₱{{ averagePrice }}</div>
             <div class="text-subtitle-1">Average Price</div>
           </v-card-text>
         </v-card>
@@ -78,7 +78,7 @@
                     v-model="editedItem.price"
                     label="Monthly Rent"
                     type="number"
-                    prefix="$"
+                    prefix="₱"
                     :rules="[rules.required, rules.positive]"
                     hint="Monthly rent amount"
                     persistent-hint
@@ -330,7 +330,7 @@
         </template>
 
         <template v-slot:item.price="{ item }">
-          ${{ item.price }}
+          ₱{{ item.price }}
         </template>
 
         <template v-slot:item.availability="{ item }">
@@ -519,7 +519,7 @@ const save = async () => {
     }
 
     if (editedItem.value.id) {
-      await axios.put(`/landlord/rooms/${editedItem.value.id}`, formData)
+      await axios.put(`/landlord/rooms/₱{editedItem.value.id}`, formData)
       snackbarText.value = 'Room updated successfully'
     } else {
       await axios.post('/landlord/rooms', formData)
@@ -581,10 +581,10 @@ const toggleAvailability = async (item) => {
     formData.append('noise_level', item.noise_level)
     formData.append('availability', !item.availability)
     
-    await axios.put(`/landlord/rooms/${item.id}`, formData)
+    await axios.put(`/landlord/rooms/₱{item.id}`, formData)
     item.availability = !item.availability
     
-    snackbarText.value = `Room marked as ${item.availability ? 'available' : 'occupied'}`
+    snackbarText.value = `Room marked as ₱{item.availability ? 'available' : 'occupied'}`
     snackbarColor.value = 'success'
     snackbar.value = true
     await fetchRooms()
@@ -601,7 +601,7 @@ const deleteItem = async (item) => {
   if (!confirmed) return
   
   try {
-    await axios.delete(`/landlord/rooms/${item.id}`)
+    await axios.delete(`/landlord/rooms/₱{item.id}`)
     snackbarText.value = 'Room deleted successfully'
     snackbarColor.value = 'success'
     snackbar.value = true
