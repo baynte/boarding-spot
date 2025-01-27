@@ -23,14 +23,14 @@
 
               <v-col cols="12" sm="6">
                 <v-text-field
-                  v-model="preferences.min_size"
-                  label="Minimum Size (sq ft)"
+                  v-model="preferences.min_capacity"
+                  label="Minimum Capacity"
                   type="number"
-                  :rules="[rules.required, rules.positive]"
-                  hint="Minimum room size you're comfortable with"
+                  :rules="[rules.required, rules.positive, rules.integer]"
+                  hint="Minimum number of occupants the room should accommodate"
                   persistent-hint
                   validate-on="blur"
-                  :error-messages="errors.min_size"
+                  :error-messages="errors.min_capacity"
                 ></v-text-field>
               </v-col>
 
@@ -208,7 +208,7 @@ const snackbarColor = ref('success')
 
 const preferences = ref({
   max_price: null,
-  min_size: null,
+  min_capacity: null,
   preferred_location: '',
   required_amenities: []
 })
@@ -222,7 +222,7 @@ const weights = ref({
 
 const errors = ref({
   max_price: '',
-  min_size: '',
+  min_capacity: '',
   preferred_location: '',
   required_amenities: '',
   weights: ''
@@ -234,8 +234,11 @@ const totalWeight = computed(() => {
 
 const isFormValid = computed(() => {
   return totalWeight.value === 100 &&
-         preferences.value.max_price > 0 &&
-         preferences.value.min_size > 0 &&
+         Number(preferences.value.max_price) > 0 &&
+         Number(preferences.value.min_capacity) > 0 &&
+         Number.isInteger(Number(preferences.value.min_capacity)) &&
+         !isNaN(preferences.value.max_price) &&
+         !isNaN(preferences.value.min_capacity) &&
          preferences.value.preferred_location.trim() !== '' &&
          preferences.value.required_amenities.length > 0
 })
@@ -254,9 +257,10 @@ const commonAmenities = [
 ]
 
 const rules = {
-  required: v => !!v || 'Field is required',
-  positive: v => v > 0 || 'Must be greater than 0',
-  amenities: v => v && v.length > 0 || 'At least one amenity is required'
+  required: v => !!v || 'This field is required',
+  positive: v => (Number(v) > 0) || 'Must be greater than 0',
+  integer: v => (Number.isInteger(Number(v)) && !isNaN(v)) || 'Must be a whole number',
+  amenities: v => v.length > 0 || 'At least one amenity is required'
 }
 
 onMounted(async () => {
@@ -269,7 +273,7 @@ const fetchPreferences = async () => {
     if (response.data) {
       preferences.value = {
         max_price: response.data.max_price,
-        min_size: response.data.min_size,
+        min_capacity: response.data.min_capacity,
         preferred_location: response.data.preferred_location,
         required_amenities: response.data.required_amenities
       }
@@ -288,84 +292,75 @@ const fetchPreferences = async () => {
 }
 
 const normalizeWeights = (changedWeight) => {
-  // Convert all weights to numbers first
-  Object.keys(weights.value).forEach(key => {
-    weights.value[key] = Number(weights.value[key]) || 0
-  })
-
-  const total = Object.values(weights.value).reduce((sum, weight) => sum + weight, 0)
-  if (total === 0) {
-    // Reset to default equal weights if total is 0
-    Object.keys(weights.value).forEach(key => {
-      weights.value[key] = 25
-    })
-    return
-  }
-
-  const factor = 100 / total
-  Object.keys(weights.value).forEach(key => {
-    if (key !== changedWeight) {
-      weights.value[key] = Math.round(weights.value[key] * factor)
-    }
-  })
-
-  // Ensure the changed weight is also a number
+  // Ensure the weight is a number and not NaN
   weights.value[changedWeight] = Number(weights.value[changedWeight]) || 0
-
-  // Adjust for rounding errors by putting the remainder in the changed weight
-  const newTotal = Object.values(weights.value).reduce((sum, weight) => sum + weight, 0)
-  if (newTotal !== 100) {
-    const diff = 100 - newTotal
-    weights.value[changedWeight] += diff
+  
+  // Ensure weight is between 0 and 100
+  weights.value[changedWeight] = Math.max(0, Math.min(100, weights.value[changedWeight]))
+  
+  const total = totalWeight.value
+  if (total !== 100) {
+    // Calculate how much we need to adjust other weights
+    const diff = 100 - total
+    const otherWeights = Object.keys(weights.value).filter(w => w !== changedWeight)
+    const totalOtherWeights = otherWeights.reduce((sum, w) => sum + weights.value[w], 0)
+    
+    if (totalOtherWeights > 0) {
+      otherWeights.forEach(w => {
+        const proportion = weights.value[w] / totalOtherWeights
+        weights.value[w] = Math.max(0, Math.min(100, weights.value[w] + (diff * proportion)))
+      })
+    } else {
+      // If all other weights are 0, distribute equally
+      const equalShare = diff / otherWeights.length
+      otherWeights.forEach(w => {
+        weights.value[w] = Math.max(0, equalShare)
+      })
+    }
   }
 }
 
 const savePreferences = async () => {
-  const { valid } = await form.value.validate()
-  if (!valid) {
-    snackbarText.value = 'Please fill in all required fields correctly'
-    snackbarColor.value = 'error'
-    snackbar.value = true
-    return
-  }
-
-  // Validate weights total
-  const totalWeight = Object.values(weights.value).reduce((sum, weight) => sum + weight, 0)
-  if (Math.abs(totalWeight - 100) > 0.01) {
-    snackbarText.value = 'Importance weights must sum to 100%'
-    snackbarColor.value = 'error'
-    snackbar.value = true
-    return
-  }
-
-  loading.value = true
-
   try {
-    // Ensure amenities is an array
-    const amenities = Array.isArray(preferences.value.required_amenities) 
-      ? preferences.value.required_amenities 
-      : []
+    loading.value = true
+    errors.value = {
+      max_price: '',
+      min_capacity: '',
+      preferred_location: '',
+      required_amenities: '',
+      weights: ''
+    }
 
-    // Convert weights from percentages to decimals (0-1)
-    const response = await axios.post('/tenant/preferences', {
+    // Validate numbers
+    if (isNaN(preferences.value.max_price) || Number(preferences.value.max_price) <= 0) {
+      errors.value.max_price = 'Please enter a valid price'
+      return
+    }
+
+    if (isNaN(preferences.value.min_capacity) || !Number.isInteger(Number(preferences.value.min_capacity)) || Number(preferences.value.min_capacity) <= 0) {
+      errors.value.min_capacity = 'Please enter a valid number of occupants'
+      return
+    }
+
+    const data = {
+      ...preferences.value,
       max_price: Number(preferences.value.max_price),
-      min_size: Number(preferences.value.min_size),
-      preferred_location: preferences.value.preferred_location.trim(),
-      required_amenities: amenities,
-      safety_weight: Number((weights.value.safety / 100).toFixed(4)),
-      cleanliness_weight: Number((weights.value.cleanliness / 100).toFixed(4)),
-      accessibility_weight: Number((weights.value.accessibility / 100).toFixed(4)),
-      noise_level_weight: Number((weights.value.noise / 100).toFixed(4))
-    })
+      min_capacity: Number(preferences.value.min_capacity),
+      required_amenities: JSON.stringify(preferences.value.required_amenities),
+      safety_weight: weights.value.safety / 100,
+      cleanliness_weight: weights.value.cleanliness / 100,
+      accessibility_weight: weights.value.accessibility / 100,
+      noise_level_weight: weights.value.noise / 100
+    }
 
-    snackbarText.value = 'Preferences saved successfully'
+    await axios.post('/api/tenant/preferences', data)
     snackbarColor.value = 'success'
+    snackbarText.value = 'Preferences saved successfully!'
     snackbar.value = true
-    router.push('/search')
   } catch (error) {
     console.error('Error saving preferences:', error)
-    snackbarText.value = error.response?.data?.error || 'Error saving preferences'
     snackbarColor.value = 'error'
+    snackbarText.value = error.response?.data?.message || 'Error saving preferences'
     snackbar.value = true
   } finally {
     loading.value = false
