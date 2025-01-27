@@ -96,16 +96,6 @@
                 </v-col>
                 <v-col cols="12" sm="6">
                   <v-text-field
-                    v-model="editedItem.size"
-                    label="Size (sq ft)"
-                    type="number"
-                    :rules="[rules.required, rules.positive]"
-                    hint="Room size in square feet"
-                    persistent-hint
-                  ></v-text-field>
-                </v-col>
-                <v-col cols="12" sm="6">
-                  <v-text-field
                     v-model="editedItem.location"
                     label="Location"
                     :rules="[rules.required]"
@@ -416,7 +406,6 @@ const editedItem = ref({
   title: '',
   description: '',
   price: 0,
-  size: 0,
   capacity: 1,
   location: '',
   amenities: [],
@@ -477,7 +466,6 @@ const headers = [
   },
   { title: 'Title', key: 'title' },
   { title: 'Price', key: 'price' },
-  { title: 'Size (sq ft)', key: 'size' },
   { title: 'Location', key: 'location' },
   { title: 'Availability', key: 'availability' },
   { title: 'Actions', key: 'actions', sortable: false }
@@ -515,7 +503,6 @@ const save = async () => {
     formData.append('title', editedItem.value.title)
     formData.append('description', editedItem.value.description)
     formData.append('price', editedItem.value.price)
-    formData.append('size', editedItem.value.size)
     formData.append('capacity', editedItem.value.capacity)
     formData.append('location', editedItem.value.location)
     formData.append('amenities', JSON.stringify(editedItem.value.amenities))
@@ -562,7 +549,6 @@ const close = () => {
     title: '',
     description: '',
     price: 0,
-    size: 0,
     capacity: 1,
     location: '',
     amenities: [],
@@ -587,7 +573,6 @@ const toggleAvailability = async (item) => {
     formData.append('title', item.title)
     formData.append('description', item.description)
     formData.append('price', item.price)
-    formData.append('size', item.size)
     formData.append('capacity', item.capacity)
     formData.append('location', item.location)
     formData.append('amenities', JSON.stringify(item.amenities))
