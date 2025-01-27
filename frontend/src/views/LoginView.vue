@@ -93,12 +93,12 @@ const handleSubmit = async () => {
     snackbarColor.value = 'success'
     snackbar.value = true
     
-    // Redirect based on user type
-    if (auth.isLandlord) {
-      router.push('/landlord')
-    } else {
-      router.push('/tenant')
-    }
+    // Set the redirect path based on user type
+    const redirectPath = auth.isLandlord ? '/landlord' : '/tenant'
+    
+    // Navigate first, then refresh
+    await router.push(redirectPath)
+    window.location.reload()
   } catch (error) {
     snackbarText.value = error.response?.data?.error || 'Login failed'
     snackbarColor.value = 'error'
