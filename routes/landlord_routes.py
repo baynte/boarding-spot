@@ -58,7 +58,7 @@ def create_room():
         title=data['title'],
         description=data['description'],
         price=float(data['price']),
-        size=float(data.get('size', 0)),
+        # size=float(data.get('size', 0)),
         location=data['location'],
         amenities=json.dumps(data.get('amenities', [])),
         safety_score=float(data.get('safety_score', 5.0)),
