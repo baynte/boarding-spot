@@ -62,24 +62,33 @@
         <v-row>
           <v-col cols="12" sm="6" md="3">
             <v-text-field
-              v-model.number="filters.max_price"
+              v-model.number="filters.maxPrice"
               label="Maximum Price"
               type="number"
               prefix="₱"
               clearable
-              hint="Leave empty to use preference"
-              persistent-hint
+              :loading="loading"
+              :disabled="loading"
+              density="comfortable"
+              variant="outlined"
+              hide-details
             ></v-text-field>
           </v-col>
 
           <v-col cols="12" sm="6" md="3">
             <v-text-field
-              v-model.number="filters.min_capacity"
+              v-model.number="filters.minCapacity"
               label="Minimum Capacity"
               type="number"
-              clearable
-              hint="Leave empty to use preference"
+              min="1"
+              hint="Minimum number of tenants"
               persistent-hint
+              clearable
+              :loading="loading"
+              :disabled="loading"
+              density="comfortable"
+              variant="outlined"
+              hide-details
             ></v-text-field>
           </v-col>
 
@@ -88,273 +97,153 @@
               v-model="filters.location"
               label="Location"
               clearable
-              hint="Leave empty to use preference"
-              persistent-hint
+              :loading="loading"
+              :disabled="loading"
+              density="comfortable"
+              variant="outlined"
+              hide-details
+              prepend-inner-icon="mdi-map-marker"
             ></v-text-field>
           </v-col>
 
           <v-col cols="12" sm="6" md="3">
+            <v-select
+              v-model="sortBy"
+              :items="sortOptions"
+              label="Sort By"
+              density="comfortable"
+              variant="outlined"
+              hide-details
+            ></v-select>
+          </v-col>
+
+          <v-col cols="12">
             <v-combobox
               v-model="filters.amenities"
               :items="commonAmenities"
               label="Required Amenities"
               multiple
               chips
+              closable-chips
               clearable
-              hint="Leave empty to use preference"
-              persistent-hint
+              :loading="loading"
+              :disabled="loading"
+              density="comfortable"
+              variant="outlined"
+              hide-details
             ></v-combobox>
           </v-col>
         </v-row>
 
-        <v-divider class="my-4"></v-divider>
-
-        <v-row>
-          <v-col cols="12" sm="6" md="3">
-            <v-text-field
-              v-model.number="filters.min_safety_score"
-              label="Minimum Safety Score"
-              type="number"
-              :min="1"
-              :max="10"
-              :step="1"
-              clearable
-              hint="1-10 scale"
-              persistent-hint
-            ></v-text-field>
+        <!-- Score Filters -->
+        <v-row class="mt-4">
+          <v-col cols="12">
+            <div class="text-subtitle-1 mb-2">Score Filters</div>
           </v-col>
-
           <v-col cols="12" sm="6" md="3">
-            <v-text-field
-              v-model.number="filters.min_cleanliness_score"
-              label="Minimum Cleanliness Score"
-              type="number"
+            <div class="d-flex align-center justify-space-between mb-1">
+              <span class="text-body-2">Min Safety Score</span>
+              <v-chip size="x-small" :color="getScoreColor(filters.minSafetyScore)">{{ filters.minSafetyScore }}/10</v-chip>
+            </div>
+            <v-slider
+              v-model="filters.minSafetyScore"
               :min="1"
               :max="10"
-              :step="1"
-              clearable
-              hint="1-10 scale"
-              persistent-hint
-            ></v-text-field>
+              :step="0.5"
+              :color="getScoreColor(filters.minSafetyScore)"
+              track-color="grey-lighten-1"
+              show-ticks="always"
+              :tick-size="4"
+              :loading="loading"
+              :disabled="loading"
+            ></v-slider>
           </v-col>
-
           <v-col cols="12" sm="6" md="3">
-            <v-text-field
-              v-model.number="filters.min_accessibility_score"
-              label="Minimum Accessibility Score"
-              type="number"
+            <div class="d-flex align-center justify-space-between mb-1">
+              <span class="text-body-2">Max Noise Level</span>
+              <v-chip size="x-small" :color="getScoreColor(10 - filters.maxNoiseLevel)">{{ filters.maxNoiseLevel }}/10</v-chip>
+            </div>
+            <v-slider
+              v-model="filters.maxNoiseLevel"
               :min="1"
               :max="10"
-              :step="1"
-              clearable
-              hint="1-10 scale"
-              persistent-hint
-            ></v-text-field>
+              :step="0.5"
+              :color="getScoreColor(10 - filters.maxNoiseLevel)"
+              track-color="grey-lighten-1"
+              show-ticks="always"
+              :tick-size="4"
+              :loading="loading"
+              :disabled="loading"
+            ></v-slider>
           </v-col>
-
           <v-col cols="12" sm="6" md="3">
-            <v-text-field
-              v-model.number="filters.max_noise_level"
-              label="Maximum Noise Level"
-              type="number"
+            <div class="d-flex align-center justify-space-between mb-1">
+              <span class="text-body-2">Min Accessibility</span>
+              <v-chip size="x-small" :color="getScoreColor(filters.minAccessibilityScore)">{{ filters.minAccessibilityScore }}/10</v-chip>
+            </div>
+            <v-slider
+              v-model="filters.minAccessibilityScore"
               :min="1"
               :max="10"
-              :step="1"
-              clearable
-              hint="1-10 scale (lower is better)"
-              persistent-hint
-            ></v-text-field>
+              :step="0.5"
+              :color="getScoreColor(filters.minAccessibilityScore)"
+              track-color="grey-lighten-1"
+              show-ticks="always"
+              :tick-size="4"
+              :loading="loading"
+              :disabled="loading"
+            ></v-slider>
+          </v-col>
+          <v-col cols="12" sm="6" md="3">
+            <div class="d-flex align-center justify-space-between mb-1">
+              <span class="text-body-2">Min Cleanliness</span>
+              <v-chip size="x-small" :color="getScoreColor(filters.minCleanlinessScore)">{{ filters.minCleanlinessScore }}/10</v-chip>
+            </div>
+            <v-slider
+              v-model="filters.minCleanlinessScore"
+              :min="1"
+              :max="10"
+              :step="0.5"
+              :color="getScoreColor(filters.minCleanlinessScore)"
+              track-color="grey-lighten-1"
+              show-ticks="always"
+              :tick-size="4"
+              :loading="loading"
+              :disabled="loading"
+            ></v-slider>
           </v-col>
         </v-row>
 
-        <v-row class="mt-4">
-          <v-col cols="12" class="text-center">
+        <v-row class="mt-2">
+          <v-col cols="12" class="d-flex justify-end">
+            <v-btn
+              color="error"
+              variant="text"
+              @click="clearFilters"
+              :disabled="loading"
+              class="me-2"
+            >
+              Clear All
+            </v-btn>
             <v-btn
               color="primary"
-              :loading="loading"
               @click="searchRooms"
-              class="mr-2"
+              :loading="loading"
+              :disabled="loading"
             >
-              {{ activeFiltersCount }} active
-            </v-chip>
-          </div>
-        </v-expansion-panel-title>
-        <v-expansion-panel-text>
-          <v-row>
-            <v-col cols="12" sm="6" md="3">
-              <v-text-field
-                v-model="filters.maxPrice"
-                label="Maximum Price"
-                type="number"
-                prefix="₱"
-                clearable
-                :loading="loading"
-                :disabled="loading"
-                density="comfortable"
-                variant="outlined"
-                hide-details
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" sm="6" md="3">
-              <v-text-field
-                v-model="filters.minCapacity"
-                label="Minimum Capacity"
-                type="number"
-                min="1"
-                hint="Minimum number of tenants"
-                persistent-hint
-                clearable
-                :loading="loading"
-                :disabled="loading"
-                density="comfortable"
-                variant="outlined"
-                hide-details
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" sm="6" md="3">
-              <v-text-field
-                v-model="filters.location"
-                label="Location"
-                clearable
-                :loading="loading"
-                :disabled="loading"
-                density="comfortable"
-                variant="outlined"
-                hide-details
-                prepend-inner-icon="mdi-map-marker"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12" sm="6" md="3">
-              <v-select
-                v-model="sortBy"
-                :items="sortOptions"
-                label="Sort By"
-                density="comfortable"
-                variant="outlined"
-                hide-details
-              ></v-select>
-            </v-col>
-            <v-col cols="12">
-              <v-combobox
-                v-model="filters.amenities"
-                :items="commonAmenities"
-                label="Required Amenities"
-                multiple
-                chips
-                closable-chips
-                clearable
-                :loading="loading"
-                :disabled="loading"
-                density="comfortable"
-                variant="outlined"
-                hide-details
-              ></v-combobox>
-            </v-col>
-          </v-row>
-
-          <!-- Score Filters -->
-          <v-row class="mt-4">
-            <v-col cols="12">
-              <div class="text-subtitle-1 mb-2">Score Filters</div>
-            </v-col>
-            <v-col cols="12" sm="6" md="3">
-              <div class="d-flex align-center justify-space-between mb-1">
-                <span class="text-body-2">Min Safety Score</span>
-                <v-chip size="x-small" :color="getScoreColor(filters.minSafetyScore)">{{ filters.minSafetyScore }}/10</v-chip>
-              </div>
-              <v-slider
-                v-model="filters.minSafetyScore"
-                :min="1"
-                :max="10"
-                :step="0.5"
-                :color="getScoreColor(filters.minSafetyScore)"
-                track-color="grey-lighten-1"
-                show-ticks="always"
-                :tick-size="4"
-                :loading="loading"
-                :disabled="loading"
-              ></v-slider>
-            </v-col>
-            <v-col cols="12" sm="6" md="3">
-              <div class="d-flex align-center justify-space-between mb-1">
-                <span class="text-body-2">Max Noise Level</span>
-                <v-chip size="x-small" :color="getScoreColor(10 - filters.maxNoiseLevel)">{{ filters.maxNoiseLevel }}/10</v-chip>
-              </div>
-              <v-slider
-                v-model="filters.maxNoiseLevel"
-                :min="1"
-                :max="10"
-                :step="0.5"
-                :color="getScoreColor(10 - filters.maxNoiseLevel)"
-                track-color="grey-lighten-1"
-                show-ticks="always"
-                :tick-size="4"
-                :loading="loading"
-                :disabled="loading"
-              ></v-slider>
-            </v-col>
-            <v-col cols="12" sm="6" md="3">
-              <div class="d-flex align-center justify-space-between mb-1">
-                <span class="text-body-2">Min Accessibility</span>
-                <v-chip size="x-small" :color="getScoreColor(filters.minAccessibilityScore)">{{ filters.minAccessibilityScore }}/10</v-chip>
-              </div>
-              <v-slider
-                v-model="filters.minAccessibilityScore"
-                :min="1"
-                :max="10"
-                :step="0.5"
-                :color="getScoreColor(filters.minAccessibilityScore)"
-                track-color="grey-lighten-1"
-                show-ticks="always"
-                :tick-size="4"
-                :loading="loading"
-                :disabled="loading"
-              ></v-slider>
-            </v-col>
-            <v-col cols="12" sm="6" md="3">
-              <div class="d-flex align-center justify-space-between mb-1">
-                <span class="text-body-2">Min Cleanliness</span>
-                <v-chip size="x-small" :color="getScoreColor(filters.minCleanlinessScore)">{{ filters.minCleanlinessScore }}/10</v-chip>
-              </div>
-              <v-slider
-                v-model="filters.minCleanlinessScore"
-                :min="1"
-                :max="10"
-                :step="0.5"
-                :color="getScoreColor(filters.minCleanlinessScore)"
-                track-color="grey-lighten-1"
-                show-ticks="always"
-                :tick-size="4"
-                :loading="loading"
-                :disabled="loading"
-              ></v-slider>
-            </v-col>
-          </v-row>
-
-          <v-row class="mt-2">
-            <v-col cols="12" class="d-flex justify-end">
-              <v-btn
-                color="error"
-                variant="text"
-                @click="clearFilters"
-                :disabled="loading"
-                class="me-2"
+              Search
+              <v-chip
+                v-if="activeFiltersCount > 0"
+                size="x-small"
+                class="ml-2"
               >
-                Clear All
-              </v-btn>
-              <v-btn
-                color="primary"
-                @click="applyFilters"
-                :loading="loading"
-                :disabled="loading"
-              >
-                Apply Filters
-              </v-btn>
-            </v-col>
-          </v-row>
-        </v-expansion-panel-text>
-      </v-expansion-panel>
-    </v-expansion-panels>
+                {{ activeFiltersCount }} active
+              </v-chip>
+            </v-btn>
+          </v-col>
+        </v-row>
+      </v-card-text>
+    </v-card>
 
     <!-- Search Results -->
     <template v-if="!loading && searchPerformed">
@@ -401,102 +290,7 @@
             sm="6"
             md="4"
           >
-            <v-card
-              @click="viewRoom(room)"
-              class="room-card"
-              :class="getMatchClass(room.comprehensive_score)"
-            >
-              <v-img
-                :src="room.image_urls?.[0] || '/placeholder-room.jpg'"
-                height="200"
-                cover
-              >
-                <template v-slot:placeholder>
-                  <div class="d-flex align-center justify-center fill-height">
-                    <v-progress-circular
-                      indeterminate
-                      color="primary"
-                    ></v-progress-circular>
-                  </div>
-                </template>
-              </v-img>
-
-              <v-card-title>
-                {{ room.title }}
-                <v-chip
-                  :color="getMatchColor(room.comprehensive_score)"
-                  size="small"
-                  class="ml-2"
-                >
-                  {{ Math.round(room.comprehensive_score) }}% Match
-                </v-chip>
-              </v-card-title>
-
-              <v-card-text>
-                <div class="d-flex align-center mb-2">
-                  <v-icon size="small" class="mr-1">mdi-currency-php</v-icon>
-                  <span class="text-h6">{{ room.price }}</span>
-                  <v-spacer></v-spacer>
-                  <v-icon size="small" class="mr-1">mdi-account-group</v-icon>
-                  <span>{{ room.capacity }} person(s)</span>
-                </div>
-
-                <div class="d-flex align-center mb-2">
-                  <v-icon size="small" class="mr-1">mdi-map-marker</v-icon>
-                  <span class="text-truncate">{{ room.location }}</span>
-                </div>
-
-                <v-divider class="my-2"></v-divider>
-
-                <div class="scores-grid">
-                  <div class="score-item">
-                    <v-icon size="small" color="success">mdi-shield-check</v-icon>
-                    <span>{{ room.safety_score }}/10</span>
-                  </div>
-                  <div class="score-item">
-                    <v-icon size="small" color="info">mdi-broom</v-icon>
-                    <span>{{ room.cleanliness_score }}/10</span>
-                  </div>
-                  <div class="score-item">
-                    <v-icon size="small" color="primary">mdi-transit-connection</v-icon>
-                    <span>{{ room.accessibility_score }}/10</span>
-                  </div>
-                  <div class="score-item">
-                    <v-icon size="small" color="warning">mdi-volume-medium</v-icon>
-                    <span>{{ room.noise_level }}/10</span>
-                  </div>
-                </div>
-
-                <v-chip-group class="mt-2">
-                  <v-chip
-                    v-for="amenity in room.amenities.slice(0, 3)"
-                    :key="amenity"
-                    size="x-small"
-                    variant="outlined"
-                  >
-                    {{ amenity }}
-                  </v-chip>
-                  <v-chip
-                    v-if="room.amenities.length > 3"
-                    size="x-small"
-                    variant="outlined"
-                  >
-                    +{{ room.amenities.length - 3 }} more
-                  </v-chip>
-                </v-chip-group>
-              </v-card-text>
-
-              <v-card-actions>
-                <v-spacer></v-spacer>
-                <v-btn
-                  variant="text"
-                  color="primary"
-                  @click.stop="viewRoom(room)"
-                >
-                  View Details
-                </v-btn>
-              </v-card-actions>
-            </v-card>
+            <RoomCard :room="room" />
           </v-col>
         </template>
         <v-col v-else cols="12" class="text-center">
@@ -585,10 +379,11 @@ const activeFiltersCount = computed(() => {
   if (filters.value.minCapacity) count++
   if (filters.value.location) count++
   if (filters.value.amenities.length > 0) count++
-  if (filters.value.min_safety_score) count++
-  if (filters.value.max_noise_level) count++
-  if (filters.value.min_accessibility_score) count++
-  if (filters.value.min_cleanliness_score) count++
+  if (filters.value.minSafetyScore > 1) count++
+  if (filters.value.maxNoiseLevel < 10) count++
+  if (filters.value.minAccessibilityScore > 1) count++
+  if (filters.value.minCleanlinessScore > 1) count++
+  if (sortBy.value !== 'match_desc') count++
   return count
 })
 
@@ -629,6 +424,8 @@ const clearFilters = () => {
 }
 
 const searchRooms = async () => {
+  loading.value = true
+  searchPerformed.value = true
   try {
     const params = {
       max_price: filters.value.maxPrice,
@@ -638,18 +435,32 @@ const searchRooms = async () => {
       min_safety_score: filters.value.minSafetyScore,
       max_noise_level: filters.value.maxNoiseLevel,
       min_accessibility_score: filters.value.minAccessibilityScore,
-      min_cleanliness_score: filters.value.minCleanlinessScore
+      min_cleanliness_score: filters.value.minCleanlinessScore,
+      sort_by: sortBy.value
     }
     
     const response = await axios.get('/tenant/search', { params })
     searchResults.value = response.data
+    if (!response.data.all_rooms) {
+      searchResults.value.all_rooms = []
+    }
 
   } catch (error) {
     console.error('Error searching rooms:', error)
     snackbarText.value = error.response?.data?.error || 'Error searching rooms'
     snackbarColor.value = 'error'
     snackbar.value = true
-    searchResults.value = { summary: null, all_rooms: [] }
+    searchResults.value = { 
+      summary: {
+        total_rooms: 0,
+        perfect_matches_count: 0,
+        excellent_matches_count: 0,
+        good_matches_count: 0,
+        fair_matches_count: 0,
+        other_matches_count: 0
+      }, 
+      all_rooms: [] 
+    }
   } finally {
     loading.value = false
   }
