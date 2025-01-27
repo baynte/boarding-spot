@@ -246,7 +246,7 @@ onMounted(async () => {
 
 const fetchPreferences = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/tenant/preferences')
+    const response = await axios.get('/tenant/preferences')
     if (response.data) {
       preferences.value = {
         ...response.data,
@@ -260,8 +260,7 @@ const fetchPreferences = async () => {
 
 const fetchRecentlyViewed = async () => {
   try {
-    // This endpoint would need to be implemented in the backend
-    const response = await axios.get('http://localhost:5000/tenant/recently-viewed')
+    const response = await axios.get('/tenant/recently-viewed')
     recentlyViewed.value = response.data
   } catch (error) {
     console.error('Error fetching recently viewed rooms:', error)

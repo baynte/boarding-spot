@@ -1,15 +1,16 @@
 import axios from 'axios'
 
 // Create axios instance with custom config
-const instance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000',
+const axiosInstance = axios.create({
+  baseURL: import.meta.env.VITE_API_BASE_URL,
+  timeout: 5000,
   headers: {
     'Content-Type': 'application/json'
   }
 })
 
 // Add a request interceptor to handle auth tokens
-instance.interceptors.request.use(
+axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token')
     if (token) {
@@ -23,7 +24,7 @@ instance.interceptors.request.use(
 )
 
 // Add a response interceptor to handle errors
-instance.interceptors.response.use(
+axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
@@ -35,4 +36,4 @@ instance.interceptors.response.use(
   }
 )
 
-export default instance 
+export default axiosInstance 

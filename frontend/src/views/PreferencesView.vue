@@ -265,7 +265,7 @@ onMounted(async () => {
 
 const fetchPreferences = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/tenant/preferences')
+    const response = await axios.get('/tenant/preferences')
     if (response.data) {
       preferences.value = {
         max_price: response.data.max_price,
@@ -347,7 +347,7 @@ const savePreferences = async () => {
       : []
 
     // Convert weights from percentages to decimals (0-1)
-    const response = await axios.post('http://localhost:5000/tenant/preferences', {
+    const response = await axios.post('/tenant/preferences', {
       max_price: Number(preferences.value.max_price),
       min_size: Number(preferences.value.min_size),
       preferred_location: preferences.value.preferred_location.trim(),
