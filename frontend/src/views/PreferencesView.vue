@@ -9,10 +9,10 @@
             <v-row>
               <v-col cols="12" sm="6">
                 <v-text-field
-                  v-model.number="preferences.max_price"
+                  v-model="preferences.max_price"
                   label="Maximum Price"
                   type="number"
-                  prefix="₱"
+                  prefix="$"
                   :rules="[rules.required, rules.positive]"
                   hint="Your maximum budget for rent"
                   persistent-hint
@@ -26,9 +26,10 @@
                   v-model="preferences.min_capacity"
                   label="Minimum Capacity"
                   type="number"
-                  min="1"
-                  hint="Minimum number of tenants that can occupy the room"
+                  :rules="[rules.required, rules.positive]"
+                  hint="Minimum number of people you're comfortable with"
                   persistent-hint
+                  validate-on="blur"
                   :error-messages="errors.min_capacity"
                 ></v-text-field>
               </v-col>
@@ -74,9 +75,10 @@
                   v-model="weights.safety"
                   label="Safety Importance"
                   thumb-label
-                  :min="1"
-                  :max="10"
-                  :step="1"
+                  :min="0"
+                  :max="100"
+                  :step="5"
+                  @update:model-value="normalizeWeights('safety')"
                 >
                   <template v-slot:append>
                     <v-text-field
@@ -85,8 +87,7 @@
                       style="width: 70px"
                       density="compact"
                       hide-details
-                      :min="1"
-                      :max="10"
+                      @update:model-value="normalizeWeights('safety')"
                     ></v-text-field>
                   </template>
                 </v-slider>
@@ -97,9 +98,10 @@
                   v-model="weights.cleanliness"
                   label="Cleanliness Importance"
                   thumb-label
-                  :min="1"
-                  :max="10"
-                  :step="1"
+                  :min="0"
+                  :max="100"
+                  :step="5"
+                  @update:model-value="normalizeWeights('cleanliness')"
                 >
                   <template v-slot:append>
                     <v-text-field
@@ -108,8 +110,7 @@
                       style="width: 70px"
                       density="compact"
                       hide-details
-                      :min="1"
-                      :max="10"
+                      @update:model-value="normalizeWeights('cleanliness')"
                     ></v-text-field>
                   </template>
                 </v-slider>
@@ -120,9 +121,10 @@
                   v-model="weights.accessibility"
                   label="Accessibility Importance"
                   thumb-label
-                  :min="1"
-                  :max="10"
-                  :step="1"
+                  :min="0"
+                  :max="100"
+                  :step="5"
+                  @update:model-value="normalizeWeights('accessibility')"
                 >
                   <template v-slot:append>
                     <v-text-field
@@ -131,8 +133,7 @@
                       style="width: 70px"
                       density="compact"
                       hide-details
-                      :min="1"
-                      :max="10"
+                      @update:model-value="normalizeWeights('accessibility')"
                     ></v-text-field>
                   </template>
                 </v-slider>
@@ -143,9 +144,10 @@
                   v-model="weights.noise"
                   label="Noise Level Importance"
                   thumb-label
-                  :min="1"
-                  :max="10"
-                  :step="1"
+                  :min="0"
+                  :max="100"
+                  :step="5"
+                  @update:model-value="normalizeWeights('noise')"
                 >
                   <template v-slot:append>
                     <v-text-field
@@ -154,8 +156,7 @@
                       style="width: 70px"
                       density="compact"
                       hide-details
-                      :min="1"
-                      :max="10"
+                      @update:model-value="normalizeWeights('noise')"
                     ></v-text-field>
                   </template>
                 </v-slider>
@@ -163,8 +164,10 @@
 
               <v-col cols="12">
                 <div class="d-flex align-center">
-                  <div class="text-subtitle-1">Importance Scale:</div>
-                  <div class="ml-2">1 (Least Important) to 10 (Most Important)</div>
+                  <div class="text-subtitle-1">Total Weight:</div>
+                  <div :class="{'text-error': totalWeight !== 100, 'text-success': totalWeight === 100}" class="ml-2">
+                    {{ totalWeight }}%
+                  </div>
                 </div>
               </v-col>
             </v-row>
@@ -194,7 +197,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import axiosInstance from '@/utils/axios'
+import axios from '@/plugins/axios'
 
 const router = useRouter()
 const form = ref(null)
@@ -207,18 +210,14 @@ const preferences = ref({
   max_price: null,
   min_capacity: null,
   preferred_location: '',
-  required_amenities: [],
-  safety_weight: 0.25,
-  cleanliness_weight: 0.25,
-  accessibility_weight: 0.25,
-  noise_level_weight: 0.25
+  required_amenities: []
 })
 
 const weights = ref({
-  safety: 5,
-  cleanliness: 5,
-  accessibility: 5,
-  noise: 5
+  safety: 25,
+  cleanliness: 25,
+  accessibility: 25,
+  noise: 25
 })
 
 const errors = ref({
@@ -233,25 +232,12 @@ const totalWeight = computed(() => {
   return Object.values(weights.value).reduce((sum, weight) => sum + Number(weight), 0)
 })
 
-const normalizedWeights = computed(() => {
-  const total = totalWeight.value
-  return {
-    safety: weights.value.safety / total,
-    cleanliness: weights.value.cleanliness / total,
-    accessibility: weights.value.accessibility / total,
-    noise: weights.value.noise / total
-  }
-})
-
 const isFormValid = computed(() => {
-  // Check if all weights are valid (between 1 and 10)
-  const validWeights = Object.values(weights.value).every(w => w >= 1 && w <= 10)
-  
-  return preferences.value.max_price > 0 &&
+  return totalWeight.value === 100 &&
+         preferences.value.max_price > 0 &&
          preferences.value.min_capacity > 0 &&
          preferences.value.preferred_location.trim() !== '' &&
-         preferences.value.required_amenities.length > 0 &&
-         validWeights
+         preferences.value.required_amenities.length > 0
 })
 
 const commonAmenities = [
@@ -268,10 +254,9 @@ const commonAmenities = [
 ]
 
 const rules = {
-  required: v => !!v || 'This field is required',
-  positive: v => (Number(v) > 0) || 'Must be greater than 0',
-  integer: v => (Number.isInteger(Number(v)) && !isNaN(v)) || 'Must be a whole number',
-  amenities: v => v.length > 0 || 'At least one amenity is required'
+  required: v => !!v || 'Field is required',
+  positive: v => v > 0 || 'Must be greater than 0',
+  amenities: v => v && v.length > 0 || 'At least one amenity is required'
 }
 
 onMounted(async () => {
@@ -280,129 +265,104 @@ onMounted(async () => {
 
 const fetchPreferences = async () => {
   try {
-    console.log('Fetching preferences...')
-    const response = await axiosInstance.get('/tenant/preferences')
-    console.log('Received preferences:', response.data)
-    
+    const response = await axios.get('/tenant/preferences')
     if (response.data) {
-      // Backend returned preferences
       preferences.value = {
         max_price: response.data.max_price,
         min_capacity: response.data.min_capacity,
         preferred_location: response.data.preferred_location,
-        required_amenities: response.data.required_amenities,
-        safety_weight: response.data.safety_weight,
-        cleanliness_weight: response.data.cleanliness_weight,
-        accessibility_weight: response.data.accessibility_weight,
-        noise_level_weight: response.data.noise_level_weight
+        required_amenities: response.data.required_amenities
       }
       weights.value = {
-        safety: Math.round(response.data.safety_weight * 10),
-        cleanliness: Math.round(response.data.cleanliness_weight * 10),
-        accessibility: Math.round(response.data.accessibility_weight * 10),
-        noise: Math.round(response.data.noise_level_weight * 10)
+        safety: response.data.safety_weight * 100,
+        cleanliness: response.data.cleanliness_weight * 100,
+        accessibility: response.data.accessibility_weight * 100,
+        noise: response.data.noise_level_weight * 100
       }
-      console.log('Set preferences to:', preferences.value)
-      console.log('Set weights to:', weights.value)
-    } else {
-      // No preferences found, set defaults
-      preferences.value = {
-        max_price: null,
-        min_capacity: null,
-        preferred_location: '',
-        required_amenities: [],
-        safety_weight: 0.5,
-        cleanliness_weight: 0.5,
-        accessibility_weight: 0.5,
-        noise_level_weight: 0.5
-      }
-      weights.value = {
-        safety: 5,
-        cleanliness: 5,
-        accessibility: 5,
-        noise: 5
-      }
-      console.log('No preferences found, using defaults')
     }
   } catch (error) {
-    console.error('Error fetching preferences:', error)
-    snackbarText.value = error.response?.data?.error || 'Error fetching preferences'
+    snackbarText.value = 'Error fetching preferences'
     snackbarColor.value = 'error'
     snackbar.value = true
-    
-    // Set defaults on error
-    preferences.value = {
-      max_price: null,
-      min_capacity: null,
-      preferred_location: '',
-      required_amenities: [],
-      safety_weight: 0.5,
-      cleanliness_weight: 0.5,
-      accessibility_weight: 0.5,
-      noise_level_weight: 0.5
+  }
+}
+
+const normalizeWeights = (changedWeight) => {
+  // Convert all weights to numbers first
+  Object.keys(weights.value).forEach(key => {
+    weights.value[key] = Number(weights.value[key]) || 0
+  })
+
+  const total = Object.values(weights.value).reduce((sum, weight) => sum + weight, 0)
+  if (total === 0) {
+    // Reset to default equal weights if total is 0
+    Object.keys(weights.value).forEach(key => {
+      weights.value[key] = 25
+    })
+    return
+  }
+
+  const factor = 100 / total
+  Object.keys(weights.value).forEach(key => {
+    if (key !== changedWeight) {
+      weights.value[key] = Math.round(weights.value[key] * factor)
     }
-    weights.value = {
-      safety: 5,
-      cleanliness: 5,
-      accessibility: 5,
-      noise: 5
-    }
+  })
+
+  // Ensure the changed weight is also a number
+  weights.value[changedWeight] = Number(weights.value[changedWeight]) || 0
+
+  // Adjust for rounding errors by putting the remainder in the changed weight
+  const newTotal = Object.values(weights.value).reduce((sum, weight) => sum + weight, 0)
+  if (newTotal !== 100) {
+    const diff = 100 - newTotal
+    weights.value[changedWeight] += diff
   }
 }
 
 const savePreferences = async () => {
+  const { valid } = await form.value.validate()
+  if (!valid) {
+    snackbarText.value = 'Please fill in all required fields correctly'
+    snackbarColor.value = 'error'
+    snackbar.value = true
+    return
+  }
+
+  // Validate weights total
+  const totalWeight = Object.values(weights.value).reduce((sum, weight) => sum + weight, 0)
+  if (Math.abs(totalWeight - 100) > 0.01) {
+    snackbarText.value = 'Importance weights must sum to 100%'
+    snackbarColor.value = 'error'
+    snackbar.value = true
+    return
+  }
+
+  loading.value = true
+
   try {
-    loading.value = true
-    errors.value = {
-      max_price: '',
-      min_capacity: '',
-      preferred_location: '',
-      required_amenities: '',
-      weights: ''
-    }
-
-    // Validate numbers
-    if (isNaN(preferences.value.max_price) || Number(preferences.value.max_price) <= 0) {
-      errors.value.max_price = 'Please enter a valid price'
-      return
-    }
-
-    if (isNaN(preferences.value.min_capacity) || !Number.isInteger(Number(preferences.value.min_capacity)) || Number(preferences.value.min_capacity) <= 0) {
-      errors.value.min_capacity = 'Please enter a valid number of occupants'
-      return
-    }
-
-    // Validate weights are between 1 and 10
-    if (!Object.values(weights.value).every(w => w >= 1 && w <= 10)) {
-      errors.value.weights = 'All importance weights must be between 1 and 10'
-      return
-    }
-
-    // Get normalized weights that sum to 1.0
-    const normalized = normalizedWeights.value
-
-    const data = {
+    const response = await axios.post('/tenant/preferences', {
       max_price: Number(preferences.value.max_price),
       min_capacity: Number(preferences.value.min_capacity),
       preferred_location: preferences.value.preferred_location.trim(),
       required_amenities: preferences.value.required_amenities,
-      safety_weight: normalized.safety,
-      cleanliness_weight: normalized.cleanliness,
-      accessibility_weight: normalized.accessibility,
-      noise_level_weight: normalized.noise
-    }
+      safety_weight: weights.value.safety / 100,
+      cleanliness_weight: weights.value.cleanliness / 100,
+      accessibility_weight: weights.value.accessibility / 100,
+      noise_level_weight: weights.value.noise / 100
+    })
 
-    await axiosInstance.post('/tenant/preferences', data)
+    snackbarText.value = 'Preferences saved successfully'
     snackbarColor.value = 'success'
-    snackbarText.value = 'Preferences saved successfully!'
     snackbar.value = true
+    router.push('/search')
   } catch (error) {
     console.error('Error saving preferences:', error)
-    snackbarColor.value = 'error'
     snackbarText.value = error.response?.data?.error || 'Error saving preferences'
+    snackbarColor.value = 'error'
     snackbar.value = true
   } finally {
     loading.value = false
   }
 }
-</script> 
+</script>

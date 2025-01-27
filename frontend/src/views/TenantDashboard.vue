@@ -44,14 +44,14 @@
           </v-col>
         </v-row>
 
-        <v-divider class="my-4"></v-divider>
+        <!-- <v-divider class="my-4"></v-divider> -->
 
-        <div class="text-subtitle-1 mb-2">Importance Weights</div>
-        <v-row>
+        <!-- <div class="text-subtitle-1 mb-2">Importance Weights</div> -->
+        <!-- <v-row>
           <v-col cols="12" sm="6" md="3">
             <div class="text-caption">Safety</div>
             <v-progress-linear
-              :model-value="preferences.safety_weight * 10"
+              :model-value="preferences.safety_weight * 100"
               color="primary"
               height="8"
             >
@@ -63,7 +63,7 @@
           <v-col cols="12" sm="6" md="3">
             <div class="text-caption">Cleanliness</div>
             <v-progress-linear
-              :model-value="preferences.cleanliness_weight * 10"
+              :model-value="preferences.cleanliness_weight * 100"
               color="primary"
               height="8"
             >
@@ -75,7 +75,7 @@
           <v-col cols="12" sm="6" md="3">
             <div class="text-caption">Accessibility</div>
             <v-progress-linear
-              :model-value="preferences.accessibility_weight * 10"
+              :model-value="preferences.accessibility_weight * 100"
               color="primary"
               height="8"
             >
@@ -87,7 +87,7 @@
           <v-col cols="12" sm="6" md="3">
             <div class="text-caption">Noise Level</div>
             <v-progress-linear
-              :model-value="preferences.noise_level_weight * 10"
+              :model-value="preferences.noise_level_weight * 100"
               color="primary"
               height="8"
             >
@@ -96,7 +96,7 @@
               </template>
             </v-progress-linear>
           </v-col>
-        </v-row>
+        </v-row> -->
       </v-card-text>
 
       <v-card-text v-else>
