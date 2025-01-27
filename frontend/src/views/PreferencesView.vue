@@ -9,7 +9,7 @@
             <v-row>
               <v-col cols="12" sm="6">
                 <v-text-field
-                  v-model="preferences.max_price"
+                  v-model.number="preferences.max_price"
                   label="Maximum Price"
                   type="number"
                   prefix="₱"
@@ -23,7 +23,7 @@
 
               <v-col cols="12" sm="6">
                 <v-text-field
-                  v-model="preferences.min_capacity"
+                  v-model.number="preferences.min_capacity"
                   label="Minimum Capacity"
                   type="number"
                   :rules="[rules.required, rules.positive, rules.integer]"
@@ -274,10 +274,12 @@ const fetchPreferences = async () => {
     if (response.data) {
       // Backend returned preferences
       preferences.value = {
-        max_price: response.data.max_price || null,
-        min_capacity: response.data.min_capacity || null,
+        max_price: response.data.max_price ? Number(response.data.max_price) : null,
+        min_capacity: response.data.min_capacity ? Number(response.data.min_capacity) : null,
         preferred_location: response.data.preferred_location || '',
-        required_amenities: response.data.required_amenities || []
+        required_amenities: Array.isArray(response.data.required_amenities) ? 
+          response.data.required_amenities : 
+          (response.data.required_amenities ? JSON.parse(response.data.required_amenities) : [])
       }
       weights.value = {
         safety: Math.round((response.data.safety_weight || 0.25) * 10),
@@ -308,6 +310,20 @@ const fetchPreferences = async () => {
     snackbarText.value = error.response?.data?.error || 'Error fetching preferences'
     snackbarColor.value = 'error'
     snackbar.value = true
+    
+    // Set defaults on error
+    preferences.value = {
+      max_price: null,
+      min_capacity: null,
+      preferred_location: '',
+      required_amenities: []
+    }
+    weights.value = {
+      safety: 5,
+      cleanliness: 5,
+      accessibility: 5,
+      noise: 5
+    }
   }
 }
 
