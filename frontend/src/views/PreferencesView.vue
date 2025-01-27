@@ -268,7 +268,7 @@ onMounted(async () => {
 const fetchPreferences = async () => {
   try {
     console.log('Fetching preferences...')
-    const response = await axios.get('/tenant/preferences')
+    const response = await axios.get(`${import.meta.env.VITE_API_URL}/tenant/preferences`)
     console.log('Received preferences:', response.data)
     
     if (response.data) {
@@ -360,7 +360,7 @@ const savePreferences = async () => {
       noise_level_weight: weights.value.noise / 10
     }
 
-    await axios.post('/tenant/preferences', data)
+    await axios.post(`${import.meta.env.VITE_API_URL}/tenant/preferences`, data)
     snackbarColor.value = 'success'
     snackbarText.value = 'Preferences saved successfully!'
     snackbar.value = true
