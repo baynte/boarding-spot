@@ -24,7 +24,7 @@
           </v-col>
           <v-col cols="12" sm="6" md="3">
             <div class="text-subtitle-1">Minimum Capacity</div>
-            <div class="text-h6">{{ preferences.min_capacity }} person(s)</div>
+            <div class="text-h6">{{ preferences.min_capacity }}</div>
           </v-col>
           <v-col cols="12" sm="6" md="3">
             <div class="text-subtitle-1">Preferred Location</div>
@@ -56,7 +56,7 @@
               height="8"
             >
               <template v-slot:default="{ value }">
-                <strong>{{ Math.round(value) }}/10</strong>
+                <strong>{{ Math.round(value) }}</strong>
               </template>
             </v-progress-linear>
           </v-col>
@@ -68,7 +68,7 @@
               height="8"
             >
               <template v-slot:default="{ value }">
-                <strong>{{ Math.round(value) }}/10</strong>
+                <strong>{{ Math.round(value) }}</strong>
               </template>
             </v-progress-linear>
           </v-col>
@@ -80,7 +80,7 @@
               height="8"
             >
               <template v-slot:default="{ value }">
-                <strong>{{ Math.round(value) }}/10</strong>
+                <strong>{{ Math.round(value) }}</strong>
               </template>
             </v-progress-linear>
           </v-col>
@@ -92,7 +92,7 @@
               height="8"
             >
               <template v-slot:default="{ value }">
-                <strong>{{ Math.round(value) }}/10</strong>
+                <strong>{{ Math.round(value) }}</strong>
               </template>
             </v-progress-linear>
           </v-col>

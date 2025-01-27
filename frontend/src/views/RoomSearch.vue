@@ -175,19 +175,186 @@
               @click="searchRooms"
               class="mr-2"
             >
-              Search Rooms
-            </v-btn>
-            <v-btn
-              variant="outlined"
-              @click="resetFilters"
-              :disabled="loading"
-            >
-              Reset Filters
-            </v-btn>
-          </v-col>
-        </v-row>
-      </v-card-text>
-    </v-card>
+              {{ activeFiltersCount }} active
+            </v-chip>
+          </div>
+        </v-expansion-panel-title>
+        <v-expansion-panel-text>
+          <v-row>
+            <v-col cols="12" sm="6" md="3">
+              <v-text-field
+                v-model="filters.maxPrice"
+                label="Maximum Price"
+                type="number"
+                prefix="₱"
+                clearable
+                :loading="loading"
+                :disabled="loading"
+                density="comfortable"
+                variant="outlined"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" sm="6" md="3">
+              <v-text-field
+                v-model="filters.minCapacity"
+                label="Minimum Capacity"
+                type="number"
+                min="1"
+                hint="Minimum number of tenants"
+                persistent-hint
+                clearable
+                :loading="loading"
+                :disabled="loading"
+                density="comfortable"
+                variant="outlined"
+                hide-details
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" sm="6" md="3">
+              <v-text-field
+                v-model="filters.location"
+                label="Location"
+                clearable
+                :loading="loading"
+                :disabled="loading"
+                density="comfortable"
+                variant="outlined"
+                hide-details
+                prepend-inner-icon="mdi-map-marker"
+              ></v-text-field>
+            </v-col>
+            <v-col cols="12" sm="6" md="3">
+              <v-select
+                v-model="sortBy"
+                :items="sortOptions"
+                label="Sort By"
+                density="comfortable"
+                variant="outlined"
+                hide-details
+              ></v-select>
+            </v-col>
+            <v-col cols="12">
+              <v-combobox
+                v-model="filters.amenities"
+                :items="commonAmenities"
+                label="Required Amenities"
+                multiple
+                chips
+                closable-chips
+                clearable
+                :loading="loading"
+                :disabled="loading"
+                density="comfortable"
+                variant="outlined"
+                hide-details
+              ></v-combobox>
+            </v-col>
+          </v-row>
+
+          <!-- Score Filters -->
+          <v-row class="mt-4">
+            <v-col cols="12">
+              <div class="text-subtitle-1 mb-2">Score Filters</div>
+            </v-col>
+            <v-col cols="12" sm="6" md="3">
+              <div class="d-flex align-center justify-space-between mb-1">
+                <span class="text-body-2">Min Safety Score</span>
+                <v-chip size="x-small" :color="getScoreColor(filters.minSafetyScore)">{{ filters.minSafetyScore }}/10</v-chip>
+              </div>
+              <v-slider
+                v-model="filters.minSafetyScore"
+                :min="1"
+                :max="10"
+                :step="0.5"
+                :color="getScoreColor(filters.minSafetyScore)"
+                track-color="grey-lighten-1"
+                show-ticks="always"
+                :tick-size="4"
+                :loading="loading"
+                :disabled="loading"
+              ></v-slider>
+            </v-col>
+            <v-col cols="12" sm="6" md="3">
+              <div class="d-flex align-center justify-space-between mb-1">
+                <span class="text-body-2">Max Noise Level</span>
+                <v-chip size="x-small" :color="getScoreColor(10 - filters.maxNoiseLevel)">{{ filters.maxNoiseLevel }}/10</v-chip>
+              </div>
+              <v-slider
+                v-model="filters.maxNoiseLevel"
+                :min="1"
+                :max="10"
+                :step="0.5"
+                :color="getScoreColor(10 - filters.maxNoiseLevel)"
+                track-color="grey-lighten-1"
+                show-ticks="always"
+                :tick-size="4"
+                :loading="loading"
+                :disabled="loading"
+              ></v-slider>
+            </v-col>
+            <v-col cols="12" sm="6" md="3">
+              <div class="d-flex align-center justify-space-between mb-1">
+                <span class="text-body-2">Min Accessibility</span>
+                <v-chip size="x-small" :color="getScoreColor(filters.minAccessibilityScore)">{{ filters.minAccessibilityScore }}/10</v-chip>
+              </div>
+              <v-slider
+                v-model="filters.minAccessibilityScore"
+                :min="1"
+                :max="10"
+                :step="0.5"
+                :color="getScoreColor(filters.minAccessibilityScore)"
+                track-color="grey-lighten-1"
+                show-ticks="always"
+                :tick-size="4"
+                :loading="loading"
+                :disabled="loading"
+              ></v-slider>
+            </v-col>
+            <v-col cols="12" sm="6" md="3">
+              <div class="d-flex align-center justify-space-between mb-1">
+                <span class="text-body-2">Min Cleanliness</span>
+                <v-chip size="x-small" :color="getScoreColor(filters.minCleanlinessScore)">{{ filters.minCleanlinessScore }}/10</v-chip>
+              </div>
+              <v-slider
+                v-model="filters.minCleanlinessScore"
+                :min="1"
+                :max="10"
+                :step="0.5"
+                :color="getScoreColor(filters.minCleanlinessScore)"
+                track-color="grey-lighten-1"
+                show-ticks="always"
+                :tick-size="4"
+                :loading="loading"
+                :disabled="loading"
+              ></v-slider>
+            </v-col>
+          </v-row>
+
+          <v-row class="mt-2">
+            <v-col cols="12" class="d-flex justify-end">
+              <v-btn
+                color="error"
+                variant="text"
+                @click="clearFilters"
+                :disabled="loading"
+                class="me-2"
+              >
+                Clear All
+              </v-btn>
+              <v-btn
+                color="primary"
+                @click="applyFilters"
+                :loading="loading"
+                :disabled="loading"
+              >
+                Apply Filters
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-expansion-panel-text>
+      </v-expansion-panel>
+    </v-expansion-panels>
 
     <!-- Search Results -->
     <template v-if="!loading && searchPerformed">
@@ -391,30 +558,31 @@ const searchResults = ref({
 
 // Filters
 const filters = ref({
-  max_price: null,
-  min_capacity: null,
+  maxPrice: null,
+  minCapacity: null,
   location: '',
   amenities: [],
-  min_safety_score: null,
-  min_cleanliness_score: null,
-  min_accessibility_score: null,
-  max_noise_level: null
+  minSafetyScore: 1,
+  maxNoiseLevel: 10,
+  minAccessibilityScore: 1,
+  minCleanlinessScore: 1,
+  sortBy: 'match_desc'
 })
 
 const sortOptions = [
-  { title: 'Match Score (High to Low)', value: 'score' },
+  { title: 'Best Match', value: 'match_desc' },
   { title: 'Price (Low to High)', value: 'price_asc' },
   { title: 'Price (High to Low)', value: 'price_desc' },
-  { title: 'Size (Largest First)', value: 'size_desc' },
-  { title: 'Size (Smallest First)', value: 'size_asc' }
+  { title: 'Capacity (Largest First)', value: 'capacity_desc' },
+  { title: 'Capacity (Smallest First)', value: 'capacity_asc' }
 ]
-const sortBy = ref('score')
+const sortBy = ref('match_desc')
 
 // Computed properties
 const activeFiltersCount = computed(() => {
   let count = 0
-  if (filters.value.max_price) count++
-  if (filters.value.min_capacity) count++
+  if (filters.value.maxPrice) count++
+  if (filters.value.minCapacity) count++
   if (filters.value.location) count++
   if (filters.value.amenities.length > 0) count++
   if (filters.value.min_safety_score) count++
@@ -447,35 +615,33 @@ const getScoreColor = (score) => {
 
 const clearFilters = () => {
   filters.value = {
-    max_price: null,
-    min_capacity: null,
+    maxPrice: null,
+    minCapacity: null,
     location: '',
     amenities: [],
-    min_safety_score: null,
-    min_cleanliness_score: null,
-    min_accessibility_score: null,
-    max_noise_level: null
+    minSafetyScore: 1,
+    maxNoiseLevel: 10,
+    minAccessibilityScore: 1,
+    minCleanlinessScore: 1,
+    sortBy: 'match_desc'
   }
   searchRooms()
 }
 
 const searchRooms = async () => {
   try {
-    loading.value = true
-    searchPerformed.value = true
-
-    // Build query parameters
-    const params = new URLSearchParams()
-    if (filters.value.max_price) params.append('max_price', filters.value.max_price)
-    if (filters.value.min_capacity) params.append('min_capacity', filters.value.min_capacity)
-    if (filters.value.location) params.append('location', filters.value.location)
-    if (filters.value.amenities?.length) params.append('amenities', JSON.stringify(filters.value.amenities))
-    if (filters.value.min_safety_score) params.append('min_safety_score', filters.value.min_safety_score)
-    if (filters.value.min_cleanliness_score) params.append('min_cleanliness_score', filters.value.min_cleanliness_score)
-    if (filters.value.min_accessibility_score) params.append('min_accessibility_score', filters.value.min_accessibility_score)
-    if (filters.value.max_noise_level) params.append('max_noise_level', filters.value.max_noise_level)
-
-    const response = await axios.get(`${import.meta.env.VITE_API_URL}/tenant/search?${params.toString()}`)
+    const params = {
+      max_price: filters.value.maxPrice,
+      min_capacity: filters.value.minCapacity,
+      location: filters.value.location,
+      amenities: filters.value.amenities,
+      min_safety_score: filters.value.minSafetyScore,
+      max_noise_level: filters.value.maxNoiseLevel,
+      min_accessibility_score: filters.value.minAccessibilityScore,
+      min_cleanliness_score: filters.value.minCleanlinessScore
+    }
+    
+    const response = await axios.get('/tenant/search', { params })
     searchResults.value = response.data
 
   } catch (error) {
@@ -523,14 +689,15 @@ const checkPreferences = async () => {
     if (response.data) {
       // Initialize filters with preferences
       filters.value = {
-        max_price: response.data.max_price,
-        min_capacity: response.data.min_capacity,
+        maxPrice: response.data.max_price,
+        minCapacity: response.data.min_capacity,
         location: response.data.preferred_location,
         amenities: response.data.required_amenities || [],
-        min_safety_score: Math.max(1, Math.round(response.data.safety_weight * 10)),
-        max_noise_level: Math.min(10, Math.round((1 - response.data.noise_level_weight) * 10)),
-        min_accessibility_score: Math.max(1, Math.round(response.data.accessibility_weight * 10)),
-        min_cleanliness_score: Math.max(1, Math.round(response.data.cleanliness_weight * 10))
+        minSafetyScore: Math.max(1, Math.round(response.data.safety_weight * 10)),
+        maxNoiseLevel: Math.min(10, Math.round((1 - response.data.noise_level_weight) * 10)),
+        minAccessibilityScore: Math.max(1, Math.round(response.data.accessibility_weight * 10)),
+        minCleanlinessScore: Math.max(1, Math.round(response.data.cleanliness_weight * 10)),
+        sortBy: 'match_desc'
       }
     }
   } catch (error) {

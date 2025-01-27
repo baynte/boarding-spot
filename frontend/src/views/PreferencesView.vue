@@ -23,13 +23,12 @@
 
               <v-col cols="12" sm="6">
                 <v-text-field
-                  v-model.number="preferences.min_capacity"
+                  v-model="preferences.min_capacity"
                   label="Minimum Capacity"
                   type="number"
-                  :rules="[rules.required, rules.positive, rules.integer]"
-                  hint="Minimum number of occupants the room should accommodate"
+                  min="1"
+                  hint="Minimum number of tenants that can occupy the room"
                   persistent-hint
-                  validate-on="blur"
                   :error-messages="errors.min_capacity"
                 ></v-text-field>
               </v-col>
@@ -208,7 +207,11 @@ const preferences = ref({
   max_price: null,
   min_capacity: null,
   preferred_location: '',
-  required_amenities: []
+  required_amenities: [],
+  safety_weight: 0.25,
+  cleanliness_weight: 0.25,
+  accessibility_weight: 0.25,
+  noise_level_weight: 0.25
 })
 
 const weights = ref({
@@ -231,12 +234,9 @@ const totalWeight = computed(() => {
 })
 
 const isFormValid = computed(() => {
-  return totalWeight.value === 10 &&
-         Number(preferences.value.max_price) > 0 &&
-         Number(preferences.value.min_capacity) > 0 &&
-         Number.isInteger(Number(preferences.value.min_capacity)) &&
-         !isNaN(preferences.value.max_price) &&
-         !isNaN(preferences.value.min_capacity) &&
+  return totalWeight.value === 100 &&
+         preferences.value.max_price > 0 &&
+         preferences.value.min_capacity > 0 &&
          preferences.value.preferred_location.trim() !== '' &&
          preferences.value.required_amenities.length > 0
 })
@@ -274,12 +274,14 @@ const fetchPreferences = async () => {
     if (response.data) {
       // Backend returned preferences
       preferences.value = {
-        max_price: response.data.max_price ? Number(response.data.max_price) : null,
-        min_capacity: response.data.min_capacity ? Number(response.data.min_capacity) : null,
-        preferred_location: response.data.preferred_location || '',
-        required_amenities: Array.isArray(response.data.required_amenities) ? 
-          response.data.required_amenities : 
-          (response.data.required_amenities ? JSON.parse(response.data.required_amenities) : [])
+        max_price: response.data.max_price,
+        min_capacity: response.data.min_capacity,
+        preferred_location: response.data.preferred_location,
+        required_amenities: response.data.required_amenities,
+        safety_weight: response.data.safety_weight * 100,
+        cleanliness_weight: response.data.cleanliness_weight * 100,
+        accessibility_weight: response.data.accessibility_weight * 100,
+        noise_level_weight: response.data.noise_level_weight * 100
       }
       weights.value = {
         safety: Math.round((response.data.safety_weight || 0.25) * 10),

@@ -96,11 +96,13 @@
                 </v-col>
                 <v-col cols="12" sm="6">
                   <v-text-field
-                    v-model="editedItem.location"
-                    label="Location"
-                    :rules="[rules.required]"
-                    hint="Room location or neighborhood"
+                    v-model="editedItem.capacity"
+                    label="Capacity"
+                    type="number"
+                    min="1"
+                    hint="Number of tenants that can occupy the room"
                     persistent-hint
+                    :rules="[rules.required, rules.positive]"
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6">
@@ -465,8 +467,11 @@ const headers = [
     align: 'center',
   },
   { title: 'Title', key: 'title' },
+  { title: 'Description', key: 'description' },
   { title: 'Price', key: 'price' },
+  { title: 'Capacity', key: 'capacity' },
   { title: 'Location', key: 'location' },
+  { title: 'Amenities', key: 'amenities' },
   { title: 'Availability', key: 'availability' },
   { title: 'Actions', key: 'actions', sortable: false }
 ]
