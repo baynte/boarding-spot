@@ -69,9 +69,10 @@
               clearable
               :loading="loading"
               :disabled="loading"
-              density="comfortable"
+              density="compact"
               variant="outlined"
               hide-details
+              class="mb-3"
             ></v-text-field>
           </v-col>
 
@@ -86,9 +87,10 @@
               clearable
               :loading="loading"
               :disabled="loading"
-              density="comfortable"
+              density="compact"
               variant="outlined"
               hide-details
+              class="mb-3"
             ></v-text-field>
           </v-col>
 
@@ -99,10 +101,11 @@
               clearable
               :loading="loading"
               :disabled="loading"
-              density="comfortable"
+              density="compact"
               variant="outlined"
               hide-details
               prepend-inner-icon="mdi-map-marker"
+              class="mb-3"
             ></v-text-field>
           </v-col>
 
@@ -111,9 +114,10 @@
               v-model="sortBy"
               :items="sortOptions"
               label="Sort By"
-              density="comfortable"
+              density="compact"
               variant="outlined"
               hide-details
+              class="mb-3"
             ></v-select>
           </v-col>
 
@@ -581,5 +585,28 @@ onMounted(async () => {
 
 .other-match {
   border: 2px solid rgb(var(--v-theme-grey)) !important;
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 600px) {
+  .v-card-title {
+    font-size: 1.25rem !important;
+  }
+
+  .text-h4 {
+    font-size: 1.5rem !important;
+  }
+
+  .v-chip-group {
+    flex-wrap: wrap;
+  }
+
+  .v-chip {
+    margin-bottom: 4px;
+  }
+
+  .v-slider {
+    margin-bottom: 24px;
+  }
 }
 </style> 
