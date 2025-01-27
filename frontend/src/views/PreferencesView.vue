@@ -341,15 +341,21 @@ const savePreferences = async () => {
   loading.value = true
 
   try {
+    // Ensure amenities is an array
+    const amenities = Array.isArray(preferences.value.required_amenities) 
+      ? preferences.value.required_amenities 
+      : []
+
+    // Convert weights from percentages to decimals (0-1)
     const response = await axios.post('http://localhost:5000/tenant/preferences', {
       max_price: Number(preferences.value.max_price),
       min_size: Number(preferences.value.min_size),
       preferred_location: preferences.value.preferred_location.trim(),
-      required_amenities: preferences.value.required_amenities,
-      safety_weight: weights.value.safety / 100,
-      cleanliness_weight: weights.value.cleanliness / 100,
-      accessibility_weight: weights.value.accessibility / 100,
-      noise_level_weight: weights.value.noise / 100
+      required_amenities: amenities,
+      safety_weight: Number((weights.value.safety / 100).toFixed(4)),
+      cleanliness_weight: Number((weights.value.cleanliness / 100).toFixed(4)),
+      accessibility_weight: Number((weights.value.accessibility / 100).toFixed(4)),
+      noise_level_weight: Number((weights.value.noise / 100).toFixed(4))
     })
 
     snackbarText.value = 'Preferences saved successfully'
