@@ -96,12 +96,13 @@
                 </v-col>
                 <v-col cols="12" sm="6">
                   <v-text-field
-                    v-model="editedItem.size"
-                    label="Size (sq ft)"
+                    v-model="editedItem.capacity"
+                    label="Capacity"
                     type="number"
-                    :rules="[rules.required, rules.positive]"
-                    hint="Room size in square feet"
+                    min="1"
+                    hint="Number of tenants that can occupy the room"
                     persistent-hint
+                    :rules="[rules.required, rules.positive]"
                   ></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6">
@@ -406,7 +407,7 @@ const editedItem = ref({
   title: '',
   description: '',
   price: 0,
-  size: 0,
+  capacity: 1,
   location: '',
   amenities: [],
   safety_score: 5,
@@ -463,9 +464,11 @@ const headers = [
     align: 'center',
   },
   { title: 'Title', key: 'title' },
+  { title: 'Description', key: 'description' },
   { title: 'Price', key: 'price' },
-  { title: 'Size (sq ft)', key: 'size' },
+  { title: 'Capacity', key: 'capacity' },
   { title: 'Location', key: 'location' },
+  { title: 'Amenities', key: 'amenities' },
   { title: 'Availability', key: 'availability' },
   { title: 'Actions', key: 'actions', sortable: false }
 ]
@@ -502,7 +505,7 @@ const save = async () => {
     formData.append('title', editedItem.value.title)
     formData.append('description', editedItem.value.description)
     formData.append('price', editedItem.value.price)
-    formData.append('size', editedItem.value.size)
+    formData.append('capacity', editedItem.value.capacity)
     formData.append('location', editedItem.value.location)
     formData.append('amenities', JSON.stringify(editedItem.value.amenities))
     formData.append('safety_score', editedItem.value.safety_score)
@@ -548,7 +551,7 @@ const close = () => {
     title: '',
     description: '',
     price: 0,
-    size: 0,
+    capacity: 1,
     location: '',
     amenities: [],
     safety_score: 5,
@@ -572,7 +575,7 @@ const toggleAvailability = async (item) => {
     formData.append('title', item.title)
     formData.append('description', item.description)
     formData.append('price', item.price)
-    formData.append('size', item.size)
+    formData.append('capacity', item.capacity)
     formData.append('location', item.location)
     formData.append('amenities', JSON.stringify(item.amenities))
     formData.append('safety_score', item.safety_score)

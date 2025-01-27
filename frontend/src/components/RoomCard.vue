@@ -50,8 +50,8 @@
         </div>
 
         <div class="d-flex align-center mb-2">
-          <v-icon size="small" class="me-1">mdi-ruler-square</v-icon>
-          <span class="text-body-2">{{ room.size }} sq ft</span>
+          <v-icon size="small" class="me-1">mdi-account-group</v-icon>
+          <span class="text-body-2">{{ room.capacity }} tenant{{ room.capacity > 1 ? 's' : '' }}</span>
         </div>
 
         <div class="d-flex align-center mb-2">
@@ -317,14 +317,16 @@
 
               <v-divider class="mb-4"></v-divider>
 
-              <!-- Location and Size -->
-              <div class="d-flex align-center mb-3">
-                <v-icon size="20" class="me-2">mdi-map-marker</v-icon>
-                <span class="text-body-1">{{ room.location }}</span>
-              </div>
-              <div class="d-flex align-center mb-3">
-                <v-icon size="20" class="me-2">mdi-ruler-square</v-icon>
-                <span class="text-body-1">{{ room.size }} sq ft</span>
+              <!-- Location and Capacity -->
+              <div class="d-flex flex-column gap-2">
+                <div class="d-flex align-center">
+                  <v-icon size="20" class="me-2">mdi-map-marker</v-icon>
+                  <span class="text-body-1">{{ room.location }}</span>
+                </div>
+                <div class="d-flex align-center">
+                  <v-icon size="20" class="me-2">mdi-account-group</v-icon>
+                  <span class="text-body-1">{{ room.capacity }} tenant{{ room.capacity > 1 ? 's' : '' }}</span>
+                </div>
               </div>
 
               <!-- Description -->
@@ -400,13 +402,13 @@ const props = defineProps({
   room: {
     type: Object,
     required: true,
-    validator: (obj) => {
-      const required = [
+    validator: (room) => {
+      return [
         'id',
         'title',
         'description',
         'price',
-        'size',
+        'capacity',
         'location',
         'amenities',
         'availability',
@@ -415,16 +417,8 @@ const props = defineProps({
         'cleanliness_score',
         'accessibility_score',
         'noise_level',
-        'landlord',
-        'topsis_score',
-        'rank',
-        'percentile',
-        'comprehensive_score',
-        'match_details'
-      ]
-      
-      // Check if all required properties exist
-      return required.every(prop => obj[prop] !== undefined)
+        'landlord'
+      ].every(prop => prop in room)
     }
   },
   match_score: {

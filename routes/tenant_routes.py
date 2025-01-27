@@ -24,7 +24,7 @@ def set_preferences():
             return jsonify({'error': 'No data provided'}), 400
 
         # Validate required fields
-        required_fields = ['max_price', 'min_size', 'preferred_location', 'required_amenities',
+        required_fields = ['max_price', 'min_capacity', 'preferred_location', 'required_amenities',
                          'safety_weight', 'cleanliness_weight', 'accessibility_weight', 'noise_level_weight']
         missing_fields = [field for field in required_fields if field not in data]
         if missing_fields:
@@ -33,11 +33,11 @@ def set_preferences():
         # Validate numeric fields
         try:
             max_price = float(data['max_price'])
-            min_size = float(data['min_size'])
-            if max_price <= 0 or min_size <= 0:
-                return jsonify({'error': 'Price and size must be positive numbers'}), 400
+            min_capacity = int(data['min_capacity'])
+            if max_price <= 0 or min_capacity <= 0:
+                return jsonify({'error': 'Price and capacity must be positive numbers'}), 400
         except (ValueError, TypeError):
-            return jsonify({'error': 'Invalid price or size value'}), 400
+            return jsonify({'error': 'Invalid price or capacity value'}), 400
 
         # Validate weights
         try:
@@ -62,7 +62,7 @@ def set_preferences():
             preference = TenantPreference(
                 tenant_id=current_user_id,
                 max_price=max_price,
-                min_size=min_size,
+                min_capacity=min_capacity,
                 preferred_location=data['preferred_location'],
                 required_amenities=json.dumps(data['required_amenities']),
                 safety_weight=weights[0],
@@ -98,7 +98,7 @@ def get_preferences():
     
     return jsonify({
         'max_price': preference.max_price,
-        'min_size': preference.min_size,
+        'min_capacity': preference.min_capacity,
         'preferred_location': preference.preferred_location,
         'required_amenities': json.loads(preference.required_amenities),
         'safety_weight': preference.safety_weight,
@@ -118,7 +118,7 @@ def search_rooms():
     
     # Get filter parameters
     max_price = request.args.get('max_price', type=float)
-    min_size = request.args.get('min_size', type=float)
+    min_capacity = request.args.get('min_capacity', type=int)
     location = request.args.get('location', '')
     amenities = json.loads(request.args.get('amenities', '[]'))
     
@@ -128,7 +128,7 @@ def search_rooms():
     min_accessibility_score = request.args.get('min_accessibility_score', type=float, default=1)
     min_cleanliness_score = request.args.get('min_cleanliness_score', type=float, default=1)
     
-    current_app.logger.info(f"Filter parameters received: max_price={max_price}, min_size={min_size}, location='{location}', amenities={amenities}")
+    current_app.logger.info(f"Filter parameters received: max_price={max_price}, min_capacity={min_capacity}, location='{location}', amenities={amenities}")
     current_app.logger.info(f"Score filters: safety>={min_safety_score}, noise<={max_noise_level}, accessibility>={min_accessibility_score}, cleanliness>={min_cleanliness_score}")
     
     # Get tenant preferences for TOPSIS weights
@@ -136,7 +136,7 @@ def search_rooms():
     if not preference:
         return jsonify({'error': 'Please set your preferences first'}), 400
     
-    current_app.logger.info(f"Tenant preferences: max_price={preference.max_price}, min_size={preference.min_size}, location='{preference.preferred_location}', amenities={preference.required_amenities}")
+    current_app.logger.info(f"Tenant preferences: max_price={preference.max_price}, min_capacity={preference.min_capacity}, location='{preference.preferred_location}', amenities={preference.required_amenities}")
     
     # Filter rooms based on basic criteria
     query = Room.query.filter_by(availability=True)
@@ -149,12 +149,12 @@ def search_rooms():
         query = query.filter(Room.price <= preference.max_price)
         current_app.logger.debug(f"Filtering by preference max price: {preference.max_price}")
         
-    if min_size:
-        query = query.filter(Room.size >= min_size)
-        current_app.logger.debug(f"Filtering by min size: {min_size}")
-    elif preference.min_size:
-        query = query.filter(Room.size >= preference.min_size)
-        current_app.logger.debug(f"Filtering by preference min size: {preference.min_size}")
+    if min_capacity:
+        query = query.filter(Room.capacity >= min_capacity)
+        current_app.logger.debug(f"Filtering by min capacity: {min_capacity}")
+    elif preference.min_capacity:
+        query = query.filter(Room.capacity >= preference.min_capacity)
+        current_app.logger.debug(f"Filtering by preference min capacity: {preference.min_capacity}")
         
     if location:
         query = query.filter(Room.location.ilike(f'%{location}%'))
@@ -174,7 +174,7 @@ def search_rooms():
     current_app.logger.info(f"After basic filtering: {len(rooms)} rooms found")
     
     if not rooms:
-        return jsonify({'message': 'No rooms found matching your basic criteria (price, size, location, scores)'})
+        return jsonify({'message': 'No rooms found matching your basic criteria (price, capacity, location, scores)'})
     
     # Filter by amenities if provided
     if amenities:
@@ -213,8 +213,8 @@ def search_rooms():
         # Define criteria ranges for normalization
         max_price = max(room.price for room in rooms)
         min_price = min(room.price for room in rooms)
-        max_size = max(room.size for room in rooms)
-        min_size = min(room.size for room in rooms)
+        max_capacity = max(room.capacity for room in rooms)
+        min_capacity = min(room.capacity for room in rooms)
         
         for room in rooms:
             # Normalize scores to 0-1 range and handle None values
@@ -223,9 +223,9 @@ def search_rooms():
             accessibility = (float(room.accessibility_score) if room.accessibility_score is not None else 5.0) / 10.0
             noise = 1 - ((float(room.noise_level) if room.noise_level is not None else 5.0) / 10.0)  # Invert noise so higher is better
             
-            # Normalize price and size (lower price and higher size are better)
+            # Normalize price and capacity (lower price and higher capacity are better)
             price_norm = 1 - ((float(room.price) - min_price) / (max_price - min_price) if max_price != min_price else 0)
-            size_norm = (float(room.size) - min_size) / (max_size - min_size) if max_size != min_size else 1
+            capacity_norm = (float(room.capacity) - min_capacity) / (max_capacity - min_capacity) if max_capacity != min_capacity else 1
             
             # Calculate amenity match score
             room_amenities = json.loads(room.amenities) if room.amenities else []
@@ -243,7 +243,7 @@ def search_rooms():
                 noise,
                 amenity_score,
                 price_norm,
-                size_norm
+                capacity_norm
             ]
             decision_matrix.append(row)
         
@@ -261,7 +261,7 @@ def search_rooms():
             float(preference.noise_level_weight) * 1.5,  # Increased weight for noise
             0.4,  # Increased amenity weight
             0.5,  # Increased price weight
-            0.4   # Increased size weight
+            0.4   # Increased capacity weight
         ], dtype=np.float64)
         
         # Normalize weights to sum to 1
@@ -290,10 +290,10 @@ def search_rooms():
                 price_diff_ratio = (room.price - preference.max_price) / preference.max_price
                 percentage_scores[i] -= min(20, price_diff_ratio * 100)  # Penalty for exceeding max price
             
-            # Size preference bonus
-            if room.size >= preference.min_size:
-                size_ratio = room.size / preference.min_size
-                percentage_scores[i] += min(10, size_ratio * 5)  # Bonus scales with size
+            # Capacity preference bonus
+            if room.capacity >= preference.min_capacity:
+                capacity_ratio = room.capacity / preference.min_capacity
+                percentage_scores[i] += min(10, capacity_ratio * 5)  # Bonus scales with capacity
             
             # Location match bonus
             if preference.preferred_location.lower() in room.location.lower():
@@ -373,7 +373,7 @@ def search_rooms():
                 'title': room.title,
                 'description': room.description,
                 'price': float(room.price),
-                'size': float(room.size),
+                'capacity': float(room.capacity),
                 'location': room.location,
                 'amenities': json.loads(room.amenities) if room.amenities else [],
                 'availability': room.availability,

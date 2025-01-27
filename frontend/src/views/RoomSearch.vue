@@ -90,10 +90,12 @@
             </v-col>
             <v-col cols="12" sm="6" md="3">
               <v-text-field
-                v-model="filters.minSize"
-                label="Minimum Size"
+                v-model="filters.minCapacity"
+                label="Minimum Capacity"
                 type="number"
-                suffix="sq ft"
+                min="1"
+                hint="Minimum number of tenants"
+                persistent-hint
                 clearable
                 :loading="loading"
                 :disabled="loading"
@@ -427,29 +429,30 @@ const searchResults = ref({
 // Filters
 const filters = ref({
   maxPrice: null,
-  minSize: null,
+  minCapacity: null,
   location: '',
   amenities: [],
   minSafetyScore: 1,
   maxNoiseLevel: 10,
   minAccessibilityScore: 1,
-  minCleanlinessScore: 1
+  minCleanlinessScore: 1,
+  sortBy: 'match_desc'
 })
 
 const sortOptions = [
-  { title: 'Match Score (High to Low)', value: 'score' },
+  { title: 'Best Match', value: 'match_desc' },
   { title: 'Price (Low to High)', value: 'price_asc' },
   { title: 'Price (High to Low)', value: 'price_desc' },
-  { title: 'Size (Largest First)', value: 'size_desc' },
-  { title: 'Size (Smallest First)', value: 'size_asc' }
+  { title: 'Capacity (Largest First)', value: 'capacity_desc' },
+  { title: 'Capacity (Smallest First)', value: 'capacity_asc' }
 ]
-const sortBy = ref('score')
+const sortBy = ref('match_desc')
 
 // Computed properties
 const activeFiltersCount = computed(() => {
   let count = 0
   if (filters.value.maxPrice) count++
-  if (filters.value.minSize) count++
+  if (filters.value.minCapacity) count++
   if (filters.value.location) count++
   if (filters.value.amenities.length > 0) count++
   if (filters.value.minSafetyScore > 1) count++
@@ -483,13 +486,14 @@ const getScoreColor = (score) => {
 const clearFilters = () => {
   filters.value = {
     maxPrice: null,
-    minSize: null,
+    minCapacity: null,
     location: '',
     amenities: [],
     minSafetyScore: 1,
     maxNoiseLevel: 10,
     minAccessibilityScore: 1,
-    minCleanlinessScore: 1
+    minCleanlinessScore: 1,
+    sortBy: 'match_desc'
   }
   applyFilters()
 }
@@ -499,7 +503,7 @@ const applyFilters = async () => {
   try {
     const params = {
       max_price: filters.value.maxPrice,
-      min_size: filters.value.minSize,
+      min_capacity: filters.value.minCapacity,
       location: filters.value.location,
       amenities: filters.value.amenities,
       min_safety_score: filters.value.minSafetyScore,
@@ -532,13 +536,14 @@ const checkPreferences = async () => {
       // Initialize filters with preferences
       filters.value = {
         maxPrice: response.data.max_price,
-        minSize: response.data.min_size,
+        minCapacity: response.data.min_capacity,
         location: response.data.preferred_location,
         amenities: response.data.required_amenities || [],
         minSafetyScore: Math.max(1, Math.round(response.data.safety_weight * 10)),
         maxNoiseLevel: Math.min(10, Math.round((1 - response.data.noise_level_weight) * 10)),
         minAccessibilityScore: Math.max(1, Math.round(response.data.accessibility_weight * 10)),
-        minCleanlinessScore: Math.max(1, Math.round(response.data.cleanliness_weight * 10))
+        minCleanlinessScore: Math.max(1, Math.round(response.data.cleanliness_weight * 10)),
+        sortBy: 'match_desc'
       }
     }
   } catch (error) {

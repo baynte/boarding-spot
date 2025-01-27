@@ -23,14 +23,13 @@
 
               <v-col cols="12" sm="6">
                 <v-text-field
-                  v-model="preferences.min_size"
-                  label="Minimum Size (sq ft)"
+                  v-model="preferences.min_capacity"
+                  label="Minimum Capacity"
                   type="number"
-                  :rules="[rules.required, rules.positive]"
-                  hint="Minimum room size you're comfortable with"
+                  min="1"
+                  hint="Minimum number of tenants that can occupy the room"
                   persistent-hint
-                  validate-on="blur"
-                  :error-messages="errors.min_size"
+                  :error-messages="errors.min_capacity"
                 ></v-text-field>
               </v-col>
 
@@ -208,9 +207,13 @@ const snackbarColor = ref('success')
 
 const preferences = ref({
   max_price: null,
-  min_size: null,
+  min_capacity: null,
   preferred_location: '',
-  required_amenities: []
+  required_amenities: [],
+  safety_weight: 0.25,
+  cleanliness_weight: 0.25,
+  accessibility_weight: 0.25,
+  noise_level_weight: 0.25
 })
 
 const weights = ref({
@@ -222,7 +225,7 @@ const weights = ref({
 
 const errors = ref({
   max_price: '',
-  min_size: '',
+  min_capacity: '',
   preferred_location: '',
   required_amenities: '',
   weights: ''
@@ -235,7 +238,7 @@ const totalWeight = computed(() => {
 const isFormValid = computed(() => {
   return totalWeight.value === 100 &&
          preferences.value.max_price > 0 &&
-         preferences.value.min_size > 0 &&
+         preferences.value.min_capacity > 0 &&
          preferences.value.preferred_location.trim() !== '' &&
          preferences.value.required_amenities.length > 0
 })
@@ -269,9 +272,13 @@ const fetchPreferences = async () => {
     if (response.data) {
       preferences.value = {
         max_price: response.data.max_price,
-        min_size: response.data.min_size,
+        min_capacity: response.data.min_capacity,
         preferred_location: response.data.preferred_location,
-        required_amenities: response.data.required_amenities
+        required_amenities: response.data.required_amenities,
+        safety_weight: response.data.safety_weight * 100,
+        cleanliness_weight: response.data.cleanliness_weight * 100,
+        accessibility_weight: response.data.accessibility_weight * 100,
+        noise_level_weight: response.data.noise_level_weight * 100
       }
       weights.value = {
         safety: response.data.safety_weight * 100,
@@ -343,7 +350,7 @@ const savePreferences = async () => {
   try {
     const response = await axios.post('http://localhost:5000/tenant/preferences', {
       max_price: Number(preferences.value.max_price),
-      min_size: Number(preferences.value.min_size),
+      min_capacity: Number(preferences.value.min_capacity),
       preferred_location: preferences.value.preferred_location.trim(),
       required_amenities: preferences.value.required_amenities,
       safety_weight: weights.value.safety / 100,
