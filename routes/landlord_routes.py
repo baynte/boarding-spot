@@ -88,7 +88,7 @@ def get_rooms():
         'title': room.title,
         'description': room.description,
         'price': room.price,
-        'size': room.size,
+        # 'size': room.size,
         'location': room.location,
         'amenities': json.loads(room.amenities),
         'availability': room.availability,

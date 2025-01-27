@@ -49,10 +49,10 @@
           <span class="text-body-2">{{ room.location }}</span>
         </div>
 
-        <div class="d-flex align-center mb-2">
+        <!-- <div class="d-flex align-center mb-2">
           <v-icon size="small" class="me-1">mdi-ruler-square</v-icon>
           <span class="text-body-2">{{ room.size }} sq ft</span>
-        </div>
+        </div> -->
 
         <div class="d-flex align-center mb-2">
           <v-icon size="small" class="me-1">mdi-account</v-icon>
@@ -322,10 +322,10 @@
                 <v-icon size="20" class="me-2">mdi-map-marker</v-icon>
                 <span class="text-body-1">{{ room.location }}</span>
               </div>
-              <div class="d-flex align-center mb-3">
+              <!-- <div class="d-flex align-center mb-3">
                 <v-icon size="20" class="me-2">mdi-ruler-square</v-icon>
                 <span class="text-body-1">{{ room.size }} sq ft</span>
-              </div>
+              </div> -->
 
               <!-- Description -->
               <div class="text-body-1 mb-4">{{ room.description }}</div>
