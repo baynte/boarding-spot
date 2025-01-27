@@ -113,6 +113,16 @@
                     persistent-hint
                   ></v-text-field>
                 </v-col>
+                <v-col cols="12" sm="6">
+                  <v-text-field
+                    v-model.number="editedItem.capacity"
+                    label="Capacity"
+                    type="number"
+                    :rules="[rules.required, rules.positive, rules.integer]"
+                    hint="Maximum number of occupants"
+                    persistent-hint
+                  ></v-text-field>
+                </v-col>
               </v-row>
 
               <!-- Amenities -->
@@ -234,7 +244,7 @@
                     accept="image/*"
                     label="Room Images"
                     prepend-icon="mdi-camera"
-                    :rules="[editedItem.id ? undefined : rules.required]"
+                    :rules="[editedItem.id ? undefined : rules.images]"
                     hint="Upload clear images of the room (you can select multiple)"
                     persistent-hint
                     show-size
@@ -407,6 +417,7 @@ const editedItem = ref({
   description: '',
   price: 0,
   size: 0,
+  capacity: 1,
   location: '',
   amenities: [],
   safety_score: 5,
@@ -442,7 +453,9 @@ const commonAmenities = [
 const rules = {
   required: v => !!v || 'Field is required',
   positive: v => v > 0 || 'Must be greater than 0',
-  amenities: v => v && v.length > 0 || 'At least one amenity is required'
+  integer: v => Number.isInteger(Number(v)) || 'Must be a whole number',
+  amenities: v => v && v.length > 0 || 'At least one amenity is required',
+  images: files => !files || files.length > 0 || 'At least one image is required'
 }
 
 const parseImageUrls = (urls) => {
@@ -503,6 +516,7 @@ const save = async () => {
     formData.append('description', editedItem.value.description)
     formData.append('price', editedItem.value.price)
     formData.append('size', editedItem.value.size)
+    formData.append('capacity', editedItem.value.capacity)
     formData.append('location', editedItem.value.location)
     formData.append('amenities', JSON.stringify(editedItem.value.amenities))
     formData.append('safety_score', editedItem.value.safety_score)
@@ -519,7 +533,7 @@ const save = async () => {
     }
 
     if (editedItem.value.id) {
-      await axios.put(`/landlord/rooms/₱{editedItem.value.id}`, formData)
+      await axios.put(`/landlord/rooms/${editedItem.value.id}`, formData)
       snackbarText.value = 'Room updated successfully'
     } else {
       await axios.post('/landlord/rooms', formData)
@@ -549,6 +563,7 @@ const close = () => {
     description: '',
     price: 0,
     size: 0,
+    capacity: 1,
     location: '',
     amenities: [],
     safety_score: 5,
@@ -567,12 +582,13 @@ const editItem = (item) => {
 
 const toggleAvailability = async (item) => {
   try {
-    console.log('Toggling availability for room:', item)
+    loading.value = true
     const formData = new FormData()
     formData.append('title', item.title)
     formData.append('description', item.description)
     formData.append('price', item.price)
     formData.append('size', item.size)
+    formData.append('capacity', item.capacity)
     formData.append('location', item.location)
     formData.append('amenities', JSON.stringify(item.amenities))
     formData.append('safety_score', item.safety_score)
@@ -581,10 +597,10 @@ const toggleAvailability = async (item) => {
     formData.append('noise_level', item.noise_level)
     formData.append('availability', !item.availability)
     
-    await axios.put(`/landlord/rooms/₱{item.id}`, formData)
+    await axios.put(`/landlord/rooms/${item.id}`, formData)
     item.availability = !item.availability
     
-    snackbarText.value = `Room marked as ₱{item.availability ? 'available' : 'occupied'}`
+    snackbarText.value = `Room marked as ${item.availability ? 'available' : 'occupied'}`
     snackbarColor.value = 'success'
     snackbar.value = true
     await fetchRooms()
@@ -593,6 +609,8 @@ const toggleAvailability = async (item) => {
     snackbarText.value = error.response?.data?.error || 'Error updating room availability'
     snackbarColor.value = 'error'
     snackbar.value = true
+  } finally {
+    loading.value = false
   }
 }
 
@@ -601,7 +619,7 @@ const deleteItem = async (item) => {
   if (!confirmed) return
   
   try {
-    await axios.delete(`/landlord/rooms/₱{item.id}`)
+    await axios.delete(`/landlord/rooms/${item.id}`)
     snackbarText.value = 'Room deleted successfully'
     snackbarColor.value = 'success'
     snackbar.value = true
