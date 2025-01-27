@@ -267,22 +267,44 @@ onMounted(async () => {
 
 const fetchPreferences = async () => {
   try {
+    console.log('Fetching preferences...')
     const response = await axios.get('/tenant/preferences')
+    console.log('Received preferences:', response.data)
+    
     if (response.data) {
+      // Backend returned preferences
       preferences.value = {
-        max_price: response.data.max_price,
-        min_capacity: response.data.min_capacity,
-        preferred_location: response.data.preferred_location,
-        required_amenities: response.data.required_amenities
+        max_price: response.data.max_price || null,
+        min_capacity: response.data.min_capacity || null,
+        preferred_location: response.data.preferred_location || '',
+        required_amenities: response.data.required_amenities || []
       }
       weights.value = {
-        safety: Math.round(response.data.safety_weight * 10),
-        cleanliness: Math.round(response.data.cleanliness_weight * 10),
-        accessibility: Math.round(response.data.accessibility_weight * 10),
-        noise: Math.round(response.data.noise_level_weight * 10)
+        safety: Math.round((response.data.safety_weight || 0.25) * 10),
+        cleanliness: Math.round((response.data.cleanliness_weight || 0.25) * 10),
+        accessibility: Math.round((response.data.accessibility_weight || 0.25) * 10),
+        noise: Math.round((response.data.noise_level_weight || 0.25) * 10)
       }
+      console.log('Set preferences to:', preferences.value)
+      console.log('Set weights to:', weights.value)
+    } else {
+      // No preferences found, set defaults
+      preferences.value = {
+        max_price: null,
+        min_capacity: null,
+        preferred_location: '',
+        required_amenities: []
+      }
+      weights.value = {
+        safety: 5,
+        cleanliness: 5,
+        accessibility: 5,
+        noise: 5
+      }
+      console.log('No preferences found, using defaults')
     }
   } catch (error) {
+    console.error('Error fetching preferences:', error)
     snackbarText.value = error.response?.data?.error || 'Error fetching preferences'
     snackbarColor.value = 'error'
     snackbar.value = true
