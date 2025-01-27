@@ -107,11 +107,10 @@
                 </v-col>
                 <v-col cols="12" sm="6">
                   <v-text-field
-                    v-model.number="editedItem.capacity"
-                    label="Capacity"
-                    type="number"
-                    :rules="[rules.required, rules.positive, rules.integer]"
-                    hint="Maximum number of occupants"
+                    v-model="editedItem.location"
+                    label="Location"
+                    :rules="[rules.required]"
+                    hint="Location of the room"
                     persistent-hint
                   ></v-text-field>
                 </v-col>

@@ -20,7 +20,7 @@
     </v-alert>
 
     <!-- Search Stats -->
-    <v-row class="mb-4">
+    <!-- <v-row class="mb-4">
       <v-col cols="12" sm="4">
         <v-card>
           <v-card-text class="text-center">
@@ -53,7 +53,7 @@
           </v-card-text>
         </v-card>
       </v-col>
-    </v-row>
+    </v-row> -->
 
     <!-- Search Filters -->
     <v-card class="mb-6">
