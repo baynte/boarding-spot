@@ -271,7 +271,7 @@ const fetchPreferences = async () => {
 
 const fetchRecentlyViewed = async () => {
   try {
-    const response = await axios.get(`${import.meta.env.VITE_API_URL}/tenant/recently-viewed`)
+    const response = await axios.get(`/tenant/recently-viewed`)
     recentlyViewed.value = response.data || []
   } catch (error) {
     console.error('Error fetching recently viewed rooms:', error)

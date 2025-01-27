@@ -3,7 +3,7 @@ import { useAuthStore } from '@/stores/auth'
 
 // Create axios instance with base URL
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:5000'
+  baseURL: import.meta.env.VITE_API_BASE_URL
 })
 
 // Add request interceptor

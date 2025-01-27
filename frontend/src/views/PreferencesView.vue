@@ -194,7 +194,7 @@
 <script setup>
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
+import axiosInstance from '@/utils/axios'
 
 const router = useRouter()
 const form = ref(null)
@@ -233,12 +233,25 @@ const totalWeight = computed(() => {
   return Object.values(weights.value).reduce((sum, weight) => sum + Number(weight), 0)
 })
 
+const normalizedWeights = computed(() => {
+  const total = totalWeight.value
+  return {
+    safety: weights.value.safety / total,
+    cleanliness: weights.value.cleanliness / total,
+    accessibility: weights.value.accessibility / total,
+    noise: weights.value.noise / total
+  }
+})
+
 const isFormValid = computed(() => {
-  return totalWeight.value === 100 &&
-         preferences.value.max_price > 0 &&
+  // Check if all weights are valid (between 1 and 10)
+  const validWeights = Object.values(weights.value).every(w => w >= 1 && w <= 10)
+  
+  return preferences.value.max_price > 0 &&
          preferences.value.min_capacity > 0 &&
          preferences.value.preferred_location.trim() !== '' &&
-         preferences.value.required_amenities.length > 0
+         preferences.value.required_amenities.length > 0 &&
+         validWeights
 })
 
 const commonAmenities = [
@@ -268,7 +281,7 @@ onMounted(async () => {
 const fetchPreferences = async () => {
   try {
     console.log('Fetching preferences...')
-    const response = await axios.get(`${import.meta.env.VITE_API_URL}/tenant/preferences`)
+    const response = await axiosInstance.get('/tenant/preferences')
     console.log('Received preferences:', response.data)
     
     if (response.data) {
@@ -278,16 +291,16 @@ const fetchPreferences = async () => {
         min_capacity: response.data.min_capacity,
         preferred_location: response.data.preferred_location,
         required_amenities: response.data.required_amenities,
-        safety_weight: response.data.safety_weight * 100,
-        cleanliness_weight: response.data.cleanliness_weight * 100,
-        accessibility_weight: response.data.accessibility_weight * 100,
-        noise_level_weight: response.data.noise_level_weight * 100
+        safety_weight: response.data.safety_weight,
+        cleanliness_weight: response.data.cleanliness_weight,
+        accessibility_weight: response.data.accessibility_weight,
+        noise_level_weight: response.data.noise_level_weight
       }
       weights.value = {
-        safety: Math.round((response.data.safety_weight || 0.25) * 10),
-        cleanliness: Math.round((response.data.cleanliness_weight || 0.25) * 10),
-        accessibility: Math.round((response.data.accessibility_weight || 0.25) * 10),
-        noise: Math.round((response.data.noise_level_weight || 0.25) * 10)
+        safety: Math.round(response.data.safety_weight * 10),
+        cleanliness: Math.round(response.data.cleanliness_weight * 10),
+        accessibility: Math.round(response.data.accessibility_weight * 10),
+        noise: Math.round(response.data.noise_level_weight * 10)
       }
       console.log('Set preferences to:', preferences.value)
       console.log('Set weights to:', weights.value)
@@ -297,7 +310,11 @@ const fetchPreferences = async () => {
         max_price: null,
         min_capacity: null,
         preferred_location: '',
-        required_amenities: []
+        required_amenities: [],
+        safety_weight: 0.5,
+        cleanliness_weight: 0.5,
+        accessibility_weight: 0.5,
+        noise_level_weight: 0.5
       }
       weights.value = {
         safety: 5,
@@ -318,7 +335,11 @@ const fetchPreferences = async () => {
       max_price: null,
       min_capacity: null,
       preferred_location: '',
-      required_amenities: []
+      required_amenities: [],
+      safety_weight: 0.5,
+      cleanliness_weight: 0.5,
+      accessibility_weight: 0.5,
+      noise_level_weight: 0.5
     }
     weights.value = {
       safety: 5,
@@ -351,18 +372,27 @@ const savePreferences = async () => {
       return
     }
 
+    // Validate weights are between 1 and 10
+    if (!Object.values(weights.value).every(w => w >= 1 && w <= 10)) {
+      errors.value.weights = 'All importance weights must be between 1 and 10'
+      return
+    }
+
+    // Get normalized weights that sum to 1.0
+    const normalized = normalizedWeights.value
+
     const data = {
       max_price: Number(preferences.value.max_price),
       min_capacity: Number(preferences.value.min_capacity),
       preferred_location: preferences.value.preferred_location.trim(),
       required_amenities: preferences.value.required_amenities,
-      safety_weight: weights.value.safety / 10,
-      cleanliness_weight: weights.value.cleanliness / 10,
-      accessibility_weight: weights.value.accessibility / 10,
-      noise_level_weight: weights.value.noise / 10
+      safety_weight: normalized.safety,
+      cleanliness_weight: normalized.cleanliness,
+      accessibility_weight: normalized.accessibility,
+      noise_level_weight: normalized.noise
     }
 
-    await axios.post(`${import.meta.env.VITE_API_URL}/tenant/preferences`, data)
+    await axiosInstance.post('/tenant/preferences', data)
     snackbarColor.value = 'success'
     snackbarText.value = 'Preferences saved successfully!'
     snackbar.value = true
