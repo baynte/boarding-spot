@@ -41,14 +41,21 @@ def set_preferences():
 
         # Validate weights
         try:
-            weights = [float(data['safety_weight']), float(data['cleanliness_weight']),
-                      float(data['accessibility_weight']), float(data['noise_level_weight'])]
-            if any(w < 0 or w > 1 for w in weights):
+            weights = [
+                float(data['safety_weight']),
+                float(data['cleanliness_weight']),
+                float(data['accessibility_weight']),
+                float(data['noise_level_weight'])
+            ]
+            if any(not isinstance(w, (int, float)) or w < 0 or w > 1 for w in weights):
                 return jsonify({'error': 'Weights must be between 0 and 1'}), 400
-            if abs(sum(weights) - 1.0) > 0.0001:  # Allow small floating point error
-                return jsonify({'error': 'Weights must sum to 1.0'}), 400
-        except (ValueError, TypeError):
-            return jsonify({'error': 'Invalid weight values'}), 400
+            
+            # Allow for small floating point errors in weight sum
+            weight_sum = sum(weights)
+            if abs(weight_sum - 1.0) > 0.0001:
+                return jsonify({'error': f'Weights must sum to 1.0 (current sum: {weight_sum:.4f})'}), 400
+        except (ValueError, TypeError) as e:
+            return jsonify({'error': f'Invalid weight values: {str(e)}'}), 400
 
         # Validate amenities
         if not isinstance(data['required_amenities'], list):
@@ -78,10 +85,12 @@ def set_preferences():
             
         except SQLAlchemyError as e:
             db.session.rollback()
-            return jsonify({'error': 'Database error occurred'}), 500
+            current_app.logger.error(f"Database error while saving preferences: {str(e)}")
+            return jsonify({'error': 'Database error occurred while saving preferences'}), 500
             
     except Exception as e:
-        return jsonify({'error': 'An unexpected error occurred'}), 500
+        current_app.logger.error(f"Unexpected error in set_preferences: {str(e)}")
+        return jsonify({'error': f'An unexpected error occurred: {str(e)}'}), 500
 
 @bp.route('/preferences', methods=['GET'])
 @jwt_required()

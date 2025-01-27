@@ -33,7 +33,7 @@
       <v-col cols="12" sm="4">
         <v-card>
           <v-card-text class="text-center">
-            <div class="text-h4 mb-2">${{ averagePrice }}</div>
+            <div class="text-h4 mb-2">₱{{ averagePrice }}</div>
             <div class="text-subtitle-1">Average Price</div>
           </v-card-text>
         </v-card>
@@ -78,7 +78,7 @@
                     v-model="editedItem.price"
                     label="Monthly Rent"
                     type="number"
-                    prefix="$"
+                    prefix="₱"
                     :rules="[rules.required, rules.positive]"
                     hint="Monthly rent amount"
                     persistent-hint
@@ -107,10 +107,11 @@
                 </v-col>
                 <v-col cols="12" sm="6">
                   <v-text-field
-                    v-model="editedItem.location"
-                    label="Location"
-                    :rules="[rules.required]"
-                    hint="Room location or neighborhood"
+                    v-model.number="editedItem.capacity"
+                    label="Capacity"
+                    type="number"
+                    :rules="[rules.required, rules.positive, rules.integer]"
+                    hint="Maximum number of occupants"
                     persistent-hint
                   ></v-text-field>
                 </v-col>
@@ -235,7 +236,7 @@
                     accept="image/*"
                     label="Room Images"
                     prepend-icon="mdi-camera"
-                    :rules="[editedItem.id ? undefined : rules.required]"
+                    :rules="[editedItem.id ? undefined : rules.images]"
                     hint="Upload clear images of the room (you can select multiple)"
                     persistent-hint
                     show-size
@@ -331,7 +332,7 @@
         </template>
 
         <template v-slot:item.price="{ item }">
-          ${{ item.price }}
+          ₱{{ item.price }}
         </template>
 
         <template v-slot:item.availability="{ item }">
@@ -443,7 +444,9 @@ const commonAmenities = [
 const rules = {
   required: v => !!v || 'Field is required',
   positive: v => v > 0 || 'Must be greater than 0',
-  amenities: v => v && v.length > 0 || 'At least one amenity is required'
+  integer: v => Number.isInteger(Number(v)) || 'Must be a whole number',
+  amenities: v => v && v.length > 0 || 'At least one amenity is required',
+  images: files => !files || files.length > 0 || 'At least one image is required'
 }
 
 const parseImageUrls = (urls) => {
@@ -570,7 +573,7 @@ const editItem = (item) => {
 
 const toggleAvailability = async (item) => {
   try {
-    console.log('Toggling availability for room:', item)
+    loading.value = true
     const formData = new FormData()
     formData.append('title', item.title)
     formData.append('description', item.description)
@@ -596,6 +599,8 @@ const toggleAvailability = async (item) => {
     snackbarText.value = error.response?.data?.error || 'Error updating room availability'
     snackbarColor.value = 'error'
     snackbar.value = true
+  } finally {
+    loading.value = false
   }
 }
 

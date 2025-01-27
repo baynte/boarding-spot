@@ -20,7 +20,7 @@
         <v-row>
           <v-col cols="12" sm="6" md="3">
             <div class="text-subtitle-1">Maximum Price</div>
-            <div class="text-h6">${{ preferences.max_price }}</div>
+            <div class="text-h6">₱{{ preferences.max_price }}</div>
           </v-col>
           <v-col cols="12" sm="6" md="3">
             <div class="text-subtitle-1">Minimum Capacity</div>
@@ -51,7 +51,7 @@
           <v-col cols="12" sm="6" md="3">
             <div class="text-caption">Safety</div>
             <v-progress-linear
-              :model-value="preferences.safety_weight * 100"
+              :model-value="preferences.safety_weight * 10"
               color="primary"
               height="8"
             >
@@ -63,7 +63,7 @@
           <v-col cols="12" sm="6" md="3">
             <div class="text-caption">Cleanliness</div>
             <v-progress-linear
-              :model-value="preferences.cleanliness_weight * 100"
+              :model-value="preferences.cleanliness_weight * 10"
               color="primary"
               height="8"
             >
@@ -75,7 +75,7 @@
           <v-col cols="12" sm="6" md="3">
             <div class="text-caption">Accessibility</div>
             <v-progress-linear
-              :model-value="preferences.accessibility_weight * 100"
+              :model-value="preferences.accessibility_weight * 10"
               color="primary"
               height="8"
             >
@@ -87,7 +87,7 @@
           <v-col cols="12" sm="6" md="3">
             <div class="text-caption">Noise Level</div>
             <v-progress-linear
-              :model-value="preferences.noise_level_weight * 100"
+              :model-value="preferences.noise_level_weight * 10"
               color="primary"
               height="8"
             >
@@ -196,12 +196,12 @@
               v-for="room in recentlyViewed"
               :key="room.id"
               :title="room.title"
-              :subtitle="`$${room.price} - ${room.location}`"
+              :subtitle="`₱${room.price} - ${room.location}`"
               @click="viewRoom(room)"
             >
               <template v-slot:prepend>
                 <v-avatar size="48">
-                  <v-img :src="room.image_url" cover></v-img>
+                  <v-img :src="room.image_urls?.[0]" cover></v-img>
                 </v-avatar>
               </template>
             </v-list-item>
@@ -246,41 +246,45 @@ onMounted(async () => {
 
 const fetchPreferences = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/tenant/preferences')
+    const response = await axios.get(`${import.meta.env.VITE_API_URL}/tenant/preferences`)
     if (response.data) {
       preferences.value = {
-        ...response.data,
-        required_amenities: response.data.required_amenities
+        max_price: response.data.max_price,
+        min_capacity: response.data.min_capacity,
+        preferred_location: response.data.preferred_location,
+        required_amenities: Array.isArray(response.data.required_amenities) ? 
+          response.data.required_amenities : 
+          (response.data.required_amenities ? JSON.parse(response.data.required_amenities) : []),
+        safety_weight: response.data.safety_weight,
+        cleanliness_weight: response.data.cleanliness_weight,
+        accessibility_weight: response.data.accessibility_weight,
+        noise_level_weight: response.data.noise_level_weight
       }
     }
   } catch (error) {
     console.error('Error fetching preferences:', error)
+    snackbarText.value = error.response?.data?.error || 'Error fetching preferences'
+    snackbarColor.value = 'error'
+    snackbar.value = true
   }
 }
 
 const fetchRecentlyViewed = async () => {
   try {
-    // This endpoint would need to be implemented in the backend
-    const response = await axios.get('http://localhost:5000/tenant/recently-viewed')
-    recentlyViewed.value = response.data
+    const response = await axios.get(`${import.meta.env.VITE_API_URL}/tenant/recently-viewed`)
+    recentlyViewed.value = response.data || []
   } catch (error) {
     console.error('Error fetching recently viewed rooms:', error)
   }
 }
 
 const showRecentlyViewed = () => {
-  if (recentlyViewed.value.length === 0) {
-    snackbarText.value = 'No recently viewed rooms'
-    snackbarColor.value = 'info'
-    snackbar.value = true
-    return
-  }
   recentlyViewedDialog.value = true
 }
 
 const viewRoom = (room) => {
   recentlyViewedDialog.value = false
-  router.push(`/search?room=${room.id}`)
+  router.push(`/rooms/${room.id}`)
 }
 </script>
 

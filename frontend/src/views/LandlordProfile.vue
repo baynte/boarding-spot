@@ -34,6 +34,7 @@
                       type="email"
                       :rules="[rules.required, rules.email]"
                       readonly
+                      disabled
                     ></v-text-field>
                   </v-col>
 
@@ -42,27 +43,33 @@
                       v-model="profile.contact_number"
                       label="Contact Number"
                       :rules="[rules.required, rules.phone]"
-                      placeholder="Enter your contact number"
+                      hint="Enter your contact number (e.g. +63 912 345 6789)"
+                      persistent-hint
+                      :disabled="loading"
                     ></v-text-field>
                   </v-col>
 
                   <v-col cols="12">
+                    <v-divider class="mb-4"></v-divider>
+                    <div class="text-subtitle-1 mb-2">Change Password</div>
                     <v-text-field
                       v-model="profile.currentPassword"
                       label="Current Password"
                       type="password"
                       :rules="[rules.required]"
-                      placeholder="Enter current password to make changes"
+                      :disabled="loading"
                     ></v-text-field>
                   </v-col>
 
                   <v-col cols="12">
                     <v-text-field
                       v-model="profile.newPassword"
-                      label="New Password (Optional)"
+                      label="New Password"
                       type="password"
                       :rules="[rules.passwordOptional]"
-                      placeholder="Leave blank to keep current password"
+                      hint="Leave blank to keep current password"
+                      persistent-hint
+                      :disabled="loading"
                     ></v-text-field>
                   </v-col>
 
@@ -72,21 +79,20 @@
                       label="Confirm New Password"
                       type="password"
                       :rules="[rules.passwordMatch]"
-                      placeholder="Confirm new password"
-                      :disabled="!profile.newPassword"
+                      :disabled="!profile.newPassword || loading"
                     ></v-text-field>
                   </v-col>
                 </v-row>
 
                 <v-row class="mt-4">
-                  <v-col cols="12">
+                  <v-col cols="12" class="d-flex justify-end">
                     <v-btn
-                      color="primary"
                       type="submit"
+                      color="primary"
                       :loading="loading"
-                      block
+                      :disabled="loading"
                     >
-                      Update Profile
+                      Save Changes
                     </v-btn>
                   </v-col>
                 </v-row>
@@ -102,7 +108,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from '@/utils/axios'
+import axios from '@/plugins/axios'
 
 const router = useRouter()
 const form = ref(null)
@@ -127,18 +133,24 @@ const rules = {
 }
 
 const fetchProfile = async () => {
+  loading.value = true
+  errorMessage.value = ''
+  
   try {
     const response = await axios.get('/landlord/profile')
     profile.value.email = response.data.email
     profile.value.contact_number = response.data.contact_number
   } catch (error) {
-    errorMessage.value = 'Failed to load profile data'
     console.error('Error fetching profile:', error)
+    errorMessage.value = error.response?.data?.error || 'Failed to load profile data'
+  } finally {
+    loading.value = false
   }
 }
 
 const updateProfile = async () => {
-  if (!form.value.validate()) return
+  const { valid } = await form.value.validate()
+  if (!valid) return
 
   loading.value = true
   errorMessage.value = ''
@@ -151,6 +163,10 @@ const updateProfile = async () => {
     }
 
     if (profile.value.newPassword) {
+      if (profile.value.newPassword !== profile.value.confirmPassword) {
+        errorMessage.value = 'New passwords do not match'
+        return
+      }
       updateData.new_password = profile.value.newPassword
     }
 
@@ -161,9 +177,12 @@ const updateProfile = async () => {
     profile.value.currentPassword = ''
     profile.value.newPassword = ''
     profile.value.confirmPassword = ''
+    
+    // Refresh profile data
+    await fetchProfile()
   } catch (error) {
-    errorMessage.value = error.response?.data?.error || 'Failed to update profile'
     console.error('Error updating profile:', error)
+    errorMessage.value = error.response?.data?.error || 'Failed to update profile'
   } finally {
     loading.value = false
   }
@@ -172,4 +191,14 @@ const updateProfile = async () => {
 onMounted(() => {
   fetchProfile()
 })
-</script> 
+</script>
+
+<style scoped>
+.v-card {
+  transition: transform 0.2s;
+}
+
+.v-card:hover {
+  transform: translateY(-2px);
+}
+</style> 
