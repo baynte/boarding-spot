@@ -75,10 +75,9 @@
                   v-model="weights.safety"
                   label="Safety Importance"
                   thumb-label
-                  :min="0"
-                  :max="100"
-                  :step="5"
-                  @update:model-value="normalizeWeights('safety')"
+                  :min="1"
+                  :max="10"
+                  :step="1"
                 >
                   <template v-slot:append>
                     <v-text-field
@@ -87,7 +86,8 @@
                       style="width: 70px"
                       density="compact"
                       hide-details
-                      @update:model-value="normalizeWeights('safety')"
+                      :min="1"
+                      :max="10"
                     ></v-text-field>
                   </template>
                 </v-slider>
@@ -98,10 +98,9 @@
                   v-model="weights.cleanliness"
                   label="Cleanliness Importance"
                   thumb-label
-                  :min="0"
-                  :max="100"
-                  :step="5"
-                  @update:model-value="normalizeWeights('cleanliness')"
+                  :min="1"
+                  :max="10"
+                  :step="1"
                 >
                   <template v-slot:append>
                     <v-text-field
@@ -110,7 +109,8 @@
                       style="width: 70px"
                       density="compact"
                       hide-details
-                      @update:model-value="normalizeWeights('cleanliness')"
+                      :min="1"
+                      :max="10"
                     ></v-text-field>
                   </template>
                 </v-slider>
@@ -121,10 +121,9 @@
                   v-model="weights.accessibility"
                   label="Accessibility Importance"
                   thumb-label
-                  :min="0"
-                  :max="100"
-                  :step="5"
-                  @update:model-value="normalizeWeights('accessibility')"
+                  :min="1"
+                  :max="10"
+                  :step="1"
                 >
                   <template v-slot:append>
                     <v-text-field
@@ -133,7 +132,8 @@
                       style="width: 70px"
                       density="compact"
                       hide-details
-                      @update:model-value="normalizeWeights('accessibility')"
+                      :min="1"
+                      :max="10"
                     ></v-text-field>
                   </template>
                 </v-slider>
@@ -144,10 +144,9 @@
                   v-model="weights.noise"
                   label="Noise Level Importance"
                   thumb-label
-                  :min="0"
-                  :max="100"
-                  :step="5"
-                  @update:model-value="normalizeWeights('noise')"
+                  :min="1"
+                  :max="10"
+                  :step="1"
                 >
                   <template v-slot:append>
                     <v-text-field
@@ -156,7 +155,8 @@
                       style="width: 70px"
                       density="compact"
                       hide-details
-                      @update:model-value="normalizeWeights('noise')"
+                      :min="1"
+                      :max="10"
                     ></v-text-field>
                   </template>
                 </v-slider>
@@ -164,10 +164,8 @@
 
               <v-col cols="12">
                 <div class="d-flex align-center">
-                  <div class="text-subtitle-1">Total Weight:</div>
-                  <div :class="{'text-error': totalWeight !== 100, 'text-success': totalWeight === 100}" class="ml-2">
-                    {{ totalWeight }}%
-                  </div>
+                  <div class="text-subtitle-1">Importance Scale:</div>
+                  <div class="ml-2">1 (Least Important) to 10 (Most Important)</div>
                 </div>
               </v-col>
             </v-row>
@@ -214,10 +212,10 @@ const preferences = ref({
 })
 
 const weights = ref({
-  safety: 25,
-  cleanliness: 25,
-  accessibility: 25,
-  noise: 25
+  safety: 5,
+  cleanliness: 5,
+  accessibility: 5,
+  noise: 5
 })
 
 const errors = ref({
@@ -233,7 +231,7 @@ const totalWeight = computed(() => {
 })
 
 const isFormValid = computed(() => {
-  return totalWeight.value === 100 &&
+  return totalWeight.value === 10 &&
          Number(preferences.value.max_price) > 0 &&
          Number(preferences.value.min_capacity) > 0 &&
          Number.isInteger(Number(preferences.value.min_capacity)) &&
@@ -278,45 +276,16 @@ const fetchPreferences = async () => {
         required_amenities: response.data.required_amenities
       }
       weights.value = {
-        safety: response.data.safety_weight * 100,
-        cleanliness: response.data.cleanliness_weight * 100,
-        accessibility: response.data.accessibility_weight * 100,
-        noise: response.data.noise_level_weight * 100
+        safety: Math.round(response.data.safety_weight * 10),
+        cleanliness: Math.round(response.data.cleanliness_weight * 10),
+        accessibility: Math.round(response.data.accessibility_weight * 10),
+        noise: Math.round(response.data.noise_level_weight * 10)
       }
     }
   } catch (error) {
-    snackbarText.value = 'Error fetching preferences'
+    snackbarText.value = error.response?.data?.error || 'Error fetching preferences'
     snackbarColor.value = 'error'
     snackbar.value = true
-  }
-}
-
-const normalizeWeights = (changedWeight) => {
-  // Ensure the weight is a number and not NaN
-  weights.value[changedWeight] = Number(weights.value[changedWeight]) || 0
-  
-  // Ensure weight is between 0 and 100
-  weights.value[changedWeight] = Math.max(0, Math.min(100, weights.value[changedWeight]))
-  
-  const total = totalWeight.value
-  if (total !== 100) {
-    // Calculate how much we need to adjust other weights
-    const diff = 100 - total
-    const otherWeights = Object.keys(weights.value).filter(w => w !== changedWeight)
-    const totalOtherWeights = otherWeights.reduce((sum, w) => sum + weights.value[w], 0)
-    
-    if (totalOtherWeights > 0) {
-      otherWeights.forEach(w => {
-        const proportion = weights.value[w] / totalOtherWeights
-        weights.value[w] = Math.max(0, Math.min(100, weights.value[w] + (diff * proportion)))
-      })
-    } else {
-      // If all other weights are 0, distribute equally
-      const equalShare = diff / otherWeights.length
-      otherWeights.forEach(w => {
-        weights.value[w] = Math.max(0, equalShare)
-      })
-    }
   }
 }
 
@@ -343,24 +312,24 @@ const savePreferences = async () => {
     }
 
     const data = {
-      ...preferences.value,
       max_price: Number(preferences.value.max_price),
       min_capacity: Number(preferences.value.min_capacity),
-      required_amenities: JSON.stringify(preferences.value.required_amenities),
-      safety_weight: weights.value.safety / 100,
-      cleanliness_weight: weights.value.cleanliness / 100,
-      accessibility_weight: weights.value.accessibility / 100,
-      noise_level_weight: weights.value.noise / 100
+      preferred_location: preferences.value.preferred_location.trim(),
+      required_amenities: preferences.value.required_amenities,
+      safety_weight: weights.value.safety / 10,
+      cleanliness_weight: weights.value.cleanliness / 10,
+      accessibility_weight: weights.value.accessibility / 10,
+      noise_level_weight: weights.value.noise / 10
     }
 
-    await axios.post('/api/tenant/preferences', data)
+    await axios.post('/tenant/preferences', data)
     snackbarColor.value = 'success'
     snackbarText.value = 'Preferences saved successfully!'
     snackbar.value = true
   } catch (error) {
     console.error('Error saving preferences:', error)
     snackbarColor.value = 'error'
-    snackbarText.value = error.response?.data?.message || 'Error saving preferences'
+    snackbarText.value = error.response?.data?.error || 'Error saving preferences'
     snackbar.value = true
   } finally {
     loading.value = false
