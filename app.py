@@ -15,14 +15,16 @@ def create_app():
     app.config['JWT_SECRET_KEY'] = os.environ.get('JWT_SECRET_KEY', 'jwt-secret-key')
     app.config['JWT_ACCESS_TOKEN_EXPIRES'] = timedelta(hours=1)
     
-    # CORS Configuration
-    app.config['CORS_HEADERS'] = 'Content-Type'
-    app.config['CORS_RESOURCES'] = {r"/*": {"origins": ["http://localhost:5173", "http://localhost:5174"]}}
-
     # Initialize extensions
     db.init_app(app)
     jwt.init_app(app)
-    cors.init_app(app)
+    cors.init_app(app, 
+        origins=[f"http://{os.environ.get('CURRENT_IP')}:5173", f"http://{os.environ.get('CURRENT_IP')}:5174", "http://localhost:5173", "http://localhost:5174"],
+        allow_credentials=True,
+        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allow_headers=["Content-Type", "Authorization"],
+        expose_headers=["Content-Type", "Authorization"]
+    )
     migrate = Migrate(app, db)
 
     # Register blueprints
@@ -36,4 +38,4 @@ if __name__ == '__main__':
     app = create_app()
     with app.app_context():
         db.create_all()
-    app.run(debug=True) 
+    app.run(debug=True, host='0.0.0.0') 

@@ -38,13 +38,13 @@
                 required
               ></v-text-field>
 
-              <v-text-field
+              <!-- <v-text-field
                 v-model="contactNumber"
                 label="Contact Number"
                 :rules="contactNumberRules"
                 persistent-hint
                 hint="Enter your contact number (required for landlords)"
-              ></v-text-field>
+              ></v-text-field> -->
 
               <v-select
                 v-model="userType"
