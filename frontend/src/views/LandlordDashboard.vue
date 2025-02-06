@@ -437,7 +437,13 @@ const commonAmenities = [
   'TV',
   'Private Bathroom',
   'Study Desk',
-  'Closet'
+  'Closet',
+  'CCTV',
+  'Fire Exits',
+  'Common CR',
+  'Appliances',
+  'Receiving Area',
+  
 ]
 
 const rules = {

@@ -394,14 +394,19 @@ const activeFiltersCount = computed(() => {
 const commonAmenities = [
   'WiFi',
   'Air Conditioning',
-  'Private Bathroom',
-  'Kitchen Access',
+  'Heating',
+  'Kitchen',
   'Laundry',
-  'Study Area',
   'Parking',
-  'Security System',
-  'Water Heater',
-  'Furnished'
+  'TV',
+  'Private Bathroom',
+  'Study Desk',
+  'Closet',
+  'CCTV',
+  'Fire Exits',
+  'Common CR',
+  'Appliances',
+  'Receiving Area',
 ]
 
 // Methods
@@ -471,7 +476,7 @@ const searchRooms = async () => {
 }
 
 const viewRoom = (room) => {
-  router.push(`/rooms/${room.id}`)
+  router.push(`/rooms/₱{room.id}`)
 }
 
 const getMatchClass = (score) => {
