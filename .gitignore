@@ -41,3 +41,4 @@ instance/
 # Environment variables
 .env
 .env.* 
+*.pyc
