@@ -64,10 +64,10 @@ def create_room():
         longitude=float(data.get('longitude')) if data.get('longitude') else None,
         living_space_type=data.get('living_space_type', 'Boarding House'),
         amenities=json.dumps(data.get('amenities', [])),
-        safety_score=float(data.get('safety_score', 5.0)),
-        cleanliness_score=float(data.get('cleanliness_score', 5.0)),
-        accessibility_score=float(data.get('accessibility_score', 5.0)),
-        noise_level=float(data.get('noise_level', 5.0)),
+        safety_score=0.0,
+        cleanliness_score=0.0,
+        accessibility_score=0.0,
+        noise_level=0.0,
         image_urls=json.dumps(image_urls)
     )
     

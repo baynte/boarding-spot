@@ -50,7 +50,7 @@ def submit_rating(room_id):
             )
             db.session.add(rating)
 
-        # Update room's average ratings
+        # Calculate new average ratings
         avg_ratings = db.session.query(
             func.avg(TenantRating.safety_rating).label('avg_safety'),
             func.avg(TenantRating.cleanliness_rating).label('avg_cleanliness'),
@@ -59,11 +59,18 @@ def submit_rating(room_id):
             func.count(TenantRating.id).label('total')
         ).filter(TenantRating.room_id == room_id).first()
 
-        room.avg_safety_rating = float(avg_ratings.avg_safety or 0)
-        room.avg_cleanliness_rating = float(avg_ratings.avg_cleanliness or 0)
-        room.avg_accessibility_rating = float(avg_ratings.avg_accessibility or 0)
-        room.avg_noise_level_rating = float(avg_ratings.avg_noise or 0)
+        # Update room's scores with the new averages
+        room.safety_score = float(avg_ratings.avg_safety or 0)
+        room.cleanliness_score = float(avg_ratings.avg_cleanliness or 0)
+        room.accessibility_score = float(avg_ratings.avg_accessibility or 0)
+        room.noise_level = float(avg_ratings.avg_noise or 0)
         room.total_ratings = int(avg_ratings.total or 0)
+
+        # Also update the average ratings fields
+        room.avg_safety_rating = room.safety_score
+        room.avg_cleanliness_rating = room.cleanliness_score
+        room.avg_accessibility_rating = room.accessibility_score
+        room.avg_noise_level_rating = room.noise_level
 
         db.session.commit()
         
@@ -77,6 +84,13 @@ def submit_rating(room_id):
                 'comment': rating.comment,
                 'created_at': rating.created_at.isoformat(),
                 'updated_at': rating.updated_at.isoformat()
+            },
+            'room_scores': {
+                'safety_score': room.safety_score,
+                'cleanliness_score': room.cleanliness_score,
+                'accessibility_score': room.accessibility_score,
+                'noise_level': room.noise_level,
+                'total_ratings': room.total_ratings
             }
         })
         
