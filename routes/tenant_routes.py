@@ -400,6 +400,8 @@ def search_rooms():
                 'price': float(room.price),
                 'capacity': float(room.capacity),
                 'location': room.location,
+                'latitude': float(room.latitude) if room.latitude is not None else None,
+                'longitude': float(room.longitude) if room.longitude is not None else None,
                 'amenities': json.loads(room.amenities) if room.amenities else [],
                 'availability': room.availability,
                 'image_urls': json.loads(room.image_urls) if room.image_urls else [],
