@@ -60,6 +60,9 @@ def create_room():
         price=float(data['price']),
         capacity=int(data.get('capacity', 1)),
         location=data['location'],
+        latitude=float(data.get('latitude')) if data.get('latitude') else None,
+        longitude=float(data.get('longitude')) if data.get('longitude') else None,
+        living_space_type=data.get('living_space_type', 'Boarding House'),
         amenities=json.dumps(data.get('amenities', [])),
         safety_score=float(data.get('safety_score', 5.0)),
         cleanliness_score=float(data.get('cleanliness_score', 5.0)),
@@ -83,21 +86,25 @@ def get_rooms():
         return jsonify({'error': 'Unauthorized'}), 403
     
     rooms = Room.query.filter_by(landlord_id=current_user_id).all()
-    return jsonify([{
+    rooms_data = [{
         'id': room.id,
         'title': room.title,
         'description': room.description,
         'price': room.price,
         'capacity': room.capacity,
         'location': room.location,
+        'latitude': room.latitude,
+        'longitude': room.longitude,
+        'living_space_type': room.living_space_type,
         'amenities': json.loads(room.amenities),
         'availability': room.availability,
         'safety_score': room.safety_score,
         'cleanliness_score': room.cleanliness_score,
         'accessibility_score': room.accessibility_score,
         'noise_level': room.noise_level,
-        'image_urls': json.loads(room.image_urls) if room.image_urls else []
-    } for room in rooms])
+        'image_urls': json.loads(room.image_urls)
+    } for room in rooms]
+    return jsonify(rooms_data)
 
 @bp.route('/rooms/<int:room_id>', methods=['PUT'])
 @jwt_required()
@@ -147,26 +154,35 @@ def update_room(room_id):
                     new_image_urls.append(get_image_url(filename))
             room.image_urls = json.dumps(new_image_urls)
     
-    # Handle other form data
+    # Process form data
     data = request.form.to_dict()
-    print(f"Received form data: {data}")
     
-    if 'amenities' in data:
-        data['amenities'] = json.dumps(json.loads(data['amenities']))
+    # Convert numeric fields
+    float_fields = ['price']
+    for field in float_fields:
+        if field in data:
+            data[field] = float(data[field])
     
-    # Handle boolean values
-    if 'availability' in data:
-        data['availability'] = str(data['availability']).lower() == 'true'
-        print(f"Setting availability to: {data['availability']}")
-    
-    try:
-        for key, value in data.items():
-            if hasattr(room, key):
-                if key in ['price', 'size', 'safety_score', 'cleanliness_score', 'accessibility_score', 'noise_level']:
-                    value = float(value)
-                print(f"Setting {key} to {value}")
-                setattr(room, key, value)
+    # Convert capacity to integer
+    if 'capacity' in data:
+        data['capacity'] = int(data['capacity'])
         
+    # Convert lat/lng to float if present
+    if 'latitude' in data:
+        data['latitude'] = float(data['latitude'])
+    if 'longitude' in data:
+        data['longitude'] = float(data['longitude'])
+        
+    # Convert availability to boolean
+    if 'availability' in data:
+        data['availability'] = data['availability'].lower() == 'true'
+
+    # Update room attributes
+    for key, value in data.items():
+        if hasattr(room, key):
+            setattr(room, key, value)
+        
+    try:
         db.session.commit()
         print(f"Successfully updated room {room_id}")
         return jsonify({'message': 'Room updated successfully'})

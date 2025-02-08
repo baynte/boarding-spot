@@ -114,6 +114,26 @@
                     persistent-hint
                   ></v-text-field>
                 </v-col>
+                <v-col cols="12" sm="6">
+                  <v-select
+                    v-model="editedItem.living_space_type"
+                    :items="livingSpaceTypes"
+                    label="Living Space Type"
+                    :rules="[rules.required]"
+                    hint="Type of living space"
+                    persistent-hint
+                  ></v-select>
+                </v-col>
+                <v-col cols="12">
+                  <div class="text-subtitle-1 mb-2">Pin Location on Map</div>
+                  <p class="text-caption mb-2">Click on the map to set the exact location of your room</p>
+                  <leaflet-map
+                    :marker-lat-lng="markerPosition"
+                    :popup-content="editedItem.title || 'New Room'"
+                    @marker-click="handleMarkerClick"
+                    ref="mapRef"
+                  />
+                </v-col>
               </v-row>
 
               <!-- Amenities -->
@@ -130,99 +150,6 @@
                     hint="Select or type amenities available in the room"
                     persistent-hint
                   ></v-combobox>
-                </v-col>
-              </v-row>
-
-              <!-- Ratings -->
-              <div class="text-h6 mb-2">Property Ratings</div>
-              <v-row>
-                <v-col cols="12" sm="6">
-                  <v-slider
-                    v-model="editedItem.safety_score"
-                    label="Safety Score"
-                    min="1"
-                    max="10"
-                    step="0.5"
-                    thumb-label
-                    hint="Rate the safety of the neighborhood (1-10)"
-                    persistent-hint
-                  >
-                    <template v-slot:append>
-                      <v-text-field
-                        v-model="editedItem.safety_score"
-                        type="number"
-                        style="width: 70px"
-                        density="compact"
-                        hide-details
-                      ></v-text-field>
-                    </template>
-                  </v-slider>
-                </v-col>
-                <v-col cols="12" sm="6">
-                  <v-slider
-                    v-model="editedItem.cleanliness_score"
-                    label="Cleanliness Score"
-                    min="1"
-                    max="10"
-                    step="0.5"
-                    thumb-label
-                    hint="Rate the cleanliness of the property (1-10)"
-                    persistent-hint
-                  >
-                    <template v-slot:append>
-                      <v-text-field
-                        v-model="editedItem.cleanliness_score"
-                        type="number"
-                        style="width: 70px"
-                        density="compact"
-                        hide-details
-                      ></v-text-field>
-                    </template>
-                  </v-slider>
-                </v-col>
-                <v-col cols="12" sm="6">
-                  <v-slider
-                    v-model="editedItem.accessibility_score"
-                    label="Accessibility Score"
-                    min="1"
-                    max="10"
-                    step="0.5"
-                    thumb-label
-                    hint="Rate the accessibility to public transport/amenities (1-10)"
-                    persistent-hint
-                  >
-                    <template v-slot:append>
-                      <v-text-field
-                        v-model="editedItem.accessibility_score"
-                        type="number"
-                        style="width: 70px"
-                        density="compact"
-                        hide-details
-                      ></v-text-field>
-                    </template>
-                  </v-slider>
-                </v-col>
-                <v-col cols="12" sm="6">
-                  <v-slider
-                    v-model="editedItem.noise_level"
-                    label="Noise Level"
-                    min="1"
-                    max="10"
-                    step="0.5"
-                    thumb-label
-                    hint="Rate the noise level (1=quiet, 10=noisy)"
-                    persistent-hint
-                  >
-                    <template v-slot:append>
-                      <v-text-field
-                        v-model="editedItem.noise_level"
-                        type="number"
-                        style="width: 70px"
-                        density="compact"
-                        hide-details
-                      ></v-text-field>
-                    </template>
-                  </v-slider>
                 </v-col>
               </v-row>
 
@@ -391,6 +318,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import axios from '@/utils/axios'
+import LeafletMap from '@/components/LeafletMap.vue'
 
 const form = ref(null)
 const dialog = ref(false)
@@ -401,6 +329,17 @@ const search = ref('')
 const snackbar = ref(false)
 const snackbarText = ref('')
 const snackbarColor = ref('success')
+const mapRef = ref(null)
+
+const markerPosition = ref(null)
+
+const livingSpaceTypes = [
+  'Boarding House',
+  'Apartment',
+  'House',
+  'Dormitory',
+  'Condo Unit'
+]
 
 const editedItem = ref({
   id: null,
@@ -409,13 +348,12 @@ const editedItem = ref({
   price: 0,
   capacity: 1,
   location: '',
+  living_space_type: '',
   amenities: [],
-  safety_score: 5,
-  cleanliness_score: 5,
-  accessibility_score: 5,
-  noise_level: 5,
   image_urls: null,
-  availability: true
+  availability: true,
+  latitude: null,
+  longitude: null
 })
 
 const formTitle = computed(() => editedItem.value.id ? 'Edit Room' : 'Add Room')
@@ -476,6 +414,7 @@ const headers = [
   { title: 'Price', key: 'price' },
   { title: 'Capacity', key: 'capacity' },
   { title: 'Location', key: 'location' },
+  { title: 'Living Space Type', key: 'living_space_type' },
   { title: 'Amenities', key: 'amenities' },
   { title: 'Availability', key: 'availability' },
   { title: 'Actions', key: 'actions', sortable: false }
@@ -497,6 +436,41 @@ const fetchRooms = async () => {
   }
 }
 
+const handleMarkerClick = (event) => {
+  if (mapRef.value) {
+    const { lat, lng } = event.latlng
+    markerPosition.value = [lat, lng]
+    editedItem.value.latitude = lat
+    editedItem.value.longitude = lng
+  }
+}
+
+const editItem = (item) => {
+  editedItem.value = { ...item }
+  markerPosition.value = item.latitude && item.longitude ? [item.latitude, item.longitude] : null
+  dialog.value = true
+}
+
+const close = () => {
+  dialog.value = false
+  roomImages.value = null
+  markerPosition.value = null
+  editedItem.value = {
+    id: null,
+    title: '',
+    description: '',
+    price: 0,
+    capacity: 1,
+    location: '',
+    living_space_type: '',
+    amenities: [],
+    image_urls: null,
+    availability: true,
+    latitude: null,
+    longitude: null
+  }
+}
+
 const save = async () => {
   const { valid } = await form.value.validate()
   if (!valid) {
@@ -515,12 +489,13 @@ const save = async () => {
     formData.append('price', editedItem.value.price)
     formData.append('capacity', editedItem.value.capacity)
     formData.append('location', editedItem.value.location)
+    formData.append('living_space_type', editedItem.value.living_space_type)
     formData.append('amenities', JSON.stringify(editedItem.value.amenities))
-    formData.append('safety_score', editedItem.value.safety_score)
-    formData.append('cleanliness_score', editedItem.value.cleanliness_score)
-    formData.append('accessibility_score', editedItem.value.accessibility_score)
-    formData.append('noise_level', editedItem.value.noise_level)
-    formData.append('availability', editedItem.value.availability)
+    
+    if (editedItem.value.latitude && editedItem.value.longitude) {
+      formData.append('latitude', editedItem.value.latitude)
+      formData.append('longitude', editedItem.value.longitude)
+    }
 
     // Handle multiple images
     if (roomImages.value) {
@@ -551,31 +526,6 @@ const save = async () => {
   }
 }
 
-const close = () => {
-  dialog.value = false
-  roomImages.value = null
-  editedItem.value = {
-    id: null,
-    title: '',
-    description: '',
-    price: 0,
-    capacity: 1,
-    location: '',
-    amenities: [],
-    safety_score: 5,
-    cleanliness_score: 5,
-    accessibility_score: 5,
-    noise_level: 5,
-    image_urls: null,
-    availability: true
-  }
-}
-
-const editItem = (item) => {
-  editedItem.value = { ...item }
-  dialog.value = true
-}
-
 const toggleAvailability = async (item) => {
   try {
     loading.value = true
@@ -585,11 +535,8 @@ const toggleAvailability = async (item) => {
     formData.append('price', item.price)
     formData.append('capacity', item.capacity)
     formData.append('location', item.location)
+    formData.append('living_space_type', item.living_space_type)
     formData.append('amenities', JSON.stringify(item.amenities))
-    formData.append('safety_score', item.safety_score)
-    formData.append('cleanliness_score', item.cleanliness_score)
-    formData.append('accessibility_score', item.accessibility_score)
-    formData.append('noise_level', item.noise_level)
     formData.append('availability', !item.availability)
     
     await axios.put(`/landlord/rooms/${item.id}`, formData)
@@ -636,4 +583,11 @@ const deleteItem = async (item) => {
 .v-card:hover {
   transform: translateY(-2px);
 }
-</style> 
+</style>
+
+export default {
+  name: "LandlordDashboard",
+  components: {
+    LeafletMap
+  }
+} 

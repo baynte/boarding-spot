@@ -26,6 +26,9 @@ class Room(db.Model):
     price = db.Column(db.Float, nullable=False)
     capacity = db.Column(db.Integer, nullable=False, server_default='1')  # number of tenants that can occupy
     location = db.Column(db.String(200))
+    latitude = db.Column(db.Float, nullable=True)  # Map pin latitude
+    longitude = db.Column(db.Float, nullable=True)  # Map pin longitude
+    living_space_type = db.Column(db.String(50), nullable=False, server_default='Boarding House')  # Type of living space
     amenities = db.Column(db.Text)  # JSON string of amenities
     availability = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
@@ -37,6 +40,13 @@ class Room(db.Model):
     accessibility_score = db.Column(db.Float)  # 1-10
     noise_level = db.Column(db.Float)  # 1-10 (lower is better)
 
+    # Average ratings (calculated from tenant ratings)
+    avg_safety_rating = db.Column(db.Float)  # 1-10
+    avg_cleanliness_rating = db.Column(db.Float)  # 1-10
+    avg_accessibility_rating = db.Column(db.Float)  # 1-10
+    avg_noise_level_rating = db.Column(db.Float)  # 1-10 (lower is better)
+    total_ratings = db.Column(db.Integer, default=0)  # Count of total ratings
+
 class TenantPreference(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     tenant_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -44,6 +54,7 @@ class TenantPreference(db.Model):
     min_capacity = db.Column(db.Integer, nullable=False, server_default='1')
     preferred_location = db.Column(db.String(200), nullable=False)
     required_amenities = db.Column(db.Text, nullable=False)  # JSON string of required amenities
+    living_space_type = db.Column(db.String(50))  # Add living space type preference
     
     # Weights for TOPSIS criteria (0-1)
     safety_weight = db.Column(db.Float, nullable=False, default=0.25)
@@ -61,3 +72,24 @@ class TenantPreference(db.Model):
         db.CheckConstraint('max_price > 0', name='positive_price'),
         db.CheckConstraint('min_capacity > 0', name='positive_capacity'),
     )
+
+class TenantRating(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    tenant_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    room_id = db.Column(db.Integer, db.ForeignKey('room.id'), nullable=False)
+    safety_rating = db.Column(db.Float, nullable=False)  # 1-10
+    cleanliness_rating = db.Column(db.Float, nullable=False)  # 1-10
+    accessibility_rating = db.Column(db.Float, nullable=False)  # 1-10
+    noise_level_rating = db.Column(db.Float, nullable=False)  # 1-10
+    comment = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    # Add unique constraint to prevent multiple ratings from same tenant for same room
+    __table_args__ = (
+        db.UniqueConstraint('tenant_id', 'room_id', name='unique_tenant_room_rating'),
+    )
+
+    # Add relationships
+    tenant = db.relationship('User', backref='ratings_given', foreign_keys=[tenant_id])
+    room = db.relationship('Room', backref='tenant_ratings')

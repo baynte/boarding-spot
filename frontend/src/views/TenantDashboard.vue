@@ -129,10 +129,11 @@
             >
               mdi-home-search
             </v-icon>
-            <h3 class="text-h6 mb-2">Search Rooms</h3>
-            <p class="mb-4">Find your perfect room based on your preferences</p>
+            <h3 class="text-h6 mb-2">Search Living Spaces</h3>
+            <p class="mb-4">Find your perfect living space based on your preferences</p>
             <v-btn
               color="primary"
+
               to="/search"
             >
               Search Now

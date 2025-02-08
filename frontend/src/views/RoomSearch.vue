@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1 class="text-h4 mb-4">Room Search</h1>
+    <h1 class="text-h4 mb-4">Living Space Search</h1>
 
     <!-- Warning if preferences not set -->
     <v-alert
@@ -118,6 +118,19 @@
               variant="outlined"
               hide-details
               class="mb-3"
+            ></v-select>
+          </v-col>
+
+          <v-col cols="12" sm="6" md="3">
+            <v-select
+              v-model="filters.livingSpaceType"
+              :items="livingSpaceTypes"
+              label="Living Space Type"
+              density="compact"
+              variant="outlined"
+              hide-details
+              class="mb-3"
+              clearable
             ></v-select>
           </v-col>
 
@@ -249,6 +262,30 @@
       </v-card-text>
     </v-card>
 
+    <!-- Map View -->
+    <v-card class="mb-6">
+      <v-card-title class="d-flex align-center">
+        <span>Map View</span>
+        <v-spacer></v-spacer>
+        <v-btn
+          v-if="selectedLocation"
+          color="primary"
+          variant="text"
+          density="compact"
+          @click="selectedLocation = null"
+        >
+          Clear Selection
+        </v-btn>
+      </v-card-title>
+      <v-card-text>
+        <leaflet-map
+          :marker-lat-lng="selectedLocation"
+          :popup-content="selectedLocationName"
+          @marker-click="handleMarkerClick"
+        />
+      </v-card-text>
+    </v-card>
+
     <!-- Search Results -->
     <template v-if="!loading && searchPerformed">
       <!-- Summary Section -->
@@ -294,7 +331,10 @@
             sm="6"
             md="4"
           >
-            <RoomCard :room="room" />
+            <RoomCard 
+              :room="room"
+              :user-type="userType"
+            />
           </v-col>
         </template>
         <v-col v-else cols="12" class="text-center">
@@ -317,6 +357,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import axios from '@/plugins/axios'
 import RoomCard from '@/components/RoomCard.vue'
+import LeafletMap from '@/components/LeafletMap.vue'
 
 const router = useRouter()
 const loading = ref(false)
@@ -364,7 +405,8 @@ const filters = ref({
   maxNoiseLevel: 10,
   minAccessibilityScore: 1,
   minCleanlinessScore: 1,
-  sortBy: 'match_desc'
+  sortBy: 'match_desc',
+  livingSpaceType: null,
 })
 
 const sortOptions = [
@@ -387,6 +429,7 @@ const activeFiltersCount = computed(() => {
   if (filters.value.maxNoiseLevel < 10) count++
   if (filters.value.minAccessibilityScore > 1) count++
   if (filters.value.minCleanlinessScore > 1) count++
+  if (filters.value.livingSpaceType) count++
   if (sortBy.value !== 'match_desc') count++
   return count
 })
@@ -409,6 +452,14 @@ const commonAmenities = [
   'Receiving Area',
 ]
 
+const livingSpaceTypes = [
+  'Boarding House',
+  'Apartment',
+  'House',
+  'Dormitory',
+  'Condo Unit'
+]
+
 // Methods
 const getScoreColor = (score) => {
   if (score >= 8) return 'success'
@@ -427,7 +478,8 @@ const clearFilters = () => {
     maxNoiseLevel: 10,
     minAccessibilityScore: 1,
     minCleanlinessScore: 1,
-    sortBy: 'match_desc'
+    sortBy: 'match_desc',
+    livingSpaceType: null,
   }
   searchRooms()
 }
@@ -440,15 +492,30 @@ const searchRooms = async () => {
       max_price: filters.value.maxPrice,
       min_capacity: filters.value.minCapacity,
       location: filters.value.location,
-      amenities: filters.value.amenities,
+      amenities: JSON.stringify(filters.value.amenities),
       min_safety_score: filters.value.minSafetyScore,
       max_noise_level: filters.value.maxNoiseLevel,
       min_accessibility_score: filters.value.minAccessibilityScore,
       min_cleanliness_score: filters.value.minCleanlinessScore,
+      living_space_type: filters.value.livingSpaceType,
       sort_by: sortBy.value
     }
     
-    const response = await axios.get('/tenant/search', { params })
+    const response = await axios.get('/tenant/search', { 
+      params,
+      paramsSerializer: {
+        encode: (param) => encodeURIComponent(param),
+        serialize: (params) => {
+          const searchParams = new URLSearchParams()
+          for (const key in params) {
+            if (params[key] != null) {
+              searchParams.append(key, params[key])
+            }
+          }
+          return searchParams.toString()
+        }
+      }
+    })
     searchResults.value = response.data
     if (!response.data.all_rooms) {
       searchResults.value.all_rooms = []
@@ -504,39 +571,68 @@ const checkPreferences = async () => {
         'Pragma': 'no-cache'
       }
     })
-    console.log('Preferences response:', response.data)
+    console.log('Raw preferences response:', response)
+    console.log('Preferences data:', response.data)
     hasPreferences.value = !!response.data
     if (response.data) {
+      console.log('Setting filters with preferences...')
       // Initialize filters with preferences
-      filters.value = {
-        maxPrice: response.data.max_price,
-        minCapacity: response.data.min_capacity,
-        location: response.data.preferred_location,
-        amenities: response.data.required_amenities || [],
+      const newFilters = {
+        maxPrice: response.data.max_price || null,
+        minCapacity: response.data.min_capacity || null,
+        location: response.data.preferred_location || '',
+        amenities: response.data.required_amenities || [],  // Backend already sends parsed JSON
         minSafetyScore: Math.max(1, Math.round(response.data.safety_weight * 10)),
         maxNoiseLevel: Math.min(10, Math.round((1 - response.data.noise_level_weight) * 10)),
         minAccessibilityScore: Math.max(1, Math.round(response.data.accessibility_weight * 10)),
         minCleanlinessScore: Math.max(1, Math.round(response.data.cleanliness_weight * 10)),
-        sortBy: 'match_desc'
+        livingSpaceType: response.data.living_space_type || null
       }
+      console.log('New filters:', newFilters)
+      filters.value = newFilters
+      
+      // After setting filters, trigger a search to show results based on preferences
+      console.log('Triggering initial search with preferences...')
+      await searchRooms()
     }
   } catch (error) {
     console.error('Error checking preferences:', error)
+    if (error.response) {
+      console.error('Error response:', error.response.data)
+      console.error('Error status:', error.response.status)
+    }
     hasPreferences.value = false
+  }
+}
+
+const selectedLocation = ref(null)
+const selectedLocationName = ref('')
+
+const handleMarkerClick = () => {
+  console.log('Marker clicked')
+}
+
+// Add user type state
+const userType = ref('tenant') // Default to tenant
+
+// Get user type on mount
+const getUserType = async () => {
+  try {
+    const token = localStorage.getItem('token')
+    if (token) {
+      const response = await axios.get('/auth/user-type')
+      userType.value = response.data.user_type
+    }
+  } catch (error) {
+    console.error('Error getting user type:', error)
   }
 }
 
 // Initialize on component mount
 onMounted(async () => {
-  loading.value = true
-  try {
-    await checkPreferences()
-    await searchRooms()
-  } catch (error) {
-    console.error('Error loading initial data:', error)
-  } finally {
-    loading.value = false
-  }
+  await getUserType()
+  await checkPreferences()
+  await searchRooms()
 })
 </script>
 

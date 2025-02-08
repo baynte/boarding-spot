@@ -11,6 +11,9 @@ import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
 import '@mdi/font/css/materialdesignicons.css'
 
+// Leaflet
+import 'leaflet/dist/leaflet.css'
+
 // Initialize axios auth header from localStorage
 const token = localStorage.getItem('token')
 if (token) {
@@ -25,9 +28,9 @@ const vuetify = createVuetify({
     themes: {
       light: {
         colors: {
-          primary: '#000000',
-          secondary: '#424242',
-          accent: '#82B1FF',
+          primary: '#1976D2',    // Material Blue
+          secondary: '#64B5F6',  // Lighter Blue
+          accent: '#82B1FF',     // Blue accent
           error: '#FF5252',
           info: '#2196F3',
           success: '#4CAF50',
