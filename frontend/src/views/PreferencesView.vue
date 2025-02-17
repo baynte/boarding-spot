@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1 class="text-h4 mb-4">Room Preferences</h1>
+    <h1 class="text-h4 mb-4">Living Space Preferences</h1>
 
     <v-card>
       <v-card-text>
@@ -44,6 +44,18 @@
                   validate-on="blur"
                   :error-messages="errors.preferred_location"
                 ></v-text-field>
+              </v-col>
+
+              <v-col cols="12">
+                <v-select
+                  v-model="preferences.living_space_type"
+                  :items="livingSpaceTypes"
+                  label="Preferred Living Space Type"
+                  hint="Select your preferred type of living space"
+                  persistent-hint
+                  clearable
+                  :error-messages="errors.living_space_type"
+                ></v-select>
               </v-col>
 
               <v-col cols="12">
@@ -210,7 +222,8 @@ const preferences = ref({
   max_price: null,
   min_capacity: null,
   preferred_location: '',
-  required_amenities: []
+  required_amenities: [],
+  living_space_type: null
 })
 
 const weights = ref({
@@ -225,7 +238,8 @@ const errors = ref({
   min_capacity: '',
   preferred_location: '',
   required_amenities: '',
-  weights: ''
+  weights: '',
+  living_space_type: ''
 })
 
 const totalWeight = computed(() => {
@@ -237,7 +251,8 @@ const isFormValid = computed(() => {
          preferences.value.max_price > 0 &&
          preferences.value.min_capacity > 0 &&
          preferences.value.preferred_location.trim() !== '' &&
-         preferences.value.required_amenities.length > 0
+         preferences.value.required_amenities.length > 0 &&
+         preferences.value.living_space_type !== null
 })
 
 const commonAmenities = [
@@ -251,6 +266,14 @@ const commonAmenities = [
   'Private Bathroom',
   'Study Desk',
   'Closet'
+]
+
+const livingSpaceTypes = [
+  'Boarding House',
+  'Apartment',
+  'House',
+  'Dormitory',
+  'Condo Unit'
 ]
 
 const rules = {
@@ -271,7 +294,8 @@ const fetchPreferences = async () => {
         max_price: response.data.max_price,
         min_capacity: response.data.min_capacity,
         preferred_location: response.data.preferred_location,
-        required_amenities: response.data.required_amenities
+        required_amenities: response.data.required_amenities,
+        living_space_type: response.data.living_space_type
       }
       weights.value = {
         safety: response.data.safety_weight * 100,
@@ -346,6 +370,7 @@ const savePreferences = async () => {
       min_capacity: Number(preferences.value.min_capacity),
       preferred_location: preferences.value.preferred_location.trim(),
       required_amenities: preferences.value.required_amenities,
+      living_space_type: preferences.value.living_space_type,
       safety_weight: weights.value.safety / 100,
       cleanliness_weight: weights.value.cleanliness / 100,
       accessibility_weight: weights.value.accessibility / 100,

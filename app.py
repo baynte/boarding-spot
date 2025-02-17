@@ -3,7 +3,7 @@ from datetime import timedelta
 import os
 from extensions import db, jwt, cors
 from flask_migrate import Migrate
-from routes import auth_routes, landlord_routes, tenant_routes
+from routes import auth_routes, landlord_routes, tenant_routes, rating_routes
 
 def create_app():
     app = Flask(__name__, static_url_path='/static', static_folder='static')
@@ -19,11 +19,11 @@ def create_app():
     db.init_app(app)
     jwt.init_app(app)
     cors.init_app(app, 
-        origins=[f"http://{os.environ.get('CURRENT_IP')}:5173", f"http://{os.environ.get('CURRENT_IP')}:5174", "http://localhost:5173", "http://localhost:5174"],
-        allow_credentials=True,
-        allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-        allow_headers=["Content-Type", "Authorization"],
-        expose_headers=["Content-Type", "Authorization"]
+        origins="*",  # Accept all origins
+        supports_credentials=True,
+        allow_headers=["*"],  # Accept all headers
+        methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+        expose_headers=["*"]  # Expose all headers
     )
     migrate = Migrate(app, db)
 
@@ -31,6 +31,7 @@ def create_app():
     app.register_blueprint(auth_routes.bp)
     app.register_blueprint(landlord_routes.bp)
     app.register_blueprint(tenant_routes.bp)
+    app.register_blueprint(rating_routes.bp)
 
     return app
 
