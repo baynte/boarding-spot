@@ -1,13 +1,8 @@
 <template>
   <div>
-    <div class="d-flex align-center justify-space-between mb-4">
+    <div class="d-flex align-center justify-space-between mb-4 mt-10">
       <h1 class="text-h4">Landlord Dashboard</h1>
-      <v-btn
-        color="primary"
-        variant="text"
-        prepend-icon="mdi-account-cog"
-        to="/landlord/profile"
-      >
+      <v-btn color="primary" variant="text" prepend-icon="mdi-account-cog" to="/landlord/profile">
         Profile Settings
       </v-btn>
     </div>
@@ -42,11 +37,7 @@
 
     <!-- Add Room Button -->
     <div class="d-flex justify-end mb-4">
-      <v-btn
-        color="primary"
-        prepend-icon="mdi-plus"
-        @click="dialog = true"
-      >
+      <v-btn color="primary" prepend-icon="mdi-plus" @click="dialog = true">
         Add New Room
       </v-btn>
     </div>
@@ -62,77 +53,38 @@
           <v-form ref="form">
             <v-container>
               <!-- Basic Information -->
-              <div class="text-h6 mb-2">Basic Information</div>
+              <div class="text-h6 mb-4">Basic Information</div>
               <v-row>
                 <v-col cols="12" sm="6">
-                  <v-text-field
-                    v-model="editedItem.title"
-                    label="Title"
-                    :rules="[rules.required]"
-                    hint="A descriptive title for your room"
-                    persistent-hint
-                  ></v-text-field>
+                  <v-text-field v-model="editedItem.title" label="Title" :rules="[rules.required]"
+                    hint="A descriptive title for your room" persistent-hint></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6">
-                  <v-text-field
-                    v-model="editedItem.price"
-                    label="Monthly Rent"
-                    type="number"
-                    prefix="₱"
-                    :rules="[rules.required, rules.positive]"
-                    hint="Monthly rent amount"
-                    persistent-hint
-                  ></v-text-field>
+                  <v-text-field v-model="editedItem.price" label="Monthly Rent" type="number" prefix="₱"
+                    :rules="[rules.required, rules.positive]" hint="Monthly rent amount" persistent-hint></v-text-field>
                 </v-col>
                 <v-col cols="12">
-                  <v-textarea
-                    v-model="editedItem.description"
-                    label="Description"
-                    :rules="[rules.required]"
-                    hint="Detailed description of the room"
-                    persistent-hint
-                    rows="3"
-                  ></v-textarea>
+                  <v-textarea v-model="editedItem.description" label="Description" :rules="[rules.required]"
+                    hint="Detailed description of the room" persistent-hint rows="3"></v-textarea>
                 </v-col>
                 <v-col cols="12" sm="6">
-                  <v-text-field
-                    v-model="editedItem.capacity"
-                    label="Capacity"
-                    type="number"
-                    min="1"
-                    hint="Number of tenants that can occupy the room"
-                    persistent-hint
-                    :rules="[rules.required, rules.positive]"
-                  ></v-text-field>
+                  <v-text-field v-model="editedItem.capacity" label="Capacity" type="number" min="1"
+                    hint="Number of tenants that can occupy the room" persistent-hint
+                    :rules="[rules.required, rules.positive]"></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6">
-                  <v-text-field
-                    v-model="editedItem.location"
-                    label="Location"
-                    :rules="[rules.required]"
-                    hint="Location of the room"
-                    persistent-hint
-                  ></v-text-field>
+                  <v-text-field v-model="editedItem.location" label="Location" :rules="[rules.required]"
+                    hint="Location of the room" persistent-hint></v-text-field>
                 </v-col>
                 <v-col cols="12" sm="6">
-                  <v-select
-                    v-model="editedItem.living_space_type"
-                    :items="livingSpaceTypes"
-                    label="Living Space Type"
-                    :rules="[rules.required]"
-                    hint="Type of living space"
-                    persistent-hint
-                  ></v-select>
+                  <v-select v-model="editedItem.living_space_type" :items="livingSpaceTypes" label="Living Space Type"
+                    :rules="[rules.required]" hint="Type of living space" persistent-hint></v-select>
                 </v-col>
                 <v-col cols="12">
                   <div class="text-subtitle-1 mb-2">Pin Location on Map</div>
                   <p class="text-caption mb-2">Click on the map to set the exact location of your room</p>
-                  <leaflet-map
-                    :marker-lat-lng="markerPosition"
-                    :popup-content="editedItem.title || 'New Room'"
-                    @marker-click="handleMarkerClick"
-                    ref="mapRef"
-                  />
+                  <leaflet-map :marker-lat-lng="markerPosition" :popup-content="editedItem.title || 'New Room'"
+                    @marker-click="handleMarkerClick" ref="mapRef" />
                 </v-col>
               </v-row>
 
@@ -140,42 +92,22 @@
               <div class="text-h6 mb-2">Amenities</div>
               <v-row>
                 <v-col cols="12">
-                  <v-combobox
-                    v-model="editedItem.amenities"
-                    :items="commonAmenities"
-                    label="Available Amenities"
-                    multiple
-                    chips
-                    :rules="[rules.required]"
-                    hint="Select or type amenities available in the room"
-                    persistent-hint
-                  ></v-combobox>
+                  <v-combobox v-model="editedItem.amenities" :items="commonAmenities" label="Available Amenities"
+                    multiple chips :rules="[rules.required]" hint="Select or type amenities available in the room"
+                    persistent-hint></v-combobox>
                 </v-col>
               </v-row>
 
               <!-- Image Upload -->
-              <div class="text-h6 mb-2">Room Images</div>
+              <div class="text-h6 mb-2 mt-3">Room Images</div>
               <v-row>
                 <v-col cols="12">
-                  <v-file-input
-                    v-model="roomImages"
-                    accept="image/*"
-                    label="Room Images"
-                    prepend-icon="mdi-camera"
+                  <v-file-input v-model="roomImages" accept="image/*" label="Room Images" prepend-icon="mdi-camera"
                     :rules="[editedItem.id ? undefined : rules.images]"
-                    hint="Upload clear images of the room (you can select multiple)"
-                    persistent-hint
-                    show-size
-                    multiple
-                  >
+                    hint="Upload clear images of the room (you can select multiple)" persistent-hint show-size multiple>
                     <template v-slot:selection="{ fileNames }">
                       <template v-for="fileName in fileNames" :key="fileName">
-                        <v-chip
-                          size="small"
-                          label
-                          color="primary"
-                          class="me-2"
-                        >
+                        <v-chip size="small" label color="primary" class="me-2">
                           {{ fileName }}
                         </v-chip>
                       </template>
@@ -185,13 +117,9 @@
                 <v-col cols="12" v-if="editedItem.image_urls && editedItem.image_urls.length > 0">
                   <div class="text-subtitle-2 mb-2">Current Images:</div>
                   <v-row>
-                    <v-col v-for="(url, index) in parseImageUrls(editedItem.image_urls)" :key="index" cols="12" sm="6" md="4">
-                      <v-img
-                        :src="url"
-                        max-height="200"
-                        contain
-                        class="bg-grey-lighten-2"
-                      ></v-img>
+                    <v-col v-for="(url, index) in parseImageUrls(editedItem.image_urls)" :key="index" cols="12" sm="6"
+                      md="4">
+                      <v-img :src="url" max-height="200" contain class="bg-grey-lighten-2"></v-img>
                     </v-col>
                   </v-row>
                 </v-col>
@@ -202,20 +130,10 @@
 
         <v-card-actions>
           <v-spacer></v-spacer>
-          <v-btn
-            color="error"
-            variant="text"
-            @click="close"
-          >
+          <v-btn color="error" variant="elevated" @click="close" class="mb-3">
             Cancel
           </v-btn>
-          <v-btn
-            color="success"
-            variant="text"
-            @click="save"
-            :loading="loading"
-            :disabled="loading"
-          >
+          <v-btn color="success" variant="elevated" @click="save" :loading="loading" :disabled="loading" class="mb-3 mr-3">
             Save
           </v-btn>
         </v-card-actions>
@@ -223,89 +141,133 @@
     </v-dialog>
 
     <!-- Rooms Table -->
-    <v-card>
-      <v-card-title>
-        <v-text-field
-          v-model="search"
-          prepend-icon="mdi-magnify"
-          label="Search"
-          single-line
-          hide-details
-          density="compact"
-        ></v-text-field>
+    <v-card class="rooms-table-card">
+      <!-- Search Bar with Enhanced Styling -->
+      <v-card-title class="search-section pa-4">
+      <v-text-field
+        v-model="search"
+        prepend-inner-icon="mdi-magnify"
+        label="Search rooms..."
+        variant="outlined"
+        density="comfortable"
+        hide-details
+        class="search-field"
+        bg-color="grey-lighten-4"
+      ></v-text-field>
       </v-card-title>
 
       <v-data-table
-        :headers="headers"
-        :items="rooms"
-        :search="search"
-        class="elevation-1"
+      :headers="headers"
+      :items="rooms"
+      :search="search"
+      class="elevation-2"
+      hover
       >
-        <template v-slot:item.image_urls="{ item }">
+      <!-- Image Column -->
+      <template v-slot:item.image_urls="{ item }">
+        <v-hover v-slot="{ isHovering, props }">
+        <v-card
+          v-bind="props"
+          :elevation="isHovering ? 8 : 0"
+          class="ma-2 transition-fast-in-fast-out"
+        >
           <v-img
-            :src="parseImageUrls(item.image_urls)?.[0]"
-            height="100"
-            width="150"
-            cover
-            class="bg-grey-lighten-2"
+          :src="parseImageUrls(item.image_urls)?.[0]"
+          height="120"
+          width="180"
+          cover
+          class="rounded-lg"
           >
-            <template v-slot:placeholder>
-              <v-row class="fill-height ma-0" align="center" justify="center">
-                <v-progress-circular indeterminate color="grey-lighten-5"></v-progress-circular>
-              </v-row>
-            </template>
+          <template v-slot:placeholder>
+            <v-row class="fill-height ma-0" align-items ="center" justify="center">
+            <v-progress-circular
+              indeterminate
+              color="primary"
+            ></v-progress-circular>
+            </v-row>
+          </template>
           </v-img>
-        </template>
+        </v-card>
+        </v-hover>
+      </template>
 
-        <template v-slot:item.price="{ item }">
-          ₱{{ item.price }}
-        </template>
+      <!-- Price Column -->
+      <template v-slot:item.price="{ item }">
+        <div class="text-primary font-weight-bold">
+        ₱{{ Number(item.price).toLocaleString() }}
+        </div>
+      </template>
 
-        <template v-slot:item.availability="{ item }">
-          <v-chip
-            :color="item.availability ? 'success' : 'error'"
-            :text="item.availability ? 'Available' : 'Occupied'"
+      <!-- Amenities Column -->
+      <template v-slot:item.amenities="{ item }">
+        <div class="d-flex flex-wrap gap-1">
+        <v-chip
+          v-for="(amenity, index) in item.amenities"
+          :key="index"
+          size="small"
+          variant="flat"
+          color="primary"
+          class="ma-1"
+        >
+          {{ amenity }}
+        </v-chip>
+        </div>
+      </template>
+
+      <!-- Availability Column -->
+      <template v-slot:item.availability="{ item }">
+        <v-chip
+        :color="item.availability ? 'success' : 'error'"
+        :text="item.availability ? 'Available' : 'Occupied'"
+        size="small"
+        variant="elevated"
+        class="font-weight-medium"
+        ></v-chip>
+      </template>
+
+      <!-- Actions Column -->
+      <template v-slot:item.actions="{ item }">
+        <div class="d-flex gap-3">
+        <v-tooltip location="top" text="Edit Room">
+          <template v-slot:activator="{ props }">
+          <v-btn
+            icon="mdi-pencil"
             size="small"
-          ></v-chip>
-        </template>
-
-        <template v-slot:item.actions="{ item }">
-          <v-tooltip text="Edit Room">
-            <template v-slot:activator="{ props }">
-              <v-btn
-                icon="mdi-pencil"
-                size="small"
-                color="primary"
-                v-bind="props"
-                @click="editItem(item)"
-                class="mr-2"
-              ></v-btn>
-            </template>
-          </v-tooltip>
-          <v-tooltip text="Toggle Availability">
-            <template v-slot:activator="{ props }">
-              <v-btn
-                :icon="item.availability ? 'mdi-close' : 'mdi-check'"
-                size="small"
-                :color="item.availability ? 'error' : 'success'"
-                v-bind="props"
-                @click="toggleAvailability(item)"
-                class="mr-2"
-              ></v-btn>
-            </template>
-          </v-tooltip>
-          <v-tooltip text="Delete Room">
-            <template v-slot:activator="{ props }">
-              <v-btn
-                icon="mdi-delete"
-                size="small"
-                color="error"
-                v-bind="props"
-                @click="deleteItem(item)"
-              ></v-btn>
-            </template>
-          </v-tooltip>
-        </template>
+            color="primary"
+            variant="tonal"
+            v-bind="props"
+            @click="editItem(item)"
+          ></v-btn>
+          </template>
+        </v-tooltip>
+        
+        <v-tooltip location="top" :text="item.availability ? 'Mark as Occupied' : 'Mark as Available'">
+          <template v-slot:activator="{ props }">
+          <v-btn
+            :icon="item.availability ? 'mdi-close' : 'mdi-check'"
+            size="small"
+            :color="item.availability ? 'error' : 'success'"
+            variant="tonal"
+            v-bind="props"
+            @click="toggleAvailability(item)"
+          ></v-btn>
+          </template>
+        </v-tooltip>
+        
+        <v-tooltip location="top" text="Delete Room">
+          <template v-slot:activator="{ props }">
+          <v-btn
+            icon="mdi-delete"
+            size="small"
+            color="error"
+            variant="tonal"
+            v-bind="props"
+            @click="deleteItem(item)"
+          ></v-btn>
+          </template>
+        </v-tooltip>
+        </div>
+      </template>
       </v-data-table>
     </v-card>
 
@@ -381,7 +343,7 @@ const commonAmenities = [
   'Common CR',
   'Appliances',
   'Receiving Area',
-  
+
 ]
 
 const rules = {
@@ -403,9 +365,9 @@ const parseImageUrls = (urls) => {
 }
 
 const headers = [
-  { 
-    title: 'Images', 
-    key: 'image_urls', 
+  {
+    title: 'Images',
+    key: 'image_urls',
     sortable: false,
     align: 'center',
   },
@@ -491,7 +453,7 @@ const save = async () => {
     formData.append('location', editedItem.value.location)
     formData.append('living_space_type', editedItem.value.living_space_type)
     formData.append('amenities', JSON.stringify(editedItem.value.amenities))
-    
+
     if (editedItem.value.latitude && editedItem.value.longitude) {
       formData.append('latitude', editedItem.value.latitude)
       formData.append('longitude', editedItem.value.longitude)
@@ -538,10 +500,10 @@ const toggleAvailability = async (item) => {
     formData.append('living_space_type', item.living_space_type)
     formData.append('amenities', JSON.stringify(item.amenities))
     formData.append('availability', !item.availability)
-    
+
     await axios.put(`/landlord/rooms/${item.id}`, formData)
     item.availability = !item.availability
-    
+
     snackbarText.value = `Room marked as ${item.availability ? 'available' : 'occupied'}`
     snackbarColor.value = 'success'
     snackbar.value = true
@@ -559,7 +521,7 @@ const toggleAvailability = async (item) => {
 const deleteItem = async (item) => {
   const confirmed = window.confirm('Are you sure you want to delete this room?')
   if (!confirmed) return
-  
+
   try {
     await axios.delete(`/landlord/rooms/${item.id}`)
     snackbarText.value = 'Room deleted successfully'
@@ -586,8 +548,8 @@ const deleteItem = async (item) => {
 </style>
 
 export default {
-  name: "LandlordDashboard",
-  components: {
-    LeafletMap
-  }
-} 
+name: "LandlordDashboard",
+components: {
+LeafletMap
+}
+}

@@ -1,13 +1,15 @@
 <template>
-  <v-container class="fill-height" fluid>
-    <v-row align="center" justify="center">
+  <v-container class="fill-height mt-10" fluid>
+    <v-row align-items="center" justify="center">
       <v-col cols="12" sm="8" md="6" lg="4">
-        <v-card class="elevation-12">
-          <v-toolbar color="primary" dark flat>
-            <v-toolbar-title>Register</v-toolbar-title>
+        <v-card class="elevation-12 rounded-lg">
+          <v-toolbar color="primary" dark flat class="rounded-t-lg">
+            <v-toolbar-title class="text-h5 font-weight-bold">
+              Create Account
+            </v-toolbar-title>
           </v-toolbar>
           
-          <v-card-text>
+          <v-card-text class="pa-6">
             <v-form @submit.prevent="handleSubmit" ref="form">
               <v-text-field
                 v-model="email"
@@ -15,6 +17,9 @@
                 label="Email"
                 prepend-icon="mdi-email"
                 type="email"
+                variant="outlined"
+                density="comfortable"
+                class="mb-3"
                 required
               ></v-text-field>
 
@@ -26,6 +31,9 @@
                 :type="showPassword ? 'text' : 'password'"
                 :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
                 @click:append="showPassword = !showPassword"
+                variant="outlined"
+                density="comfortable"
+                class="mb-3"
                 required
               ></v-text-field>
 
@@ -35,16 +43,23 @@
                 label="Confirm Password"
                 prepend-icon="mdi-lock-check"
                 :type="showPassword ? 'text' : 'password'"
+                variant="outlined"
+                density="comfortable"
+                class="mb-3"
                 required
               ></v-text-field>
 
-              <!-- <v-text-field
+              <v-text-field
                 v-model="contactNumber"
                 label="Contact Number"
                 :rules="contactNumberRules"
+                prepend-icon="mdi-phone"
                 persistent-hint
                 hint="Enter your contact number (required for landlords)"
-              ></v-text-field> -->
+                variant="outlined"
+                density="comfortable"
+                class="mb-3"
+              ></v-text-field>
 
               <v-select
                 v-model="userType"
@@ -52,26 +67,35 @@
                 :rules="[rules.required]"
                 label="Account Type"
                 prepend-icon="mdi-account"
+                variant="outlined"
+                density="comfortable"
+                class="mt-6"
                 required
               ></v-select>
             </v-form>
           </v-card-text>
 
-          <v-card-actions>
-            <v-spacer></v-spacer>
+          <v-card-actions class="pa-6 pt-0">
             <v-btn
               color="primary"
+              variant="elevated"
               @click="handleSubmit"
               :loading="loading"
               :disabled="loading"
+              block
+              size="large"
+              class="mb-3"
             >
+              <v-icon start>mdi-account-plus</v-icon>
               Register
             </v-btn>
           </v-card-actions>
 
-          <v-card-text class="text-center">
-            Already have an account?
-            <router-link to="/login">Login here</router-link>
+          <v-card-text class="text-center pb-3">
+            <span class="text-grey">Already have an account? </span>
+            <router-link to="/login" class="text-primary font-weight-bold text-decoration-none">
+              Sign in
+            </router-link>
           </v-card-text>
         </v-card>
       </v-col>

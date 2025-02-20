@@ -1,40 +1,52 @@
 <template>
-  <div>
-    <h1 class="text-h4 mb-4">Living Space Preferences</h1>
+  <div class="preferences-container pa-4">
+    <h1 class="text-h4 mb-6 text-center primary--text">Living Space Preferences</h1>
 
-    <v-card>
+    <v-card elevation="3" class="rounded-lg">
       <v-card-text>
         <v-form @submit.prevent="savePreferences" ref="form">
           <v-container>
+            <!-- Basic Information Section -->
             <v-row>
-              <v-col cols="12" sm="6">
+              <v-col cols="12">
+                <div class="text-h6 mb-4 primary--text">
+                  <v-icon icon="mdi-information" class="mr-2"></v-icon>
+                  Basic Information
+                </div>
+              </v-col>
+
+              <v-col cols="12" md="6">
                 <v-text-field
                   v-model="preferences.max_price"
                   label="Maximum Price"
                   type="number"
-                  prefix="$"
+                  prefix="₱"
                   :rules="[rules.required, rules.positive]"
                   hint="Your maximum budget for rent"
                   persistent-hint
                   validate-on="blur"
                   :error-messages="errors.max_price"
+                  variant="outlined"
+                  density="comfortable"
                 ></v-text-field>
               </v-col>
 
-              <v-col cols="12" sm="6">
+              <v-col cols="12" md="6">
                 <v-text-field
                   v-model="preferences.min_capacity"
                   label="Minimum Capacity"
                   type="number"
                   :rules="[rules.required, rules.positive]"
-                  hint="Minimum number of people you're comfortable with"
+                  hint="Minimum number of people"
                   persistent-hint
                   validate-on="blur"
                   :error-messages="errors.min_capacity"
+                  variant="outlined"
+                  density="comfortable"
                 ></v-text-field>
               </v-col>
 
-              <v-col cols="12">
+              <v-col cols="12" md="6">
                 <v-text-field
                   v-model="preferences.preferred_location"
                   label="Preferred Location"
@@ -43,18 +55,24 @@
                   persistent-hint
                   validate-on="blur"
                   :error-messages="errors.preferred_location"
+                  variant="outlined"
+                  density="comfortable"
+                  prepend-inner-icon="mdi-map-marker"
                 ></v-text-field>
               </v-col>
 
-              <v-col cols="12">
+              <v-col cols="12" md="6">
                 <v-select
                   v-model="preferences.living_space_type"
                   :items="livingSpaceTypes"
-                  label="Preferred Living Space Type"
-                  hint="Select your preferred type of living space"
+                  label="Living Space Type"
+                  hint="Select your preferred type"
                   persistent-hint
                   clearable
                   :error-messages="errors.living_space_type"
+                  variant="outlined"
+                  density="comfortable"
+                  prepend-inner-icon="mdi-home"
                 ></v-select>
               </v-col>
 
@@ -66,134 +84,82 @@
                   multiple
                   chips
                   :rules="[rules.required, rules.amenities]"
-                  hint="Select amenities that are important to you"
+                  hint="Select important amenities"
                   persistent-hint
                   validate-on="blur"
                   :error-messages="errors.required_amenities"
+                  variant="outlined"
+                  density="comfortable"
                 ></v-combobox>
               </v-col>
+            </v-row>
 
+            <!-- Importance Weights Section -->
+            <v-row class="mt-6">
               <v-col cols="12">
-                <div class="text-h6 mb-2">Importance Weights</div>
-                <p class="text-caption mb-4">
-                  Adjust these sliders to indicate how important each factor is in your decision.
-                  The total of all weights will automatically adjust to equal 100%.
-                </p>
-                <div v-if="errors.weights" class="text-error mb-2">{{ errors.weights }}</div>
-              </v-col>
-
-              <v-col cols="12" sm="6">
-                <v-slider
-                  v-model="weights.safety"
-                  label="Safety Importance"
-                  thumb-label
-                  :min="0"
-                  :max="100"
-                  :step="5"
-                  @update:model-value="normalizeWeights('safety')"
-                >
-                  <template v-slot:append>
-                    <v-text-field
-                      v-model="weights.safety"
-                      type="number"
-                      style="width: 70px"
-                      density="compact"
-                      hide-details
-                      @update:model-value="normalizeWeights('safety')"
-                    ></v-text-field>
-                  </template>
-                </v-slider>
-              </v-col>
-
-              <v-col cols="12" sm="6">
-                <v-slider
-                  v-model="weights.cleanliness"
-                  label="Cleanliness Importance"
-                  thumb-label
-                  :min="0"
-                  :max="100"
-                  :step="5"
-                  @update:model-value="normalizeWeights('cleanliness')"
-                >
-                  <template v-slot:append>
-                    <v-text-field
-                      v-model="weights.cleanliness"
-                      type="number"
-                      style="width: 70px"
-                      density="compact"
-                      hide-details
-                      @update:model-value="normalizeWeights('cleanliness')"
-                    ></v-text-field>
-                  </template>
-                </v-slider>
-              </v-col>
-
-              <v-col cols="12" sm="6">
-                <v-slider
-                  v-model="weights.accessibility"
-                  label="Accessibility Importance"
-                  thumb-label
-                  :min="0"
-                  :max="100"
-                  :step="5"
-                  @update:model-value="normalizeWeights('accessibility')"
-                >
-                  <template v-slot:append>
-                    <v-text-field
-                      v-model="weights.accessibility"
-                      type="number"
-                      style="width: 70px"
-                      density="compact"
-                      hide-details
-                      @update:model-value="normalizeWeights('accessibility')"
-                    ></v-text-field>
-                  </template>
-                </v-slider>
-              </v-col>
-
-              <v-col cols="12" sm="6">
-                <v-slider
-                  v-model="weights.noise"
-                  label="Noise Level Importance"
-                  thumb-label
-                  :min="0"
-                  :max="100"
-                  :step="5"
-                  @update:model-value="normalizeWeights('noise')"
-                >
-                  <template v-slot:append>
-                    <v-text-field
-                      v-model="weights.noise"
-                      type="number"
-                      style="width: 70px"
-                      density="compact"
-                      hide-details
-                      @update:model-value="normalizeWeights('noise')"
-                    ></v-text-field>
-                  </template>
-                </v-slider>
-              </v-col>
-
-              <v-col cols="12">
-                <div class="d-flex align-center">
-                  <div class="text-subtitle-1">Total Weight:</div>
-                  <div :class="{'text-error': totalWeight !== 100, 'text-success': totalWeight === 100}" class="ml-2">
-                    {{ totalWeight }}%
-                  </div>
+                <div class="text-h6 primary--text d-flex align-center">
+                  <v-icon icon="mdi-scale-balance" class="mr-2"></v-icon>
+                  Importance Weights
+                  <v-tooltip location="right">
+                    <template v-slot:activator="{ props }">
+                      <v-icon v-bind="props" icon="mdi-help-circle" class="ml-2" size="small"></v-icon>
+                    </template>
+                    <span>Adjust these values to prioritize your preferences. Total must equal 100%.</span>
+                  </v-tooltip>
                 </div>
+                <div class="text-caption mb-4">All weights must sum to 100%</div>
+              </v-col>
+
+              <v-col cols="12" sm="6" v-for="(value, key) in weights" :key="key">
+                <v-card flat class="pa-2">
+                  <v-slider
+                    v-model="weights[key]"
+                    :label="key.charAt(0).toUpperCase() + key.slice(1)"
+                    thumb-label="always"
+                    :min="0"
+                    :max="100"
+                    :step="5"
+                    @update:model-value="normalizeWeights(key)"
+                    class="ml-2"
+                  >
+                    <template v-slot:append>
+                      <v-text-field
+                        v-model="weights[key]"
+                        type="number"
+                        style="width: 70px"
+                        density="compact"
+                        hide-details
+                        variant="outlined"
+                        @update:model-value="normalizeWeights(key)"
+                      ></v-text-field>
+                    </template>
+                  </v-slider>
+                </v-card>
+              </v-col>
+
+              <v-col cols="12">
+                <v-alert
+                  :type="totalWeight === 100 ? 'success' : 'warning'"
+                  variant="tonal"
+                  class="mt-2"
+                >
+                  Total Weight: {{ totalWeight }}%
+                </v-alert>
               </v-col>
             </v-row>
           </v-container>
         </v-form>
       </v-card-text>
 
-      <v-card-actions>
+      <v-card-actions class="pa-4">
         <v-spacer></v-spacer>
         <v-btn
           color="primary"
           @click="savePreferences"
           :loading="loading"
           :disabled="loading || !isFormValid"
+          size="large"
+          prepend-icon="mdi-content-save"
         >
           Save Preferences
         </v-btn>

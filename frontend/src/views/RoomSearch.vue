@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1 class="text-h4 mb-4">Living Space Search</h1>
+    <h1 class="text-h4 mb-4 mt-10">Living Space Search</h1>
 
     <!-- Warning if preferences not set -->
     <v-alert
@@ -235,7 +235,7 @@
           <v-col cols="12" class="d-flex justify-end">
             <v-btn
               color="error"
-              variant="text"
+              variant="elevated"
               @click="clearFilters"
               :disabled="loading"
               class="me-2"

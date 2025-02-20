@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1 class="text-h4 mb-4">Tenant Dashboard</h1>
+    <h1 class="text-h4 mb-4 mt-10">Tenant Dashboard</h1>
 
     <!-- Current Preferences Card -->
     <v-card class="mb-6">

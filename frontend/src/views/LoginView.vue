@@ -1,13 +1,20 @@
 <template>
-  <v-container class="fill-height" fluid>
-    <v-row align="center" justify="center">
+  <v-container class="fill-height mt-16" fluid>
+    <v-row align-items="center" justify="center">
       <v-col cols="12" sm="8" md="6" lg="4">
-        <v-card class="elevation-12">
-          <v-toolbar color="primary" dark flat>
-            <v-toolbar-title>Login</v-toolbar-title>
+        <v-card class="elevation-12 rounded-lg">
+          <v-toolbar 
+            color="primary" 
+            dark 
+            flat
+            class="rounded-t-lg"
+          >
+            <v-toolbar-title class="text-h5 font-weight-medium">
+              Welcome Back
+            </v-toolbar-title>
           </v-toolbar>
           
-          <v-card-text>
+          <v-card-text class="pa-6">
             <v-form @submit.prevent="handleSubmit" ref="form">
               <v-text-field
                 v-model="email"
@@ -16,6 +23,9 @@
                 prepend-icon="mdi-email"
                 type="email"
                 required
+                variant="outlined"
+                density="comfortable"
+                class="mb-4"
               ></v-text-field>
 
               <v-text-field
@@ -27,25 +37,34 @@
                 :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
                 @click:append="showPassword = !showPassword"
                 required
+                variant="outlined"
+                density="comfortable"
               ></v-text-field>
             </v-form>
           </v-card-text>
 
-          <v-card-actions>
-            <v-spacer></v-spacer>
+          <v-card-actions class="pa-6 pt-0">
             <v-btn
               color="primary"
               @click="handleSubmit"
               :loading="loading"
               :disabled="loading"
+              variant="elevated"
+              size="large"
+              block
+              type="submit"
+              class="mb-1"
             >
+              <v-icon left class="mr-2">mdi-login</v-icon>
               Login
             </v-btn>
           </v-card-actions>
 
-          <v-card-text class="text-center">
-            Don't have an account?
-            <router-link to="/register">Register here</router-link>
+          <v-card-text class="text-center pb-2">
+            <span class="text-medium-emphasis">Don't have an account? </span>
+            <router-link to="/register" class="text-primary text-decoration-none font-weight-medium">
+              Register here
+            </router-link>
           </v-card-text>
         </v-card>
       </v-col>
