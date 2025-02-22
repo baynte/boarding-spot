@@ -127,7 +127,7 @@ def search_rooms():
     if user.user_type != 'tenant':
         return jsonify({'error': 'Unauthorized'}), 403
     
-    # Get filter parameters
+    # Get filter parameters -- Start
     max_price = request.args.get('max_price', type=float)
     min_capacity = request.args.get('min_capacity', type=int)
     location = request.args.get('location', '')
@@ -139,7 +139,10 @@ def search_rooms():
     max_noise_level = request.args.get('max_noise_level', type=float, default=10)
     min_accessibility_score = request.args.get('min_accessibility_score', type=float, default=1)
     min_cleanliness_score = request.args.get('min_cleanliness_score', type=float, default=1)
-    
+    # Get filter parameters -- End
+
+
+    # dili pansinon
     current_app.logger.info(f"Filter parameters received: max_price={max_price}, min_capacity={min_capacity}, location='{location}', amenities={amenities}, living_space_type={living_space_type}")
     current_app.logger.info(f"Score filters: safety>={min_safety_score}, noise<={max_noise_level}, accessibility>={min_accessibility_score}, cleanliness>={min_cleanliness_score}")
     
@@ -148,6 +151,7 @@ def search_rooms():
     if not preference:
         return jsonify({'error': 'Please set your preferences first'}), 400
     
+    # dili pansinon
     current_app.logger.info(f"Tenant preferences: max_price={preference.max_price}, min_capacity={preference.min_capacity}, location='{preference.preferred_location}', amenities={preference.required_amenities}, living_space_type={preference.living_space_type}")
     
     # Filter rooms based on basic criteria
@@ -224,7 +228,8 @@ def search_rooms():
     
     # Prepare data for TOPSIS
     current_app.logger.info("Preparing decision matrix...")
-    
+
+# Start of Logic
     try:
         # Convert room scores to float arrays, handling None values
         decision_matrix = []
@@ -232,10 +237,11 @@ def search_rooms():
         
         # Define criteria ranges for normalization
         max_price = max(room.price for room in rooms)
-        min_price = min(room.price for room in rooms)
-        max_capacity = max(room.capacity for room in rooms)
+        # min_price = min(room.price for room in rooms)
+        # max_capacity = max(room.capacity for room in rooms)
         min_capacity = min(room.capacity for room in rooms)
         
+        # Gikan sa gi filter sa Ibabaw
         for room in rooms:
             # Normalize scores to 0-1 range and handle None values
             safety = (float(room.safety_score) if room.safety_score is not None else 5.0) / 10.0
@@ -316,6 +322,8 @@ def search_rooms():
         # Convert to numpy array and scale to percentages
         raw_scores = np.array(raw_scores, dtype=np.float64)
         percentage_scores = raw_scores * 100
+
+# End of Logic
         
         # Apply perfect match bonuses
         for i, (room, score) in enumerate(zip(rooms, percentage_scores)):
