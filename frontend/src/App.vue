@@ -3,25 +3,18 @@
     <v-main>
       <div class="container">
         <v-app-bar
-          elevation="1"
+          elevation="4"
           variant="elevated"
-          class="my-3 px-5"
+          class="px-6"
+          style="height: 70px;"
         >
             <router-link to="/" class="text-decoration-none d-flex align-center">
               <div class="d-flex align-center brand-container">
-              <v-img
-                src="@/assets/logo.png"
-                max-height="48"
-                max-width="48"
-                contain
-                class="mr-2"
-                :style="{ filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.5))' }"
-              ></v-img>
               <div class="brand-text">
-                <v-card-title class="text-primary font-weight-bold pa-0 text-h5">
+                <v-card-title class="text-primary ml-6 font-weight-bold pa-0 text-h5">
                 Boarding<span class="text-secondary">Spot</span>
                 </v-card-title>
-                <div class="text-caption text-medium-emphasis">Find your perfect stay</div>
+                <div class="text-caption ml-6 text-medium-emphasis">Find your perfect stay</div>
               </div>
               </div>
             </router-link>
@@ -31,9 +24,8 @@
               <v-btn
                 to="/login"
                 color="primary"
-                variant="text"
+                variant="elevated"
                 prepend-icon="mdi-login"
-                size="x-large"
               >
               </v-btn>
             </template>
@@ -42,8 +34,9 @@
                 v-if="auth.isTenant"
                 to="/tenant"
                 color="primary"
-                variant="text"
+                variant="elevated"
                 prepend-icon="mdi-view-dashboard"
+                class="mr-4"
               >
                 Dashboard
               </v-btn>
@@ -51,18 +44,18 @@
                 v-if="auth.isLandlord"
                 to="/landlord"
                 color="primary"
-                variant="text"
+                variant="elevated"
                 prepend-icon="mdi-view-dashboard"
+                class="mr-4"
               >
                 Dashboard
               </v-btn>
               <v-btn
                 @click="logout"
                 color="error"
-                variant="text"
+                variant="elevated"
                 prepend-icon="mdi-logout"
               >
-                Logout
               </v-btn>
             </template>
           </div>

@@ -1,6 +1,5 @@
 <template>
-  <v-container class="text-center py-12">
-    <!-- Hero Section with gradient and animation -->
+  <v-container class="text-center py-12" elavation-20>
     <v-card
       class="pa-12 rounded-xl elevation-8 hero-card"
       dark

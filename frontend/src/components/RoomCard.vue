@@ -2,20 +2,37 @@
   <div>
     <v-card class="d-flex flex-column h-100">
       <!-- Card Header -->
-      <v-card-item class="pa-3 bg-grey-lighten-4">
+      <v-card-item class="pa-4 bg-grey-lighten-4 border-bottom">
         <div class="d-flex align-center justify-space-between">
-          <div class="d-flex align-center">
-            <v-icon size="24" class="me-2">mdi-home</v-icon>
-            <div class="text-h6 text-truncate">{{ room.title }}</div>
+          <div class="d-flex align-center" style="max-width: 50%;">
+        <v-avatar
+          color="primary"
+          class="me-3"
+          size="30"
+        >
+          <v-icon size="20" color="white">mdi-home</v-icon>
+        </v-avatar>
+        <div>
+          <div class="text-h7 text-truncate font-weight-bold mb-1">{{ room.title }}</div>
+        </div>
           </div>
-          <v-chip
-            :color="getMatchColor(match_score)"
-            size="small"
-            label
-          >
-            <v-icon start :icon="getMatchIcon(match_score)"></v-icon>
-            {{ Math.round(match_score) }}%
-          </v-chip>
+          <div class="d-flex flex-column align-end">
+        <v-chip
+          :color="getMatchColor(match_score)"
+          size="small"
+          label
+          elevation="1"
+          class="px-1"
+        >
+          <v-icon 
+            start 
+            :icon="getMatchIcon(match_score)"
+            size="20"
+            class="me-1"
+          ></v-icon>
+          <span class="font-weight-bold">{{ Math.round(match_score) }}% Match</span>
+        </v-chip>
+          </div>
         </div>
       </v-card-item>
 
@@ -29,15 +46,17 @@
             class="bg-grey-lighten-2"
           >
             <template v-slot:placeholder>
-              <v-row class="fill-height ma-0" align="center" justify="center">
+              <v-row class="fill-height ma-0" align-items ="center" justify="center">
                 <v-progress-circular indeterminate color="grey-lighten-5"></v-progress-circular>
               </v-row>
             </template>
           </v-img>
           <v-chip
-            class="rank-chip"
+            class="rank-chip font-weight-light text-h6"
             :color="getMatchColor(match_score)"
-            size="small"
+            size="x-small"
+            variant="elevated"
+            elevation="2"
             label
           >
             #{{ room.rank }}
@@ -51,7 +70,7 @@
           </div>
 
           <div class="d-flex align-center mb-2">
-            <v-icon size="small" class="me-1">mdi-map-marker</v-icon>
+            <v-icon size="small" class="me-2">mdi-map-marker</v-icon>
             <span class="text-body-2">{{ room.location }}</span>
           </div>
 
@@ -67,17 +86,17 @@
           </div> -->
 
           <div class="d-flex align-center mb-2">
-            <v-icon size="small" class="me-1">mdi-account-group</v-icon>
+            <v-icon size="small" class="me-2">mdi-account-group</v-icon>
             <span class="text-body-2">{{ room.capacity }} tenant{{ room.capacity > 1 ? 's' : '' }}</span>
           </div>
 
           <div class="d-flex align-center mb-2">
-            <v-icon size="small" class="me-1">mdi-account</v-icon>
+            <v-icon size="small" class="me-2">mdi-account</v-icon>
             <span class="text-body-2">Contact: {{ room.landlord?.contact_number || 'Not available' }}</span>
           </div>
 
           <div class="d-flex align-center mb-2">
-            <v-icon size="small" class="me-1">mdi-email</v-icon>
+            <v-icon size="small" class="me-2">mdi-email</v-icon>
             <span class="text-body-2">{{ room.landlord?.email || 'Email not available' }}</span>
           </div>
 
@@ -122,7 +141,9 @@
               <v-chip
                 :color="getMatchColor(match_score)"
                 size="small"
+                variant="outlined"
                 label
+                class="mb-3"
               >
                 {{ Math.round(match_score) }}% Overall
               </v-chip>
@@ -417,7 +438,7 @@
                     class="bg-grey-lighten-2"
                   >
                     <template v-slot:placeholder>
-                      <v-row class="fill-height ma-0" align="center" justify="center">
+                      <v-row class="fill-height ma-0" align-items ="center" justify="center">
                         <v-progress-circular indeterminate color="grey-lighten-5"></v-progress-circular>
                       </v-row>
                     </template>
@@ -707,6 +728,7 @@ const viewDetails = () => {
 .text-truncate-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }

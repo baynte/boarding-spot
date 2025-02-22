@@ -3,20 +3,9 @@
     <h1 class="text-h4 mb-4 mt-10">Living Space Search</h1>
 
     <!-- Warning if preferences not set -->
-    <v-alert
-      v-if="!hasPreferences"
-      type="warning"
-      class="mb-4"
-    >
+    <v-alert v-if="!hasPreferences" type="warning" class="mb-4">
       Please set your preferences to get personalized room recommendations.
-      <v-btn
-        color="warning"
-        variant="text"
-        to="/preferences"
-        class="ms-2"
-      >
-        Set Preferences
-      </v-btn>
+      <v-btn color="warning" variant="text" to="/preferences" class="ms-2"> Set Preferences </v-btn>
     </v-alert>
 
     <!-- Search Stats -->
@@ -56,285 +45,332 @@
     </v-row> -->
 
     <!-- Search Filters -->
-    <v-card class="mb-6">
-      <v-card-title>Search Filters</v-card-title>
-      <v-card-text>
-        <v-row>
-          <v-col cols="12" sm="6" md="3">
-            <v-text-field
-              v-model.number="filters.maxPrice"
-              label="Maximum Price"
-              type="number"
-              prefix="₱"
-              clearable
-              :loading="loading"
-              :disabled="loading"
-              density="compact"
-              variant="outlined"
-              hide-details
-              class="mb-3"
-            ></v-text-field>
-          </v-col>
+    <v-card class="mb-6" elevation="2">
+      <!-- Header with better visual separation -->
+      <v-card-title class="d-flex align-center py-4 px-6 bg-primary text-white">
+        <v-icon icon="mdi-filter-variant" class="me-2" />
+        Search Filters
+        <v-spacer></v-spacer>
+        <v-chip
+          v-if="activeFiltersCount > 0"
+          color="white"
+          text-color="primary"
+          variant="outlined"
+          size="small"
+          class="font-weight-bold"
+        >
+          {{ activeFiltersCount }} filters active
+        </v-chip>
+      </v-card-title>
 
-          <v-col cols="12" sm="6" md="3">
-            <v-text-field
-              v-model.number="filters.minCapacity"
-              label="Minimum Capacity"
-              type="number"
-              min="1"
-              hint="Minimum number of tenants"
-              persistent-hint
-              clearable
-              :loading="loading"
-              :disabled="loading"
-              density="compact"
-              variant="outlined"
-              hide-details
-              class="mb-3"
-            ></v-text-field>
-          </v-col>
+      <v-card-text class="pa-6">
+        <!-- Basic Filters Section -->
+        <section class="mb-6">
+          <div class="d-flex align-center mb-4">
+            <v-icon icon="mdi-tune" class="me-2" color="primary" />
+            <span class="text-h6">Basic Filters</span>
+          </div>
 
-          <v-col cols="12" sm="6" md="3">
-            <v-text-field
-              v-model="filters.location"
-              label="Location"
-              clearable
-              :loading="loading"
-              :disabled="loading"
-              density="compact"
-              variant="outlined"
-              hide-details
-              prepend-inner-icon="mdi-map-marker"
-              class="mb-3"
-            ></v-text-field>
-          </v-col>
+          <v-row dense>
+            <v-col cols="12" sm="6" md="3">
+              <v-text-field
+                v-model.number="filters.maxPrice"
+                label="Maximum Price"
+                type="number"
+                clearable
+                :loading="loading"
+                :disabled="loading"
+                density="comfortable"
+                variant="outlined"
+                hide-details="auto"
+                prepend-inner-icon="mdi-currency-php"
+                class="rounded-lg"
+              ></v-text-field>
+            </v-col>
 
-          <v-col cols="12" sm="6" md="3">
-            <v-select
-              v-model="sortBy"
-              :items="sortOptions"
-              label="Sort By"
-              density="compact"
-              variant="outlined"
-              hide-details
-              class="mb-3"
-            ></v-select>
-          </v-col>
+            <v-col cols="12" sm="6" md="3">
+              <v-text-field
+                v-model.number="filters.minCapacity"
+                label="Minimum Capacity"
+                type="number"
+                min="1"
+                clearable
+                :loading="loading"
+                :disabled="loading"
+                density="comfortable"
+                variant="outlined"
+                hide-details="auto"
+                prepend-inner-icon="mdi-account-group"
+                class="rounded-lg"
+              ></v-text-field>
+            </v-col>
 
-          <v-col cols="12" sm="6" md="3">
-            <v-select
-              v-model="filters.livingSpaceType"
-              :items="livingSpaceTypes"
-              label="Living Space Type"
-              density="compact"
-              variant="outlined"
-              hide-details
-              class="mb-3"
-              clearable
-            ></v-select>
-          </v-col>
+            <v-col cols="12" sm="6" md="3">
+              <v-text-field
+                v-model="filters.location"
+                label="Location"
+                clearable
+                :loading="loading"
+                :disabled="loading"
+                density="comfortable"
+                variant="outlined"
+                hide-details="auto"
+                prepend-inner-icon="mdi-map-marker"
+                class="rounded-lg"
+              ></v-text-field>
+            </v-col>
 
-          <v-col cols="12">
-            <v-combobox
-              v-model="filters.amenities"
-              :items="commonAmenities"
-              label="Required Amenities"
-              multiple
-              chips
-              closable-chips
-              clearable
-              :loading="loading"
-              :disabled="loading"
-              density="comfortable"
-              variant="outlined"
-              hide-details
-            ></v-combobox>
-          </v-col>
-        </v-row>
+            <v-col cols="12" sm="6" md="3">
+              <v-select
+                v-model="filters.livingSpaceType"
+                :items="livingSpaceTypes"
+                label="Living Space Type"
+                density="comfortable"
+                variant="outlined"
+                hide-details="auto"
+                clearable
+                prepend-inner-icon="mdi-home"
+                class="rounded-lg"
+              ></v-select>
+            </v-col>
+          </v-row>
+        </section>
 
-        <!-- Score Filters -->
-        <v-row class="mt-4">
-          <v-col cols="12">
-            <div class="text-subtitle-1 mb-2">Score Filters</div>
-          </v-col>
-          <v-col cols="12" sm="6" md="3">
-            <div class="d-flex align-center justify-space-between mb-1">
-              <span class="text-body-2">Min Safety Score</span>
-              <v-chip size="x-small" :color="getScoreColor(filters.minSafetyScore)">{{ filters.minSafetyScore }}/10</v-chip>
-            </div>
-            <v-slider
-              v-model="filters.minSafetyScore"
-              :min="1"
-              :max="10"
-              :step="0.5"
-              :color="getScoreColor(filters.minSafetyScore)"
-              track-color="grey-lighten-1"
-              show-ticks="always"
-              :tick-size="4"
-              :loading="loading"
-              :disabled="loading"
-            ></v-slider>
-          </v-col>
-          <v-col cols="12" sm="6" md="3">
-            <div class="d-flex align-center justify-space-between mb-1">
-              <span class="text-body-2">Max Noise Level</span>
-              <v-chip size="x-small" :color="getScoreColor(10 - filters.maxNoiseLevel)">{{ filters.maxNoiseLevel }}/10</v-chip>
-            </div>
-            <v-slider
-              v-model="filters.maxNoiseLevel"
-              :min="1"
-              :max="10"
-              :step="0.5"
-              :color="getScoreColor(10 - filters.maxNoiseLevel)"
-              track-color="grey-lighten-1"
-              show-ticks="always"
-              :tick-size="4"
-              :loading="loading"
-              :disabled="loading"
-            ></v-slider>
-          </v-col>
-          <v-col cols="12" sm="6" md="3">
-            <div class="d-flex align-center justify-space-between mb-1">
-              <span class="text-body-2">Min Accessibility</span>
-              <v-chip size="x-small" :color="getScoreColor(filters.minAccessibilityScore)">{{ filters.minAccessibilityScore }}/10</v-chip>
-            </div>
-            <v-slider
-              v-model="filters.minAccessibilityScore"
-              :min="1"
-              :max="10"
-              :step="0.5"
-              :color="getScoreColor(filters.minAccessibilityScore)"
-              track-color="grey-lighten-1"
-              show-ticks="always"
-              :tick-size="4"
-              :loading="loading"
-              :disabled="loading"
-            ></v-slider>
-          </v-col>
-          <v-col cols="12" sm="6" md="3">
-            <div class="d-flex align-center justify-space-between mb-1">
-              <span class="text-body-2">Min Cleanliness</span>
-              <v-chip size="x-small" :color="getScoreColor(filters.minCleanlinessScore)">{{ filters.minCleanlinessScore }}/10</v-chip>
-            </div>
-            <v-slider
-              v-model="filters.minCleanlinessScore"
-              :min="1"
-              :max="10"
-              :step="0.5"
-              :color="getScoreColor(filters.minCleanlinessScore)"
-              track-color="grey-lighten-1"
-              show-ticks="always"
-              :tick-size="4"
-              :loading="loading"
-              :disabled="loading"
-            ></v-slider>
-          </v-col>
-        </v-row>
+        <!-- Additional Options Section -->
+        <section class="mb-6">
+          <div class="d-flex align-center mb-4">
+            <v-icon icon="mdi-cog" class="me-2" color="primary" />
+            <span class="text-h6">Additional Options</span>
+          </div>
 
-        <v-row class="mt-2">
-          <v-col cols="12" class="d-flex justify-end">
-            <v-btn
-              color="error"
-              variant="elevated"
-              @click="clearFilters"
-              :disabled="loading"
-              class="me-2"
+          <v-row dense>
+            <v-col cols="12" md="3">
+              <v-select
+                v-model="sortBy"
+                :items="sortOptions"
+                label="Sort Results By"
+                density="comfortable"
+                variant="outlined"
+                hide-details="auto"
+                prepend-inner-icon="mdi-sort"
+                class="rounded-lg"
+              ></v-select>
+            </v-col>
+
+            <v-col cols="12" md="9">
+              <v-combobox
+                v-model="filters.amenities"
+                :items="commonAmenities"
+                label="Required Amenities"
+                multiple
+                chips
+                closable-chips
+                clearable
+                :loading="loading"
+                :disabled="loading"
+                density="comfortable"
+                variant="outlined"
+                hide-details="auto"
+                prepend-inner-icon="mdi-star"
+                class="rounded-lg"
+              ></v-combobox>
+            </v-col>
+          </v-row>
+        </section>
+
+        <!-- Score Filters Section -->
+        <section>
+          <div class="d-flex align-center mb-4">
+            <v-icon icon="mdi-chart-bar" class="me-2" color="primary" />
+            <span class="text-h6">Score Filters</span>
+          </div>
+
+          <v-row>
+            <v-col
+              v-for="(filter, index) in [
+                {
+                  label: 'Safety Score',
+                  model: 'minSafetyScore',
+                  icon: 'mdi-shield-check',
+                },
+                {
+                  label: 'Noise Level',
+                  model: 'maxNoiseLevel',
+                  icon: 'mdi-volume-high',
+                },
+                {
+                  label: 'Accessibility',
+                  model: 'minAccessibilityScore',
+                  icon: 'mdi-account-box',
+                },
+                {
+                  label: 'Cleanliness',
+                  model: 'minCleanlinessScore',
+                  icon: 'mdi-broom',
+                },
+              ]"
+              :key="index"
+              cols="12"
+              sm="6"
+              md="3"
             >
-              Clear All
-            </v-btn>
-            <v-btn
-              color="primary"
-              @click="searchRooms"
-              :loading="loading"
-              :disabled="loading"
-            >
-              Search
-              <v-chip
-                v-if="activeFiltersCount > 0"
-                size="x-small"
-                class="ml-2"
-              >
-                {{ activeFiltersCount }} active
-              </v-chip>
-            </v-btn>
-          </v-col>
-        </v-row>
+              <v-card variant="outlined" class="pa-3 rounded-lg">
+                <div class="d-flex align-center mb-2">
+                  <v-icon :icon="filter.icon" size="small" class="me-2" />
+                  <span class="text-body-2">{{ filter.label }}</span>
+                  <v-spacer></v-spacer>
+                  <v-chip size="x-small" :color="getScoreColor(filters[filter.model])">
+                    {{ filters[filter.model] }}/10
+                  </v-chip>
+                </div>
+                <v-slider
+                  v-model="filters[filter.model]"
+                  :min="1"
+                  :max="10"
+                  :step="0.5"
+                  :color="getScoreColor(filters[filter.model])"
+                  track-color="grey-lighten-5"
+                  show-ticks="always"
+                  :tick-size="4"
+                  :loading="loading"
+                  :disabled="loading"
+                ></v-slider>
+              </v-card>
+            </v-col>
+          </v-row>
+        </section>
+
+        <!-- Action Buttons -->
+        <v-divider class="my-4"></v-divider>
+        <div class="d-flex justify-end gap-3">
+          <v-btn
+            color="error"
+            variant="outlined"
+            @click="clearFilters"
+            :disabled="loading"
+            prepend-icon="mdi-refresh"
+            class="mr-4"
+          >
+            Clear All
+          </v-btn>
+          <v-btn
+            color="primary"
+            @click="searchRooms"
+            :loading="loading"
+            :disabled="loading"
+            prepend-icon="mdi-magnify"
+          >
+            Search
+          </v-btn>
+        </div>
       </v-card-text>
     </v-card>
 
     <!-- Map View -->
-    <v-card class="mb-6">
-      <v-card-title class="d-flex align-center">
-        <span>Map View</span>
-        <v-spacer></v-spacer>
-        <v-btn
-          v-if="selectedLocation"
-          color="primary"
-          variant="text"
-          density="compact"
-          @click="selectedLocation = null"
-        >
-          Clear Selection
-        </v-btn>
+    <v-card class="mb-6" elevation="2">
+      <v-card-title class="d-flex align-center py-4 px-6 bg-primary text-white">
+        <v-icon icon="mdi-map" class="me-2" />
+        Map View
       </v-card-title>
-      <v-card-text>
-        <leaflet-map
-          :marker-lat-lng="selectedLocation"
-          :popup-content="selectedLocationName"
-          @marker-click="handleMarkerClick"
-        />
+      <v-card-text class="pa-0">
+        <div class="map-container" style="height: 400px; position: relative">
+          <leaflet-map
+            :marker-lat-lng="selectedLocation"
+            :popup-content="selectedLocationName"
+            @marker-click="handleMarkerClick"
+            class="rounded-b-lg"
+          />
+          <div class="map-overlay pa-3" v-if="!selectedLocation">
+            <v-chip color="info" variant="flat" prepend-icon="mdi-information">
+              Click on the map to select a location
+            </v-chip>
+          </div>
+        </div>
       </v-card-text>
     </v-card>
 
     <!-- Search Results -->
     <template v-if="!loading && searchPerformed">
       <!-- Summary Section -->
-      <v-card class="mb-6" v-if="searchResults.summary">
-        <v-card-title>Search Results Summary</v-card-title>
-        <v-card-text>
-          <v-row>
-            <v-col cols="12" sm="6" md="4">
-              <div class="text-subtitle-1">Total Rooms Found</div>
-              <div class="text-h5">{{ searchResults.summary.total_rooms }}</div>
-            </v-col>
-            <v-col cols="12" sm="6" md="8">
-              <div class="text-subtitle-1">Match Categories</div>
-              <v-chip-group>
-                <v-chip color="success" v-if="searchResults.summary.perfect_matches_count">
-                  Perfect ({{ searchResults.summary.perfect_matches_count }})
-                </v-chip>
-                <v-chip color="info" v-if="searchResults.summary.excellent_matches_count">
-                  Excellent ({{ searchResults.summary.excellent_matches_count }})
-                </v-chip>
-                <v-chip color="primary" v-if="searchResults.summary.good_matches_count">
-                  Good ({{ searchResults.summary.good_matches_count }})
-                </v-chip>
-                <v-chip color="warning" v-if="searchResults.summary.fair_matches_count">
-                  Fair ({{ searchResults.summary.fair_matches_count }})
-                </v-chip>
-                <v-chip v-if="searchResults.summary.other_matches_count">
-                  Other ({{ searchResults.summary.other_matches_count }})
-                </v-chip>
-              </v-chip-group>
-            </v-col>
-          </v-row>
-        </v-card-text>
+      <v-card class="mb-6 mt-6" elevation="2">
+      <v-card-title class="d-flex align-center py-4 px-6 bg-primary text-white">
+        <v-icon icon="mdi-clipboard-text" class="me-2" />
+        Search Results Summary
+      </v-card-title>
+      <v-card-text class="pa-6">
+        <v-row align-items  ="center">
+        <!-- Total Rooms Counter -->
+        <v-col cols="12" sm="4">
+          <v-card class="text-center pa-4" variant="outlined">
+          <div class="text-h6 font-weight-bold mb-1">
+            {{ searchResults.summary.total_rooms }}
+          </div>
+          <div class="text-subtitle-1 text-medium-emphasis">
+            Total Rooms Found
+          </div>
+          </v-card>
+        </v-col>
+
+        <!-- Match Categories -->
+        <v-col cols="12" sm="8">
+          <div class="text-subtitle-1 font-weight-medium mb-3">Match Categories</div>
+          <v-chip-group class="match-categories">
+          <v-chip
+            v-if="searchResults.summary.perfect_matches_count"
+            color="success"
+            size="large"
+            class="font-weight-medium"
+            prepend-icon="mdi-star"
+          >
+            Perfect ({{ searchResults.summary.perfect_matches_count }})
+          </v-chip>
+          <v-chip
+            v-if="searchResults.summary.excellent_matches_count"
+            color="info"
+            size="large"
+            class="font-weight-medium"
+            prepend-icon="mdi-star-outline"
+          >
+            Excellent ({{ searchResults.summary.excellent_matches_count }})
+          </v-chip>
+          <v-chip
+            v-if="searchResults.summary.good_matches_count"
+            color="primary"
+            size="large"
+            class="font-weight-medium"
+            prepend-icon="mdi-thumb-up"
+          >
+            Good ({{ searchResults.summary.good_matches_count }})
+          </v-chip>
+          <v-chip
+            v-if="searchResults.summary.fair_matches_count"
+            color="warning"
+            size="large"
+            class="font-weight-medium"
+            prepend-icon="mdi-thumb-up-outline"
+          >
+            Fair ({{ searchResults.summary.fair_matches_count }})
+          </v-chip>
+          <v-chip
+            v-if="searchResults.summary.other_matches_count"
+            color="grey"
+            size="large"
+            class="font-weight-medium"
+            prepend-icon="mdi-dots-horizontal"
+          >
+            Other ({{ searchResults.summary.other_matches_count }})
+          </v-chip>
+          </v-chip-group>
+        </v-col>
+        </v-row>
+      </v-card-text>
       </v-card>
 
       <!-- Results Grid -->
       <v-row>
         <template v-if="searchResults.all_rooms && searchResults.all_rooms.length > 0">
-          <v-col 
-            v-for="room in searchResults.all_rooms" 
-            :key="room.id"
-            cols="12"
-            sm="6"
-            md="4"
-          >
-            <RoomCard 
-              :room="room"
-              :user-type="userType"
-            />
+          <v-col v-for="room in searchResults.all_rooms" :key="room.id" cols="12" sm="6" md="4">
+            <RoomCard :room="room" :user-type="userType" />
           </v-col>
         </template>
         <v-col v-else cols="12" class="text-center">
@@ -382,17 +418,17 @@ const searchResults = ref({
       excellent_match: '85-89%',
       good_match: '75-84%',
       fair_match: '60-74%',
-      other_match: 'Below 60%'
-    }
+      other_match: 'Below 60%',
+    },
   },
   suggestions: {
     perfect_matches: [],
     excellent_matches: [],
     good_matches: [],
     fair_matches: [],
-    other_matches: []
+    other_matches: [],
   },
-  all_rooms: []
+  all_rooms: [],
 })
 
 // Filters
@@ -414,7 +450,7 @@ const sortOptions = [
   { title: 'Price (Low to High)', value: 'price_asc' },
   { title: 'Price (High to Low)', value: 'price_desc' },
   { title: 'Capacity (Largest First)', value: 'capacity_desc' },
-  { title: 'Capacity (Smallest First)', value: 'capacity_asc' }
+  { title: 'Capacity (Smallest First)', value: 'capacity_asc' },
 ]
 const sortBy = ref('match_desc')
 
@@ -452,13 +488,7 @@ const commonAmenities = [
   'Receiving Area',
 ]
 
-const livingSpaceTypes = [
-  'Boarding House',
-  'Apartment',
-  'House',
-  'Dormitory',
-  'Condo Unit'
-]
+const livingSpaceTypes = ['Boarding House', 'Apartment', 'House', 'Dormitory', 'Condo Unit']
 
 // Methods
 const getScoreColor = (score) => {
@@ -498,10 +528,10 @@ const searchRooms = async () => {
       min_accessibility_score: filters.value.minAccessibilityScore,
       min_cleanliness_score: filters.value.minCleanlinessScore,
       living_space_type: filters.value.livingSpaceType,
-      sort_by: sortBy.value
+      sort_by: sortBy.value,
     }
-    
-    const response = await axios.get('/tenant/search', { 
+
+    const response = await axios.get('/tenant/search', {
       params,
       paramsSerializer: {
         encode: (param) => encodeURIComponent(param),
@@ -513,29 +543,28 @@ const searchRooms = async () => {
             }
           }
           return searchParams.toString()
-        }
-      }
+        },
+      },
     })
     searchResults.value = response.data
     if (!response.data.all_rooms) {
       searchResults.value.all_rooms = []
     }
-
   } catch (error) {
     console.error('Error searching rooms:', error)
     snackbarText.value = error.response?.data?.error || 'Error searching rooms'
     snackbarColor.value = 'error'
     snackbar.value = true
-    searchResults.value = { 
+    searchResults.value = {
       summary: {
         total_rooms: 0,
         perfect_matches_count: 0,
         excellent_matches_count: 0,
         good_matches_count: 0,
         fair_matches_count: 0,
-        other_matches_count: 0
-      }, 
-      all_rooms: [] 
+        other_matches_count: 0,
+      },
+      all_rooms: [],
     }
   } finally {
     loading.value = false
@@ -568,8 +597,8 @@ const checkPreferences = async () => {
     const response = await axios.get('/tenant/preferences', {
       headers: {
         'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache'
-      }
+        Pragma: 'no-cache',
+      },
     })
     console.log('Raw preferences response:', response)
     console.log('Preferences data:', response.data)
@@ -581,16 +610,16 @@ const checkPreferences = async () => {
         maxPrice: response.data.max_price || null,
         minCapacity: response.data.min_capacity || null,
         location: response.data.preferred_location || '',
-        amenities: response.data.required_amenities || [],  // Backend already sends parsed JSON
+        amenities: response.data.required_amenities || [], // Backend already sends parsed JSON
         minSafetyScore: Math.max(1, Math.round(response.data.safety_weight * 10)),
         maxNoiseLevel: Math.min(10, Math.round((1 - response.data.noise_level_weight) * 10)),
         minAccessibilityScore: Math.max(1, Math.round(response.data.accessibility_weight * 10)),
         minCleanlinessScore: Math.max(1, Math.round(response.data.cleanliness_weight * 10)),
-        livingSpaceType: response.data.living_space_type || null
+        livingSpaceType: response.data.living_space_type || null,
       }
       console.log('New filters:', newFilters)
       filters.value = newFilters
-      
+
       // After setting filters, trigger a search to show results based on preferences
       console.log('Triggering initial search with preferences...')
       await searchRooms()
@@ -643,11 +672,13 @@ onMounted(async () => {
 
 .v-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .room-card {
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
   cursor: pointer;
 }
 
@@ -710,4 +741,4 @@ onMounted(async () => {
     margin-bottom: 24px;
   }
 }
-</style> 
+</style>
