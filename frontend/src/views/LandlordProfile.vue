@@ -32,6 +32,8 @@
                       v-model="profile.email"
                       label="Email"
                       type="email"
+                      density="comfortable"
+                      variant="outlined"
                       :rules="[rules.required, rules.email]"
                       readonly
                       disabled
@@ -42,6 +44,8 @@
                     <v-text-field
                       v-model="profile.contact_number"
                       label="Contact Number"
+                      density="comfortable"
+                      variant="outlined"
                       :rules="[rules.required, rules.phone]"
                       hint="Enter your contact number (e.g. +63 912 345 6789)"
                       persistent-hint
@@ -56,6 +60,8 @@
                       v-model="profile.currentPassword"
                       label="Current Password"
                       type="password"
+                      density="comfortable"
+                      variant="outlined"
                       :rules="[rules.required]"
                       :disabled="loading"
                     ></v-text-field>
@@ -66,6 +72,8 @@
                       v-model="profile.newPassword"
                       label="New Password"
                       type="password"
+                      density="comfortable"
+                      variant="outlined"
                       :rules="[rules.passwordOptional]"
                       hint="Leave blank to keep current password"
                       persistent-hint
@@ -78,6 +86,8 @@
                       v-model="profile.confirmPassword"
                       label="Confirm New Password"
                       type="password"
+                      density="comfortable"
+                      variant="outlined"
                       :rules="[rules.passwordMatch]"
                       :disabled="!profile.newPassword || loading"
                     ></v-text-field>

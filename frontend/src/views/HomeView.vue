@@ -1,9 +1,6 @@
-<template>
-  <v-container class="text-center py-12" elavation-20>
-    <v-card
-      class="pa-12 rounded-xl elevation-8 hero-card"
-      dark
-    >
+<template class="bg-grey-lighten-5">
+  <v-container class="text-center py-12 hero-container" >
+    <v-card class="pa-12 rounded-xl elevation-8 hero-card" dark>
       <v-scale-transition>
         <h1 class="text-h2 font-weight-bold mb-4">Welcome to BoardingSpot</h1>
       </v-scale-transition>
@@ -23,7 +20,9 @@
             class="pa-8 rounded-lg transition-swing"
           >
             <h2 class="text-h4 font-weight-bold mb-4">For Tenants</h2>
-            <p class="text-subtitle-1 mb-6">Search for rooms that match your preferences and get personalized recommendations.</p>
+            <p class="text-subtitle-1 mb-6">
+              Search for rooms that match your preferences and get personalized recommendations.
+            </p>
             <v-btn
               v-if="!auth.isAuthenticated"
               to="/register"
@@ -57,7 +56,9 @@
             class="pa-8 rounded-lg transition-swing"
           >
             <h2 class="text-h4 font-weight-bold mb-4">For Landlords</h2>
-            <p class="text-subtitle-1 mb-6">List your rooms and manage your properties efficiently.</p>
+            <p class="text-subtitle-1 mb-6">
+              List your rooms and manage your properties efficiently.
+            </p>
             <v-btn
               v-if="!auth.isAuthenticated"
               to="/register"
@@ -85,7 +86,7 @@
 
     <!-- Why Choose Section with improved cards -->
     <h2 class="text-h3 font-weight-bold mt-16 mb-8">Why Choose Boarding Spot?</h2>
-    
+
     <v-row class="mt-6">
       <v-col cols="12" md="4">
         <v-hover v-slot="{ isHovering, props }">
@@ -96,7 +97,9 @@
           >
             <v-icon color="primary" size="64" class="mb-4">mdi-lightbulb-outline</v-icon>
             <h3 class="text-h5 font-weight-bold mb-3">Smart Matching</h3>
-            <p class="text-subtitle-1">Our algorithm finds rooms that perfectly match your preferences.</p>
+            <p class="text-subtitle-1">
+              Our algorithm finds rooms that perfectly match your preferences.
+            </p>
           </v-card>
         </v-hover>
       </v-col>
@@ -134,7 +137,7 @@
 
 <style scoped>
 .hero-card {
-  background: linear-gradient(135deg, var(--v-primary-base), var(--v-secondary-base));
+  background: url('/src/assets/bg-image.webp') no-repeat center center/cover;
   transition: all 0.3s ease;
 }
 
@@ -154,7 +157,6 @@
   transform: scale(1.02);
 }
 </style>
-
 
 <script setup>
 import { useAuthStore } from '@/stores/auth'

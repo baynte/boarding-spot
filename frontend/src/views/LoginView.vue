@@ -1,80 +1,82 @@
 <template>
-  <v-container class="fill-height mt-16" fluid>
-    <v-row align-items="center" justify="center">
-      <v-col cols="12" sm="8" md="6" lg="4">
-        <v-card class="elevation-12 rounded-lg">
-          <v-toolbar 
-            color="primary" 
-            dark 
-            flat
-            class="rounded-t-lg"
-          >
-            <v-toolbar-title class="text-h5 font-weight-medium">
-              Welcome Back
-            </v-toolbar-title>
-          </v-toolbar>
-          
-          <v-card-text class="pa-6">
-            <v-form @submit.prevent="handleSubmit" ref="form">
-              <v-text-field
-                v-model="email"
-                :rules="[rules.required, rules.email]"
-                label="Email"
-                prepend-icon="mdi-email"
-                type="email"
-                required
-                variant="outlined"
-                density="comfortable"
-                class="mb-4"
-              ></v-text-field>
+  <div class="login-container">
+    <v-container class="fill-height mt-12" fluid>
+      <v-row align-items="center" justify="center">
+        <v-col cols="12" sm="8" md="6" lg="4">
+          <v-card class="rounded-lg" elevation="12">
+            <v-toolbar color="primary" dark flat class="rounded-t-lg">
+              <v-toolbar-title class="text-h5 font-weight-medium"> Welcome Back </v-toolbar-title>
+            </v-toolbar>
 
-              <v-text-field
-                v-model="password"
-                :rules="[rules.required, rules.min]"
-                label="Password"
-                prepend-icon="mdi-lock"
-                :type="showPassword ? 'text' : 'password'"
-                :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-                @click:append="showPassword = !showPassword"
-                required
-                variant="outlined"
-                density="comfortable"
-              ></v-text-field>
-            </v-form>
-          </v-card-text>
+            <v-card-text class="pa-6">
+              <v-form @submit.prevent="handleSubmit" ref="form">
+                <v-text-field
+                  v-model="email"
+                  :rules="[rules.required, rules.email]"
+                  label="Email"
+                  prepend-icon="mdi-email"
+                  type="email"
+                  required
+                  variant="outlined"
+                  density="comfortable"
+                  class="mb-4"
+                ></v-text-field>
 
-          <v-card-actions class="pa-6 pt-0">
-            <v-btn
-              color="primary"
-              @click="handleSubmit"
-              :loading="loading"
-              :disabled="loading"
-              variant="elevated"
-              size="large"
-              block
-              type="submit"
-              class="mb-1"
-            >
-              <v-icon left class="mr-2">mdi-login</v-icon>
-              Login
-            </v-btn>
-          </v-card-actions>
+                <v-text-field
+                  v-model="password"
+                  :rules="[rules.required, rules.min]"
+                  label="Password"
+                  prepend-icon="mdi-lock"
+                  :type="showPassword ? 'text' : 'password'"
+                  :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                  @click:append="showPassword = !showPassword"
+                  required
+                  variant="outlined"
+                  density="comfortable"
+                ></v-text-field>
+              </v-form>
+            </v-card-text>
 
-          <v-card-text class="text-center pb-2">
-            <span class="text-medium-emphasis">Don't have an account? </span>
-            <router-link to="/register" class="text-primary text-decoration-none font-weight-medium">
-              Register here
-            </router-link>
-          </v-card-text>
-        </v-card>
-      </v-col>
-    </v-row>
+            <v-card-actions class="pa-6 pt-0">
+              <v-btn
+                color="primary"
+                @click="handleSubmit"
+                :loading="loading"
+                :disabled="loading"
+                variant="elevated"
+                size="large"
+                block
+                type="submit"
+                class="mb-1"
+              >
+                <v-icon left class="mr-2">mdi-login</v-icon>
+                Login
+              </v-btn>
+            </v-card-actions>
 
-    <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="3000">
-      {{ snackbarText }}
-    </v-snackbar>
-  </v-container>
+            <v-card-text class="text-center pb-2">
+              <span class="text-medium-emphasis">Don't have an account? </span>
+              <router-link
+                to="/register"
+                class="text-primary text-decoration-none font-weight-medium"
+              >
+                Register here
+              </router-link>
+            </v-card-text>
+          </v-card>
+        </v-col>
+      </v-row>
+
+      <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="3000">
+        {{ snackbarText }}
+      </v-snackbar>
+    </v-container>
+  </div>
 </template>
+
+<style scoped>
+
+</style>
 
 <script setup>
 import { ref } from 'vue'
@@ -94,27 +96,27 @@ const snackbarText = ref('')
 const snackbarColor = ref('success')
 
 const rules = {
-  required: v => !!v || 'Field is required',
-  email: v => /.+@.+\..+/.test(v) || 'Email must be valid',
-  min: v => v.length >= 6 || 'Min 6 characters'
+  required: (v) => !!v || 'Field is required',
+  email: (v) => /.+@.+\..+/.test(v) || 'Email must be valid',
+  min: (v) => v.length >= 6 || 'Min 6 characters',
 }
 
 const handleSubmit = async () => {
   const { valid } = await form.value.validate()
-  
+
   if (!valid) return
-  
+
   loading.value = true
-  
+
   try {
     await auth.login(email.value, password.value)
     snackbarText.value = 'Login successful!'
     snackbarColor.value = 'success'
     snackbar.value = true
-    
+
     // Set the redirect path based on user type
     const redirectPath = auth.isLandlord ? '/landlord' : '/tenant'
-    
+
     // Navigate first, then refresh
     await router.push(redirectPath)
     window.location.reload()
@@ -126,4 +128,4 @@ const handleSubmit = async () => {
     loading.value = false
   }
 }
-</script> 
+</script>

@@ -1,38 +1,28 @@
 <template>
-  <div>
-    <v-card class="d-flex flex-column h-100">
+  <div class="elevation-7" variant="outlined">
+    <v-card class="room-card h-100" elevation="3" variant="elevated">
       <!-- Card Header -->
-      <v-card-item class="pa-4 bg-grey-lighten-4 border-bottom">
+      <v-card-item class="pa-4 header-gradient">
         <div class="d-flex align-center justify-space-between">
-          <div class="d-flex align-center" style="max-width: 50%;">
-        <v-avatar
-          color="primary"
-          class="me-3"
-          size="30"
-        >
-          <v-icon size="20" color="white">mdi-home</v-icon>
-        </v-avatar>
-        <div>
-          <div class="text-h7 text-truncate font-weight-bold mb-1">{{ room.title }}</div>
-        </div>
+          <div class="d-flex align-center" style="max-width: 60%">
+            <v-avatar color="success" class="me-3" size="36">
+              <v-icon size="24" color="white">mdi-home</v-icon>
+            </v-avatar>
+            <div>
+              <div class="text-subtitle-1 font-weight-bold text-truncate">{{ room.title }}</div>
+            </div>
           </div>
-          <div class="d-flex flex-column align-end">
-        <v-chip
-          :color="getMatchColor(match_score)"
-          size="small"
-          label
-          elevation="1"
-          class="px-1"
-        >
-          <v-icon 
-            start 
-            :icon="getMatchIcon(match_score)"
-            size="20"
-            class="me-1"
-          ></v-icon>
-          <span class="font-weight-bold">{{ Math.round(match_score) }}% Match</span>
-        </v-chip>
-          </div>
+          <v-chip
+            :color="getMatchColor(match_score)"
+            size="small"
+            label
+            elevation="2"
+            class="match-score-chip font-weight-medium"
+            variant="elevated"
+          >
+            <v-icon start :icon="getMatchIcon(match_score)" size="18" class="me-1"></v-icon>
+            <span>{{ Math.round(match_score) }}% Match</span>
+          </v-chip>
         </div>
       </v-card-item>
 
@@ -41,38 +31,41 @@
         <div class="position-relative">
           <v-img
             :src="parseImageUrls(room.image_urls)?.[0] || '/placeholder-room.jpg'"
-            height="200"
+            height="220"
             cover
-            class="bg-grey-lighten-2"
+            class="bg-grey-lighten-2 image-hover-effect"
           >
-            <template v-slot:placeholder>
-              <v-row class="fill-height ma-0" align-items ="center" justify="center">
-                <v-progress-circular indeterminate color="grey-lighten-5"></v-progress-circular>
-              </v-row>
-            </template>
+          <template v-slot:placeholder>
+          <v-row class="fill-height ma-0" align-items="center" justify="center">
+            <v-progress-circular indeterminate color="grey-lighten-5"></v-progress-circular>
+          </v-row>
+        </template>
           </v-img>
-          <v-chip
-            class="rank-chip font-weight-light text-h6"
-            :color="getMatchColor(match_score)"
-            size="x-small"
-            variant="elevated"
-            elevation="2"
-            label
-          >
-            #{{ room.rank }}
-          </v-chip>
+            
+          <div class="d-flex justify-end pa-2">
+            <v-chip
+              class="rank-chip font-weight-medium"
+              :color="getMatchColor(match_score)"
+              size="small"
+              variant="elevated"
+              elevation="3"
+              label
+            >
+              #{{ room.rank }}
+            </v-chip>
+          </div>
         </div>
 
         <v-card-text>
-          <div class="d-flex align-center mb-2">
-            <div class="text-h6 primary--text">₱{{ formatPrice(room.price) }}</div>
-            <div class="text-subtitle-2 ms-1">/month</div>
+          <div class="d-flex align-center mb-2 px-1">
+            <div class="text-h5 white--text font-weight-bold">₱{{ formatPrice(room.price) }}</div>
+            <div class="text-subtitle-2 white--text ms-1">/month</div>
           </div>
 
-          <div class="d-flex align-center mb-2">
-            <v-icon size="small" class="me-2">mdi-map-marker</v-icon>
-            <span class="text-body-2">{{ room.location }}</span>
-          </div>
+          <div class="d-flex align-center mb-3">
+        <v-icon size="22" color="primary" class="me-2">mdi-map-marker</v-icon>
+        <span class="text-body-1 text-truncate">{{ room.location }}</span>
+      </div>
 
           <!-- Location Map Preview -->
           <!-- <div v-if="room.latitude && room.longitude" class="mb-2">
@@ -86,21 +79,36 @@
           </div> -->
 
           <div class="d-flex align-center mb-2">
-            <v-icon size="small" class="me-2">mdi-account-group</v-icon>
-            <span class="text-body-2">{{ room.capacity }} tenant{{ room.capacity > 1 ? 's' : '' }}</span>
+            <v-icon size="25" class="me-2">mdi-account-group</v-icon>
+            <span class="text-body-2"
+              >{{ room.capacity }} tenant{{ room.capacity > 1 ? 's' : '' }}</span
+            >
           </div>
 
           <div class="d-flex align-center mb-2">
-            <v-icon size="small" class="me-2">mdi-account</v-icon>
-            <span class="text-body-2">Contact: {{ room.landlord?.contact_number || 'Not available' }}</span>
+            <v-icon size="25" class="me-2">mdi-account</v-icon>
+            <span class="text-body-2"
+              >Contact: {{ room.landlord?.contact_number || 'Not available' }}</span
+            >
           </div>
 
           <div class="d-flex align-center mb-2">
-            <v-icon size="small" class="me-2">mdi-email</v-icon>
+            <v-icon size="25" class="me-2">mdi-email</v-icon>
             <span class="text-body-2">{{ room.landlord?.email || 'Email not available' }}</span>
           </div>
 
-          <div class="text-body-2 text-truncate-2 mb-3">{{ room.description }}</div>
+          <!-- Description -->
+          <div class="text-body-2 description-box mb-4">
+        <v-tooltip location="bottom" max-width="300">
+          <template v-slot:activator="{ props }">
+            <div v-bind="props" class="text-truncate-2">
+              <v-icon size="20" color="grey-darken-1" class="me-1">mdi-text</v-icon>
+              {{ room.description }}
+            </div>
+          </template>
+          <span>{{ room.description }}</span>
+        </v-tooltip>
+      </div>
 
           <!-- Amenities -->
           <v-chip-group class="mb-3">
@@ -135,32 +143,30 @@
           <v-divider class="mb-3"></v-divider>
 
           <!-- Match Score Details -->
-          <div class="match-details mb-4">
-            <div class="d-flex align-center justify-space-between mb-2">
-              <div class="text-h6">Match Details</div>
-              <v-chip
-                :color="getMatchColor(match_score)"
-                size="small"
-                variant="outlined"
-                label
-                class="mb-3"
-              >
-                {{ Math.round(match_score) }}% Overall
-              </v-chip>
-            </div>
-            
+          <div class="match-details">
+        <div class="d-flex align-center justify-space-between mb-3">
+          <div class="text-subtitle-1 font-weight-medium">Match Score</div>
+          <v-chip
+            :color="getMatchColor(match_score)"
+            size="small"
+            variant="elevated"
+            label
+            class="font-weight-medium"
+          >
+            {{ Math.round(match_score) }}% Overall
+          </v-chip>
+        </div>
+
             <v-row dense>
               <!-- Safety Score -->
               <v-col cols="12" class="mb-2">
                 <div class="d-flex align-center mb-1">
-                  <v-icon size="small" :color="getScoreColor(safetyScore)" class="me-1">mdi-shield-home</v-icon>
+                  <v-icon size="small" :color="getScoreColor(safetyScore)" class="me-1"
+                    >mdi-shield-home</v-icon
+                  >
                   <span class="text-body-2">Safety</span>
                   <v-spacer></v-spacer>
-                  <v-chip
-                    size="x-small"
-                    :color="getScoreColor(safetyScore)"
-                    label
-                  >
+                  <v-chip size="x-small" :color="getScoreColor(safetyScore)" label>
                     {{ safetyScore }}/10
                   </v-chip>
                 </div>
@@ -175,14 +181,12 @@
               <!-- Cleanliness Score -->
               <v-col cols="12" class="mb-2">
                 <div class="d-flex align-center mb-1">
-                  <v-icon size="small" :color="getScoreColor(cleanlinessScore)" class="me-1">mdi-broom</v-icon>
+                  <v-icon size="small" :color="getScoreColor(cleanlinessScore)" class="me-1"
+                    >mdi-broom</v-icon
+                  >
                   <span class="text-body-2">Cleanliness</span>
                   <v-spacer></v-spacer>
-                  <v-chip
-                    size="x-small"
-                    :color="getScoreColor(cleanlinessScore)"
-                    label
-                  >
+                  <v-chip size="x-small" :color="getScoreColor(cleanlinessScore)" label>
                     {{ cleanlinessScore }}/10
                   </v-chip>
                 </div>
@@ -197,14 +201,12 @@
               <!-- Accessibility Score -->
               <v-col cols="12" class="mb-2">
                 <div class="d-flex align-center mb-1">
-                  <v-icon size="small" :color="getScoreColor(accessibilityScore)" class="me-1">mdi-wheelchair-accessibility</v-icon>
+                  <v-icon size="small" :color="getScoreColor(accessibilityScore)" class="me-1"
+                    >mdi-wheelchair-accessibility</v-icon
+                  >
                   <span class="text-body-2">Accessibility</span>
                   <v-spacer></v-spacer>
-                  <v-chip
-                    size="x-small"
-                    :color="getScoreColor(accessibilityScore)"
-                    label
-                  >
+                  <v-chip size="x-small" :color="getScoreColor(accessibilityScore)" label>
                     {{ accessibilityScore }}/10
                   </v-chip>
                 </div>
@@ -219,14 +221,12 @@
               <!-- Noise Level -->
               <v-col cols="12" class="mb-2">
                 <div class="d-flex align-center mb-1">
-                  <v-icon size="small" :color="getScoreColor(10 - noiseScore)" class="me-1">mdi-volume-medium</v-icon>
+                  <v-icon size="small" :color="getScoreColor(10 - noiseScore)" class="me-1"
+                    >mdi-volume-medium</v-icon
+                  >
                   <span class="text-body-2">Noise Level</span>
                   <v-spacer></v-spacer>
-                  <v-chip
-                    size="x-small"
-                    :color="getScoreColor(10 - noiseScore)"
-                    label
-                  >
+                  <v-chip size="x-small" :color="getScoreColor(10 - noiseScore)" label>
                     {{ noiseScore }}/10
                   </v-chip>
                 </div>
@@ -241,14 +241,12 @@
               <!-- Amenity Match -->
               <v-col cols="12" class="mb-2">
                 <div class="d-flex align-center mb-1">
-                  <v-icon size="small" :color="getScoreColor(amenityScore / 10)" class="me-1">mdi-check-circle</v-icon>
+                  <v-icon size="small" :color="getScoreColor(amenityScore / 10)" class="me-1"
+                    >mdi-check-circle</v-icon
+                  >
                   <span class="text-body-2">Amenity Match</span>
                   <v-spacer></v-spacer>
-                  <v-chip
-                    size="x-small"
-                    :color="getScoreColor(amenityScore / 10)"
-                    label
-                  >
+                  <v-chip size="x-small" :color="getScoreColor(amenityScore / 10)" label>
                     {{ Math.round(amenityScore) }}%
                   </v-chip>
                 </div>
@@ -285,14 +283,12 @@
               <!-- Price Value -->
               <v-col cols="12">
                 <div class="d-flex align-center mb-1">
-                  <v-icon size="small" :color="getScoreColor(priceValueScore / 10)" class="me-1">mdi-currency-usd</v-icon>
+                  <v-icon size="small" :color="getScoreColor(priceValueScore / 10)" class="me-1"
+                    >mdi-currency-usd</v-icon
+                  >
                   <span class="text-body-2">Price Value</span>
                   <v-spacer></v-spacer>
-                  <v-chip
-                    size="x-small"
-                    :color="getScoreColor(priceValueScore / 10)"
-                    label
-                  >
+                  <v-chip size="x-small" :color="getScoreColor(priceValueScore / 10)" label>
                     {{ Math.round(priceValueScore) }}%
                   </v-chip>
                 </div>
@@ -311,7 +307,9 @@
       <!-- Card Footer -->
       <v-card-item class="pa-3 bg-grey-lighten-4">
         <div class="d-flex align-center justify-space-between">
-          <div class="text-subtitle-1">₱{{ formatPrice(room.price) }}<span class="text-caption">/month</span></div>
+          <div class="text-subtitle-1">
+            ₱{{ formatPrice(room.price) }}<span class="text-caption">/month</span>
+          </div>
           <div class="d-flex align-center">
             <v-icon size="small" class="me-1">mdi-map-marker</v-icon>
             <span class="text-body-2">{{ room.location }}</span>
@@ -334,7 +332,9 @@
         <div v-if="room.total_ratings > 0" class="mt-2">
           <!-- Safety Rating -->
           <div class="d-flex align-center mb-2">
-            <v-icon size="small" :color="getScoreColor(room.safety_score)" class="me-1">mdi-shield-home</v-icon>
+            <v-icon size="small" :color="getScoreColor(room.safety_score)" class="me-1"
+              >mdi-shield-home</v-icon
+            >
             <span class="text-body-2">Safety:</span>
             <v-rating
               :model-value="room.safety_score"
@@ -350,7 +350,9 @@
 
           <!-- Cleanliness Rating -->
           <div class="d-flex align-center mb-2">
-            <v-icon size="small" :color="getScoreColor(room.cleanliness_score)" class="me-1">mdi-broom</v-icon>
+            <v-icon size="small" :color="getScoreColor(room.cleanliness_score)" class="me-1"
+              >mdi-broom</v-icon
+            >
             <span class="text-body-2">Cleanliness:</span>
             <v-rating
               :model-value="room.cleanliness_score"
@@ -366,7 +368,9 @@
 
           <!-- Accessibility Rating -->
           <div class="d-flex align-center mb-2">
-            <v-icon size="small" :color="getScoreColor(room.accessibility_score)" class="me-1">mdi-wheelchair-accessibility</v-icon>
+            <v-icon size="small" :color="getScoreColor(room.accessibility_score)" class="me-1"
+              >mdi-wheelchair-accessibility</v-icon
+            >
             <span class="text-body-2">Accessibility:</span>
             <v-rating
               :model-value="room.accessibility_score"
@@ -382,7 +386,9 @@
 
           <!-- Noise Level Rating -->
           <div class="d-flex align-center mb-2">
-            <v-icon size="small" :color="getScoreColor(10 - room.noise_level)" class="me-1">mdi-volume-medium</v-icon>
+            <v-icon size="small" :color="getScoreColor(10 - room.noise_level)" class="me-1"
+              >mdi-volume-medium</v-icon
+            >
             <span class="text-body-2">Noise Level:</span>
             <v-rating
               :model-value="10 - room.noise_level"
@@ -396,9 +402,7 @@
             <span class="text-caption ms-2">({{ room.noise_level?.toFixed(1) || 0 }})</span>
           </div>
         </div>
-        <div v-else class="text-body-2 text-grey">
-          No ratings yet
-        </div>
+        <div v-else class="text-body-2 text-grey">No ratings yet</div>
       </v-card-text>
     </v-card>
 
@@ -406,7 +410,7 @@
     <v-dialog v-model="dialog" max-width="1200">
       <v-card height="90vh" class="d-flex flex-column">
         <!-- Modal Header -->
-        <v-card-item class="bg-grey-lighten-4">
+        <v-card-item class="bg-primary pa-4 elevation-4">
           <div class="d-flex justify-space-between align-center">
             <div class="d-flex align-center">
               <v-icon size="24" class="me-2">mdi-home</v-icon>
@@ -426,20 +430,21 @@
                 show-arrows="hover"
                 height="100%"
                 hide-delimiter-background
+                :continuous="false"
+                :touch="true"
+                cycle
               >
                 <v-carousel-item
                   v-for="(url, index) in parseImageUrls(room.image_urls)"
                   :key="index"
                 >
-                  <v-img
-                    :src="url"
-                    height="100%"
-                    cover
-                    class="bg-grey-lighten-2"
-                  >
+                  <v-img :src="url" height="100%" cover class="bg-grey-lighten-2">
                     <template v-slot:placeholder>
-                      <v-row class="fill-height ma-0" align-items ="center" justify="center">
-                        <v-progress-circular indeterminate color="grey-lighten-5"></v-progress-circular>
+                      <v-row class="fill-height ma-0" align-items="center" justify="center">
+                        <v-progress-circular
+                          indeterminate
+                          color="grey-lighten-5"
+                        ></v-progress-circular>
                       </v-row>
                     </template>
                   </v-img>
@@ -447,47 +452,57 @@
               </v-carousel>
             </v-col>
 
-            <!-- Room Details (40%) -->
+            <!-- Location Map -->
             <v-col cols="12" md="5" class="h-100 details-column">
               <div class="details-content">
-                <div v-if="room.latitude && room.longitude" class="mb-4">
-                  <div style="height: 300px; border-radius: 8px; overflow: hidden;">
+                <div v-if="room.latitude && room.longitude" class="mb-5">
+                  <div style="height: 300px; border-radius: 8px; overflow: hidden">
                     <leaflet-map
                       :marker-lat-lng="[room.latitude, room.longitude]"
                       :popup-content="room.title"
+                      :zoom="15"
+                      class="rounded-lg overflow-hidden"
+                      style="height: 300px"
                     />
                   </div>
                 </div>
-                <div class="d-flex align-center mb-4">
+                <!-- Price Information -->
+                <div class="price-section d-flex align-center mb-4 px-1">
                   <div class="text-h5 primary--text">₱{{ formatPrice(room.price) }}</div>
-                  <div class="text-subtitle-1 ms-1">/month</div>
+                  <div class="text-subtitle-1 ms-1 text-medium-emphasis">/month</div>
                 </div>
-
-                <!-- Location Map -->
 
                 <!-- Location and Capacity -->
-                <div class="d-flex flex-column gap-2">
-                  <div class="d-flex align-center">
-                    <v-icon size="20" class="me-2">mdi-map-marker</v-icon>
-                    <span class="text-body-1">{{ room.location }}</span>
+                <v-divider class="my-4"></v-divider>
+                <div class="bg-grey-lighten-3 rounded-lg py-2 px-2">
+                  <div class="d-flex flex-column gap-2">
+                    <div class="d-flex align-center">
+                      <v-icon size="25" class="me-3">mdi-map-marker</v-icon>
+                      <span class="text-body-1">{{ room.location }}</span>
+                    </div>
+                    <div class="d-flex align-center mt-2">
+                      <v-icon size="25" class="me-3">mdi-account-group</v-icon>
+                      <span class="text-body-1"
+                        >{{ room.capacity }} tenant{{ room.capacity > 1 ? 's' : '' }}</span
+                      >
+                    </div>
                   </div>
-                  <div class="d-flex align-center">
-                    <v-icon size="20" class="me-2">mdi-account-group</v-icon>
-                    <span class="text-body-1">{{ room.capacity }} tenant{{ room.capacity > 1 ? 's' : '' }}</span>
+
+                  <!-- Description -->
+                  <div class="text-body-1 mb-2 mt-2">
+                    <v-icon size="25" class="me-3">mdi-text</v-icon>{{ room.description }}
                   </div>
                 </div>
-
-                <!-- Description -->
-                <div class="text-body-1 mb-4">{{ room.description }}</div>
-
                 <!-- Amenities -->
+                <v-divider class="my-4"></v-divider>
                 <h3 class="text-h6 mb-2">Amenities</h3>
                 <v-chip-group class="mb-4">
                   <v-chip
                     v-for="amenity in parseAmenities(room.amenities)"
                     :key="amenity"
                     size="small"
-                    variant="outlined"
+                    variant="elevated"
+                    color="primary"
                     class="text-body-2"
                   >
                     {{ amenity }}
@@ -495,29 +510,43 @@
                 </v-chip-group>
 
                 <!-- Ratings -->
-                <h3 class="text-h6 mb-2">Property Ratings</h3>
-                <v-row dense>
+                <v-divider class="my-3"></v-divider>
+                <h3 class="text-h6 mb-3">Property Ratings</h3>
+                <v-row dense class="bg-grey-lighten-3 rounded-lg py-3 px-2">
                   <v-col cols="6">
                     <div class="d-flex align-center mb-1">
-                      <v-icon size="small" :color="getScoreColor(room.safety_score)" class="me-1">mdi-shield-home</v-icon>
+                      <v-icon size="25" :color="getScoreColor(room.safety_score)" class="me-1"
+                        >mdi-shield-home</v-icon
+                      >
                       <span class="text-body-2">Safety: {{ room.safety_score }}/10</span>
                     </div>
                   </v-col>
                   <v-col cols="6">
                     <div class="d-flex align-center mb-1">
-                      <v-icon size="small" :color="getScoreColor(room.cleanliness_score)" class="me-1">mdi-broom</v-icon>
+                      <v-icon size="25" :color="getScoreColor(room.cleanliness_score)" class="me-1"
+                        >mdi-broom</v-icon
+                      >
                       <span class="text-body-2">Cleanliness: {{ room.cleanliness_score }}/10</span>
                     </div>
                   </v-col>
                   <v-col cols="6">
                     <div class="d-flex align-center mb-1">
-                      <v-icon size="small" :color="getScoreColor(room.accessibility_score)" class="me-1">mdi-wheelchair-accessibility</v-icon>
-                      <span class="text-body-2">Accessibility: {{ room.accessibility_score }}/10</span>
+                      <v-icon
+                        size="25"
+                        :color="getScoreColor(room.accessibility_score)"
+                        class="me-1"
+                        >mdi-wheelchair-accessibility</v-icon
+                      >
+                      <span class="text-body-2"
+                        >Accessibility: {{ room.accessibility_score }}/10</span
+                      >
                     </div>
                   </v-col>
                   <v-col cols="6">
                     <div class="d-flex align-center mb-1">
-                      <v-icon size="small" :color="getScoreColor(10 - room.noise_level)" class="me-1">mdi-volume-medium</v-icon>
+                      <v-icon size="25" :color="getScoreColor(10 - room.noise_level)" class="me-1"
+                        >mdi-volume-medium</v-icon
+                      >
                       <span class="text-body-2">Noise Level: {{ room.noise_level }}/10</span>
                     </div>
                   </v-col>
@@ -525,14 +554,20 @@
 
                 <!-- Contact Information -->
                 <v-divider class="my-4"></v-divider>
-                <h3 class="text-h6 mb-2">Contact Information</h3>
-                <div class="d-flex align-center mb-2">
-                  <v-icon size="20" class="me-2">mdi-account</v-icon>
-                  <span class="text-body-1">{{ room.landlord?.contact_number || 'Not available' }}</span>
-                </div>
-                <div class="d-flex align-center mb-2">
-                  <v-icon size="20" class="me-2">mdi-email</v-icon>
-                  <span class="text-body-1">{{ room.landlord?.email || 'Email not available' }}</span>
+                <h3 class="text-h6 mb-2 font-weight-bold">Contact Information</h3>
+                <div class="bg-grey-lighten-3 rounded-lg py-3 px-2">
+                  <div class="d-flex align-center mb-2">
+                    <v-icon size="25" class="me-2">mdi-account</v-icon>
+                    <span class="text-body-1">{{
+                      room.landlord?.contact_number || 'Not available'
+                    }}</span>
+                  </div>
+                  <div class="d-flex align-center mb-2">
+                    <v-icon size="25" class="me-2">mdi-email</v-icon>
+                    <span class="text-body-1">{{
+                      room.landlord?.email || 'Email not available'
+                    }}</span>
+                  </div>
                 </div>
               </div>
             </v-col>
@@ -557,8 +592,8 @@ const props = defineProps({
     validator: (room) => {
       console.log('Room coordinates:', {
         latitude: room.latitude,
-        longitude: room.longitude
-      });
+        longitude: room.longitude,
+      })
       return [
         'id',
         'title',
@@ -575,44 +610,53 @@ const props = defineProps({
         'cleanliness_score',
         'accessibility_score',
         'noise_level',
-        'landlord'
-      ].every(prop => prop in room)
-    }
+        'landlord',
+      ].every((prop) => prop in room)
+    },
   },
   match_score: {
     type: Number,
     required: false,
-    default: (props) => props?.room?.comprehensive_score || 0
+    default: (props) => props?.room?.comprehensive_score || 0,
   },
   match_details: {
     type: Object,
     required: false,
-    default: (props) => props?.room?.match_details || {
-      safety: { score: 0, weight: 0, weighted_score: 0 },
-      cleanliness: { score: 0, weight: 0, weighted_score: 0 },
-      accessibility: { score: 0, weight: 0, weighted_score: 0 },
-      noise: { score: 0, weight: 0, weighted_score: 0 },
-      amenities: { score: 0, weight: 0, weighted_score: 0, matched: [], missing: [] },
-      location: { score: 0, preferred_location: '', actual_location: '' },
-      price_value: { score: 0, preferred_max: 0, actual_price: 0 }
-    }
+    default: (props) =>
+      props?.room?.match_details || {
+        safety: { score: 0, weight: 0, weighted_score: 0 },
+        cleanliness: { score: 0, weight: 0, weighted_score: 0 },
+        accessibility: { score: 0, weight: 0, weighted_score: 0 },
+        noise: { score: 0, weight: 0, weighted_score: 0 },
+        amenities: { score: 0, weight: 0, weighted_score: 0, matched: [], missing: [] },
+        location: { score: 0, preferred_location: '', actual_location: '' },
+        price_value: { score: 0, preferred_max: 0, actual_price: 0 },
+      },
   },
   total_rooms: {
     type: Number,
     required: false,
-    default: 1
+    default: 1,
   },
   userType: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 })
 
 // Update computed properties to use match_details from the room object
-const safetyScore = computed(() => props.room.match_details?.safety?.score || props.room.safety_score || 0)
-const cleanlinessScore = computed(() => props.room.match_details?.cleanliness?.score || props.room.cleanliness_score || 0)
-const accessibilityScore = computed(() => props.room.match_details?.accessibility?.score || props.room.accessibility_score || 0)
-const noiseScore = computed(() => props.room.match_details?.noise?.score || props.room.noise_level || 0)
+const safetyScore = computed(
+  () => props.room.match_details?.safety?.score || props.room.safety_score || 0,
+)
+const cleanlinessScore = computed(
+  () => props.room.match_details?.cleanliness?.score || props.room.cleanliness_score || 0,
+)
+const accessibilityScore = computed(
+  () => props.room.match_details?.accessibility?.score || props.room.accessibility_score || 0,
+)
+const noiseScore = computed(
+  () => props.room.match_details?.noise?.score || props.room.noise_level || 0,
+)
 const amenityScore = computed(() => props.room.match_details?.amenities?.score || 0)
 const locationScore = computed(() => props.room.match_details?.location?.score || 0)
 const priceValueScore = computed(() => props.room.match_details?.price_value?.score || 0)
@@ -652,7 +696,7 @@ onMounted(async () => {
     try {
       const response = await axios.get('/rating/user/ratings')
       const ratings = response.data
-      userRating.value = ratings.find(r => r.room_id === props.room.id)
+      userRating.value = ratings.find((r) => r.room_id === props.room.id)
     } catch (error) {
       console.error('Error fetching user ratings:', error)
     }
@@ -660,12 +704,12 @@ onMounted(async () => {
 })
 
 const parseImageUrls = (urls) => {
-  if (!urls) return [];
+  if (!urls) return []
   try {
-    return typeof urls === 'string' ? JSON.parse(urls) : urls;
+    return typeof urls === 'string' ? JSON.parse(urls) : urls
   } catch (error) {
-    console.error('Error parsing image URLs:', error);
-    return [];
+    console.error('Error parsing image URLs:', error)
+    return []
   }
 }
 
@@ -697,13 +741,13 @@ const getScoreColor = (score) => {
 }
 
 const parseAmenities = (amenities) => {
-  if (!amenities) return [];
-  if (Array.isArray(amenities)) return amenities;
+  if (!amenities) return []
+  if (Array.isArray(amenities)) return amenities
   try {
-    return typeof amenities === 'string' ? JSON.parse(amenities) : [];
+    return typeof amenities === 'string' ? JSON.parse(amenities) : []
   } catch (error) {
-    console.error('Error parsing amenities:', error);
-    return [];
+    console.error('Error parsing amenities:', error)
+    return []
   }
 }
 
@@ -768,8 +812,8 @@ const viewDetails = () => {
 
 /* Hide scrollbar for IE, Edge and Firefox */
 .pa-6 {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
 .h-100 {
@@ -790,7 +834,7 @@ const viewDetails = () => {
 .details-content {
   height: 100%;
   overflow-y: auto;
-  padding: 24px;
+  padding: 22px;
 }
 
 /* Show scrollbar */
@@ -817,4 +861,4 @@ const viewDetails = () => {
   scrollbar-width: thin;
   scrollbar-color: #888 #f1f1f1;
 }
-</style> 
+</style>

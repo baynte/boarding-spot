@@ -45,7 +45,7 @@
     </v-row> -->
 
     <!-- Search Filters -->
-    <v-card class="mb-6" elevation="2">
+    <v-card class="mb-6" elevation="10" variant="elevated">
       <!-- Header with better visual separation -->
       <v-card-title class="d-flex align-center py-4 px-6 bg-primary text-white">
         <v-icon icon="mdi-filter-variant" class="me-2" />
@@ -70,7 +70,6 @@
             <v-icon icon="mdi-tune" class="me-2" color="primary" />
             <span class="text-h6">Basic Filters</span>
           </div>
-
           <v-row dense>
             <v-col cols="12" sm="6" md="3">
               <v-text-field
@@ -179,66 +178,110 @@
         </section>
 
         <!-- Score Filters Section -->
-        <section>
-          <div class="d-flex align-center mb-4">
-            <v-icon icon="mdi-chart-bar" class="me-2" color="primary" />
-            <span class="text-h6">Score Filters</span>
-          </div>
-
-          <v-row>
-            <v-col
-              v-for="(filter, index) in [
-                {
-                  label: 'Safety Score',
-                  model: 'minSafetyScore',
-                  icon: 'mdi-shield-check',
-                },
-                {
-                  label: 'Noise Level',
-                  model: 'maxNoiseLevel',
-                  icon: 'mdi-volume-high',
-                },
-                {
-                  label: 'Accessibility',
-                  model: 'minAccessibilityScore',
-                  icon: 'mdi-account-box',
-                },
-                {
-                  label: 'Cleanliness',
-                  model: 'minCleanlinessScore',
-                  icon: 'mdi-broom',
-                },
-              ]"
-              :key="index"
-              cols="12"
-              sm="6"
-              md="3"
-            >
-              <v-card variant="outlined" class="pa-3 rounded-lg">
-                <div class="d-flex align-center mb-2">
-                  <v-icon :icon="filter.icon" size="small" class="me-2" />
-                  <span class="text-body-2">{{ filter.label }}</span>
-                  <v-spacer></v-spacer>
-                  <v-chip size="x-small" :color="getScoreColor(filters[filter.model])">
-                    {{ filters[filter.model] }}/10
-                  </v-chip>
-                </div>
-                <v-slider
-                  v-model="filters[filter.model]"
-                  :min="1"
-                  :max="10"
-                  :step="0.5"
-                  :color="getScoreColor(filters[filter.model])"
-                  track-color="grey-lighten-5"
-                  show-ticks="always"
-                  :tick-size="4"
-                  :loading="loading"
-                  :disabled="loading"
-                ></v-slider>
-              </v-card>
-            </v-col>
-          </v-row>
-        </section>
+        <v-row class="mt-4">
+          <v-col cols="12">
+            <div class="d-flex align-center mb-1">
+              <v-icon icon="mdi-chart-bar" class="me-2" color="primary" />
+              <span class="text-h6">Score Filters</span>
+            </div>
+          </v-col>
+          <v-col cols="12" sm="6" md="3">
+            <v-card variant="outlined" class="pa-3 rounded-lg">
+              <div class="d-flex align-center justify-space-between mb-1">
+                <v-icon size="22" color="primary">mdi-shield-check</v-icon>
+                <span class="text-body-2 font-weight-bold">Min Safety Score</span>
+                <v-chip size="x-small" :color="getScoreColor(filters.minSafetyScore)"
+                  >{{ filters.minSafetyScore }}/10</v-chip
+                >
+              </div>
+              <v-slider
+                v-model="filters.minSafetyScore"
+                :min="1"
+                :max="10"
+                :step="0.5"
+                thumb-label
+                :color="getScoreColor(filters.minSafetyScore)"
+                track-color="grey-lighten-5"
+                show-ticks="always"
+                :tick-size="3"
+                :loading="loading"
+                :disabled="loading"
+              ></v-slider>
+            </v-card>
+          </v-col>
+          <v-col cols="12" sm="6" md="3">
+            <v-card variant="outlined" class="pa-3 rounded-lg">
+              <div class="d-flex align-center justify-space-between mb-1">
+                <v-icon size="22" color="primary">mdi-volume-high</v-icon>
+                <span class="text-body-2 font-weight-bold">Max Noise Level</span>
+                <v-chip size="x-small" :color="getScoreColor(10 - filters.maxNoiseLevel)"
+                  >{{ filters.maxNoiseLevel }}/10</v-chip
+                >
+              </div>
+              <v-slider
+                v-model="filters.maxNoiseLevel"
+                :min="1"
+                :max="10"
+                :step="0.5"
+                thumb-label
+                :color="getScoreColor(10 - filters.maxNoiseLevel)"
+                track-color="grey-lighten-1"
+                show-ticks="always"
+                :tick-size="4"
+                :loading="loading"
+                :disabled="loading"
+              ></v-slider>
+            </v-card>
+          </v-col>
+          <v-col cols="12" sm="6" md="3">
+            <v-card variant="outlined" class="pa-3 rounded-lg">
+              <div class="d-flex align-center justify-space-between mb-1">
+                <v-icon size="22" color="primary">mdi-account-box</v-icon>
+                <span class="text-body-2 font-weight-bold">Min Accessibility</span>
+                <v-chip size="x-small" :color="getScoreColor(filters.minAccessibilityScore)"
+                  >{{ filters.minAccessibilityScore }}/10</v-chip
+                >
+              </div>
+              <v-slider
+                v-model="filters.minAccessibilityScore"
+                :min="1"
+                :max="10"
+                :step="0.5"
+                thumb-label
+                :color="getScoreColor(filters.minAccessibilityScore)"
+                track-color="grey-lighten-1"
+                show-ticks="always"
+                :tick-size="4"
+                :loading="loading"
+                :disabled="loading"
+              ></v-slider>
+            </v-card>
+          </v-col>
+          <v-col cols="12" sm="6" md="3">
+            <v-card variant="outlined" class="pa-3 rounded-lg">
+              <div class="d-flex align-center justify-space-between mb-1">
+                <v-icon size="20" color="primary">mdi-broom</v-icon>
+                <span class="text-body-2 font-weight-bold">Min Cleanliness</span>
+                <v-chip size="x-small" :color="getScoreColor(filters.minCleanlinessScore)"
+                  >{{ filters.minCleanlinessScore }}/10</v-chip
+                >
+              </div>
+              <v-slider
+                v-model="filters.minCleanlinessScore"
+                :min="1"
+                :max="10"
+                :step="0.5"
+                thumb-label
+                :color="getScoreColor(filters.minCleanlinessScore)"
+                track-color="grey-lighten-1"
+                show-ticks="always"
+                :tick-size="4"
+                :loading="loading"
+                :disabled="loading"
+              ></v-slider>
+            </v-card>
+          </v-col>
+        </v-row>
 
         <!-- Action Buttons -->
         <v-divider class="my-4"></v-divider>
@@ -267,7 +310,7 @@
     </v-card>
 
     <!-- Map View -->
-    <v-card class="mb-6" elevation="2">
+    <v-card class="mb-6" elevation="10" variant="elevated">
       <v-card-title class="d-flex align-center py-4 px-6 bg-primary text-white">
         <v-icon icon="mdi-map" class="me-2" />
         Map View
@@ -289,81 +332,129 @@
       </v-card-text>
     </v-card>
 
-    <!-- Search Results -->
     <template v-if="!loading && searchPerformed">
       <!-- Summary Section -->
-      <v-card class="mb-6 mt-6" elevation="2">
-      <v-card-title class="d-flex align-center py-4 px-6 bg-primary text-white">
-        <v-icon icon="mdi-clipboard-text" class="me-2" />
-        Search Results Summary
-      </v-card-title>
-      <v-card-text class="pa-6">
-        <v-row align-items  ="center">
-        <!-- Total Rooms Counter -->
-        <v-col cols="12" sm="4">
-          <v-card class="text-center pa-4" variant="outlined">
-          <div class="text-h6 font-weight-bold mb-1">
-            {{ searchResults.summary.total_rooms }}
-          </div>
-          <div class="text-subtitle-1 text-medium-emphasis">
-            Total Rooms Found
-          </div>
-          </v-card>
-        </v-col>
+      <v-card
+        class="mb-6 search-summary-card"
+        elevation="10"
+        variant="elevated"
+        v-if="searchResults.summary"
+        rounded="lg"
+      >
+        <v-card-item>
+          <template v-slot:prepend>
+            <v-icon icon="mdi-magnify" size="large" color="primary" class="mr-3"></v-icon>
+          </template>
+          <v-card-title class="text-h5 font-weight-bold pb-1">Search Results</v-card-title>
+          <v-card-subtitle
+            >Found {{ searchResults.summary.total_rooms }} rooms matching your
+            criteria</v-card-subtitle
+          >
+        </v-card-item>
 
-        <!-- Match Categories -->
-        <v-col cols="12" sm="8">
-          <div class="text-subtitle-1 font-weight-medium mb-3">Match Categories</div>
-          <v-chip-group class="match-categories">
-          <v-chip
-            v-if="searchResults.summary.perfect_matches_count"
-            color="success"
-            size="large"
-            class="font-weight-medium"
-            prepend-icon="mdi-star"
-          >
-            Perfect ({{ searchResults.summary.perfect_matches_count }})
-          </v-chip>
-          <v-chip
-            v-if="searchResults.summary.excellent_matches_count"
-            color="info"
-            size="large"
-            class="font-weight-medium"
-            prepend-icon="mdi-star-outline"
-          >
-            Excellent ({{ searchResults.summary.excellent_matches_count }})
-          </v-chip>
-          <v-chip
-            v-if="searchResults.summary.good_matches_count"
-            color="primary"
-            size="large"
-            class="font-weight-medium"
-            prepend-icon="mdi-thumb-up"
-          >
-            Good ({{ searchResults.summary.good_matches_count }})
-          </v-chip>
-          <v-chip
-            v-if="searchResults.summary.fair_matches_count"
-            color="warning"
-            size="large"
-            class="font-weight-medium"
-            prepend-icon="mdi-thumb-up-outline"
-          >
-            Fair ({{ searchResults.summary.fair_matches_count }})
-          </v-chip>
-          <v-chip
-            v-if="searchResults.summary.other_matches_count"
-            color="grey"
-            size="large"
-            class="font-weight-medium"
-            prepend-icon="mdi-dots-horizontal"
-          >
-            Other ({{ searchResults.summary.other_matches_count }})
-          </v-chip>
-          </v-chip-group>
-        </v-col>
-        </v-row>
-      </v-card-text>
+        <v-divider></v-divider>
+
+        <v-card-text>
+          <v-row align-items="center">
+            <v-col cols="12" sm="5" md="4">
+              <div class="d-flex align-center">
+                <v-avatar color="primary" size="56" class="mr-4">
+                  <span class="text-h5 font-weight-bold text-white">{{
+                    searchResults.summary.total_rooms
+                  }}</span>
+                </v-avatar>
+                <div>
+                  <div class="text-subtitle-1 font-weight-medium">Total Rooms</div>
+                  <div class="text-caption text-medium-emphasis">Available for booking</div>
+                </div>
+              </div>
+            </v-col>
+
+            <v-col cols="12" sm="7" md="8">
+              <div class="text-subtitle-1 font-weight-medium mb-2">Match Quality</div>
+              <v-chip-group class="match-quality-chips">
+                <v-chip
+                  v-if="searchResults.summary.perfect_matches_count"
+                  color="success"
+                  variant="elevated"
+                  size="large"
+                  label
+                  class="font-weight-medium"
+                >
+                  <v-icon start size="small">mdi-check-circle</v-icon>
+                  Perfect ({{ searchResults.summary.perfect_matches_count }})
+                </v-chip>
+
+                <v-chip
+                  v-if="searchResults.summary.excellent_matches_count"
+                  color="info"
+                  variant="elevated"
+                  size="large"
+                  label
+                  class="font-weight-medium"
+                >
+                  <v-icon start size="small">mdi-thumb-up</v-icon>
+                  Excellent ({{ searchResults.summary.excellent_matches_count }})
+                </v-chip>
+
+                <v-chip
+                  v-if="searchResults.summary.good_matches_count"
+                  color="primary"
+                  variant="elevated"
+                  size="large"
+                  label
+                  class="font-weight-medium"
+                >
+                  <v-icon start size="small">mdi-star</v-icon>
+                  Good ({{ searchResults.summary.good_matches_count }})
+                </v-chip>
+
+                <v-chip
+                  v-if="searchResults.summary.fair_matches_count"
+                  color="warning"
+                  variant="elevated"
+                  size="large"
+                  label
+                  class="font-weight-medium"
+                >
+                  <v-icon start size="small">mdi-alert</v-icon>
+                  Fair ({{ searchResults.summary.fair_matches_count }})
+                </v-chip>
+
+                <v-chip
+                  v-if="searchResults.summary.other_matches_count"
+                  color="grey"
+                  variant="elevated"
+                  size="large"
+                  label
+                  class="font-weight-medium"
+                >
+                  <v-icon start size="small">mdi-dots-horizontal</v-icon>
+                  Other ({{ searchResults.summary.other_matches_count }})
+                </v-chip>
+              </v-chip-group>
+            </v-col>
+          </v-row>
+
+          <v-row v-if="searchResults.filters" class="mt-2">
+            <v-col cols="12">
+              <div class="text-subtitle-1 font-weight-medium mb-2">Applied Filters</div>
+              <v-chip-group>
+                <v-chip
+                  v-for="(value, key) in searchResults.filters"
+                  :key="key"
+                  size="small"
+                  closable
+                  variant="outlined"
+                  color="grey-darken-1"
+                  @click:close="removeFilter(key)"
+                >
+                  {{ formatFilterName(key) }}: {{ value }}
+                </v-chip>
+              </v-chip-group>
+            </v-col>
+          </v-row>
+        </v-card-text>
       </v-card>
 
       <!-- Results Grid -->
@@ -740,5 +831,24 @@ onMounted(async () => {
   .v-slider {
     margin-bottom: 24px;
   }
+}
+
+.search-summary-card {
+  border-left: 4px solid var(--v-primary-base);
+  transition: all 0.3s ease;
+}
+
+.search-summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.match-quality-chips .v-chip {
+  margin: 4px;
+  transition: all 0.2s ease;
+}
+
+.match-quality-chips .v-chip:hover {
+  transform: scale(1.05);
 }
 </style>

@@ -111,7 +111,7 @@
               </v-col>
 
               <v-col cols="12" sm="6" v-for="(value, key) in weights" :key="key">
-                <v-card flat class="pa-2">
+                <v-card flat class="pa-7">
                   <v-slider
                     v-model="weights[key]"
                     :label="key.charAt(0).toUpperCase() + key.slice(1)"
@@ -232,7 +232,12 @@ const commonAmenities = [
   'TV',
   'Private Bathroom',
   'Study Desk',
-  'Closet'
+  'Closet',
+  'CCTV',
+  'Fire Exits',
+  'Common CR',
+  'Appliances',
+  'Receiving Area',
 ]
 
 const livingSpaceTypes = [
