@@ -3,7 +3,7 @@
     <v-main>
       <div class="container">
         <v-app-bar
-          elevation="4"
+          elevation="5"
           variant="elevated"
           class="px-6"
           style="height: 70px;"
@@ -88,4 +88,5 @@ const logout = async () => {
 .gap-4 {
   gap: 1rem;
 }
+
 </style>

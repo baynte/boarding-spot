@@ -83,6 +83,8 @@
                   label="Required Amenities"
                   multiple
                   chips
+                  closable-chips
+                  clearable
                   :rules="[rules.required, rules.amenities]"
                   hint="Select important amenities"
                   persistent-hint
@@ -238,6 +240,26 @@ const commonAmenities = [
   'Common CR',
   'Appliances',
   'Receiving Area',
+  'Furnished',
+  'Single bed',
+  'Double-Deck Bed',
+  'Refrigerator',
+  'Washing Machine',
+  'Microwave',
+  'Fan',
+  'Gas/Induction Stove',
+  'Rice cooker',
+  'Pet-friendly',
+  'Security Keycard',
+  'Security Fingerprint',
+  'Security Guard',
+  'Elevator',
+  'Convenient Store',
+  'Phone',
+  'Electricity Included',
+  'Water included',
+  'Gym/Fitness Gym',
+  'Swimming Pool',
 ]
 
 const livingSpaceTypes = [

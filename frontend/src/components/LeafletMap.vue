@@ -41,7 +41,7 @@
       <l-marker
         v-if="markerLatLng"
         :lat-lng="markerLatLng"
-        draggable="true"
+        :draggable="true"
         @dragend="handleMarkerDragEnd"
       >
         <l-popup>
@@ -71,7 +71,7 @@ L.Icon.Default.mergeOptions({
 // Create custom star icon for SMCC
 const smccIcon = L.divIcon({
   html: `<div class="star-marker">
-          <svg viewBox="0 0 24 24" style="width: 30px; height: 30px;">
+          <svg viewBox="0 0 24 24" style="width: 50px; height: 50px;">
             <path fill="#FF9800" d="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z" />
           </svg>
         </div>`,

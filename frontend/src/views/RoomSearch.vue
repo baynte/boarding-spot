@@ -136,9 +136,9 @@
         </section>
 
         <!-- Additional Options Section -->
-        <section class="mb-6">
+        <section class="mb-6">  
           <div class="d-flex align-center mb-4">
-            <v-icon icon="mdi-cog" class="me-2" color="primary" />
+            <v-icon icon="mdi-cog" class="me-2" color="primary"/>
             <span class="text-h6">Additional Options</span>
           </div>
 
@@ -212,19 +212,19 @@
           <v-col cols="12" sm="6" md="3">
             <v-card variant="outlined" class="pa-3 rounded-lg">
               <div class="d-flex align-center justify-space-between mb-1">
-                <v-icon size="22" color="primary">mdi-volume-high</v-icon>
-                <span class="text-body-2 font-weight-bold">Max Noise Level</span>
-                <v-chip size="x-small" :color="getScoreColor(10 - filters.maxNoiseLevel)"
-                  >{{ filters.maxNoiseLevel }}/10</v-chip
+                <v-icon size="20" color="primary">mdi-broom</v-icon>
+                <span class="text-body-2 font-weight-bold">Cleanliness</span>
+                <v-chip size="x-small" :color="getScoreColor(filters.minCleanlinessScore)"
+                  >{{ filters.minCleanlinessScore }}/10</v-chip
                 >
               </div>
               <v-slider
-                v-model="filters.maxNoiseLevel"
+                v-model="filters.minCleanlinessScore"
                 :min="1"
                 :max="10"
                 :step="0.5"
                 thumb-label
-                :color="getScoreColor(10 - filters.maxNoiseLevel)"
+                :color="getScoreColor(filters.minCleanlinessScore)"
                 track-color="grey-lighten-1"
                 show-ticks="always"
                 :tick-size="4"
@@ -260,19 +260,19 @@
           <v-col cols="12" sm="6" md="3">
             <v-card variant="outlined" class="pa-3 rounded-lg">
               <div class="d-flex align-center justify-space-between mb-1">
-                <v-icon size="20" color="primary">mdi-broom</v-icon>
-                <span class="text-body-2 font-weight-bold">Min Cleanliness</span>
-                <v-chip size="x-small" :color="getScoreColor(filters.minCleanlinessScore)"
-                  >{{ filters.minCleanlinessScore }}/10</v-chip
+                <v-icon size="22" color="primary">mdi-volume-high</v-icon>
+                <span class="text-body-2 font-weight-bold">Max Noise Level</span>
+                <v-chip size="x-small" :color="getScoreColor(10 - filters.maxNoiseLevel)"
+                  >{{ filters.maxNoiseLevel }}/10</v-chip
                 >
               </div>
               <v-slider
-                v-model="filters.minCleanlinessScore"
+                v-model="filters.maxNoiseLevel"
                 :min="1"
                 :max="10"
                 :step="0.5"
                 thumb-label
-                :color="getScoreColor(filters.minCleanlinessScore)"
+                :color="getScoreColor(10 - filters.maxNoiseLevel)"
                 track-color="grey-lighten-1"
                 show-ticks="always"
                 :tick-size="4"
@@ -293,6 +293,7 @@
             :disabled="loading"
             prepend-icon="mdi-refresh"
             class="mr-4"
+            elevation="7"
           >
             Clear All
           </v-btn>
@@ -302,6 +303,7 @@
             :loading="loading"
             :disabled="loading"
             prepend-icon="mdi-magnify"
+            elevation="8"
           >
             Search
           </v-btn>
@@ -577,6 +579,26 @@ const commonAmenities = [
   'Common CR',
   'Appliances',
   'Receiving Area',
+  'Furnished',
+  'Single bed',
+  'Double-Deck Bed',
+  'Refrigerator',
+  'Washing Machine',
+  'Microwave',
+  'Fan',
+  'Gas/Induction Stove',
+  'Rice cooker',
+  'Pet-friendly',
+  'Security Keycard',
+  'Security Fingerprint',
+  'Security Guard',
+  'Elevator',
+  'Convenient Store',
+  'Phone',
+  'Electricity Included',
+  'Water included',
+  'Gym/Fitness Gym',
+  'Swimming Pool',
 ]
 
 const livingSpaceTypes = ['Boarding House', 'Apartment', 'House', 'Dormitory', 'Condo Unit']

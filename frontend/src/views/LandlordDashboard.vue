@@ -1,5 +1,5 @@
 <template>
-  <div class="dashboard-container pa-6">
+  <div class="dashboard-container pa-6" elevation="12">
     <!-- Header Section -->
     <v-container fluid class="header-section pb-6">
       <v-row align-items ="center" justify="space-between">
@@ -25,7 +25,7 @@
       <!-- Stats Cards -->
       <v-row class="mt-4 mb-3">
         <v-col cols="12" sm="4">
-          <v-card elevation="3" class="stat-card rounded-lg" hover>
+          <v-card elevation="10" class="stat-card rounded-lg" hover>
             <v-card-text class="pa-6">
               <div class="d-flex align-center">
                 <v-icon size="36" color="primary" class="mr-4">mdi-home-group</v-icon>
@@ -38,7 +38,7 @@
           </v-card>
         </v-col>
         <v-col cols="12" sm="4">
-          <v-card elevation="3" class="stat-card rounded-lg" hover>
+          <v-card elevation="10" class="stat-card rounded-lg" hover>
             <v-card-text class="pa-6">
               <div class="d-flex align-center">
                 <v-icon size="36" color="success" class="mr-4">mdi-check-circle</v-icon>
@@ -51,7 +51,7 @@
           </v-card>
         </v-col>
         <v-col cols="12" sm="4">
-          <v-card elevation="3" class="stat-card rounded-lg" hover>
+          <v-card elevation="10" class="stat-card rounded-lg" hover>
             <v-card-text class="pa-6">
               <div class="d-flex align-center">
                 <v-icon size="36" color="info" class="mr-4">mdi-currency-php</v-icon>
@@ -359,7 +359,7 @@
     </v-dialog>
 
     <!-- Rooms Table -->
-    <v-card class="rooms-table-card rounded-lg overflow-hidden">
+    <v-card class="rooms-table-card rounded-lg overflow-hidden" elevation="10">
       <!-- Search Section -->
       <v-card-title class="search-section pa-6 bg-grey-lighten-4">
       <v-row align-items ="center" no-gutters>
@@ -586,6 +586,26 @@ const commonAmenities = [
   'Common CR',
   'Appliances',
   'Receiving Area',
+  'Furnished',
+  'Single bed',
+  'Double-Deck Bed',
+  'Refrigerator',
+  'Washing Machine',
+  'Microwave',
+  'Fan',
+  'Gas/Induction Stove',
+  'Rice cooker',
+  'Pet-friendly',
+  'Security Keycard',
+  'Security Fingerprint',
+  'Security Guard',
+  'Elevator',
+  'Convenient Store',
+  'Phone',
+  'Electricity Included',
+  'Water included',
+  'Gym/Fitness Gym',
+  'Swimming Pool',
 ]
 
 const rules = {

@@ -1,9 +1,9 @@
 <template>
   <div>
-    <v-container>
+    <v-container class="my-12">
       <v-row justify="center">
         <v-col cols="12" md="8">
-          <v-card>
+          <v-card elevation="11">
             <v-card-title class="text-h5 mb-2">
               Profile Settings
             </v-card-title>

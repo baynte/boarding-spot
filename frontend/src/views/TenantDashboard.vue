@@ -3,7 +3,7 @@
     <h1 class="text-h4 mb-4 mt-10">Tenant Dashboard</h1>
 
     <!-- Current Preferences Card -->
-    <v-card class="mb-6" elevation="2" rounded="lg">
+    <v-card class="mb-6" elevation="10" rounded="lg">
       <v-card-title class="d-flex align-center pa-6 bg-primary-lighten-5">
       <v-icon icon="mdi-tune" size="24" class="mr-2" color="primary"/>
       <span class="text-h5 font-weight-medium">My Preferences</span>
@@ -13,6 +13,7 @@
         prepend-icon="mdi-pencil"
         to="/preferences"
         rounded
+        elevation="7"
       >
         Edit Preferences
       </v-btn>
@@ -21,25 +22,25 @@
       <v-card-text v-if="preferences" class="pa-6">
       <v-row>
         <v-col cols="12" sm="6" md="3">
-        <v-card variant="flat" class="pa-4 bg-grey-lighten-4" rounded="lg">
+        <v-card variant="flat" class="pa-4 bg-grey-lighten-4" rounded="lg" elevation="5">
           <div class="text-subtitle-2 text-grey-darken-5 font-weight-bold mb-2">Maximum Price</div>
           <div class="text-h5 font-weight-bold text-primary">₱{{ preferences.max_price.toLocaleString() }}</div>
         </v-card>
         </v-col>
         <v-col cols="12" sm="6" md="3">
-        <v-card variant="flat" class="pa-4 bg-grey-lighten-4" rounded="lg">
+        <v-card variant="flat" class="pa-4 bg-grey-lighten-4" rounded="lg" elevation="5">
           <div class="text-subtitle-2 text-grey-darken-5 font-weight-bold mb-2">Minimum Capacity</div> 
           <div class="text-h5 font-weight-bold text-primary">{{ preferences.min_capacity }} Person(s)</div>
         </v-card>
         </v-col>
         <v-col cols="12" sm="6" md="3">
-        <v-card variant="flat" class="pa-4 bg-grey-lighten-4" rounded="lg">
+        <v-card variant="flat" class="pa-4 bg-grey-lighten-4" rounded="lg" elevation="5">
           <div class="text-subtitle-2 text-grey-darken-5 font-weight-bold mb-2">Preferred Location</div>
           <div class="text-h5 font-weight-bold text-primary">{{ preferences.preferred_location }}</div>
         </v-card>
         </v-col>
         <v-col cols="12" sm="6" md="3">
-        <v-card variant="flat" class="pa-4 bg-grey-lighten-4" rounded="lg">
+        <v-card variant="flat" class="pa-4 bg-grey-lighten-4" rounded="lg" elevation="5">
           <div class="text-subtitle-2 text-grey-darken-5 font-weight-bold mb-2">Required Amenities</div>
           <v-chip-group>
           <v-chip
@@ -133,7 +134,7 @@
     <!-- Quick Actions -->
     <v-row class="mb-6">
       <v-col cols="12" sm="6" md="4">
-      <v-card elevation="2" rounded="lg" class="action-card">
+      <v-card elevation="12" rounded="lg" class="action-card">
         <v-card-text class="text-center pa-6">
         <v-icon
           color="primary"
@@ -148,7 +149,7 @@
           size="large"
           block
           rounded="lg"
-          elevation="1"
+          elevation="7"
           to="/search"
           class="text-none"
         >
@@ -159,7 +160,7 @@
       </v-col>
 
       <v-col cols="12" sm="6" md="4">
-      <v-card elevation="2" rounded="lg" class="action-card">
+      <v-card elevation="12" rounded="lg" class="action-card">
         <v-card-text class="text-center pa-6">
         <v-icon
           color="primary"
@@ -174,7 +175,7 @@
           size="large"
           block
           rounded="lg"
-          elevation="1"
+          elevation="7"
           to="/preferences"
           class="text-none"
         >
@@ -200,7 +201,7 @@
           size="large"
           block
           rounded="lg"
-          elevation="1"
+          elevation="7"
           @click="showRecentlyViewed"
           class="text-none"
         >

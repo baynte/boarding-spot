@@ -3,7 +3,7 @@
     <v-container class="fill-height mt-12" fluid>
       <v-row align-items="center" justify="center">
         <v-col cols="12" sm="8" md="6" lg="4">
-          <v-card class="elevation-12 rounded-lg">
+          <v-card class="rounded-lg" elevation="12">
             <v-toolbar color="primary" dark flat class="rounded-t-lg">
               <v-toolbar-title class="text-h5 font-weight-bold"> Create Account </v-toolbar-title>
             </v-toolbar>

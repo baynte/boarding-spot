@@ -111,15 +111,16 @@
       </div>
 
           <!-- Amenities -->
-          <v-chip-group class="mb-3">
+          <v-chip-group class="mb-3" shows-arrows="always">
             <template v-if="match_details?.amenities?.matched?.length">
               <v-chip
                 v-for="amenity in match_details.amenities.matched"
                 :key="amenity"
                 size="small"
                 color="success"
-                variant="outlined"
+                variant="elevated"
                 class="text-caption"
+                elevation="10"
               >
                 <v-icon start size="x-small">mdi-check</v-icon>
                 {{ amenity }}
@@ -152,6 +153,7 @@
             variant="elevated"
             label
             class="font-weight-medium"
+            elevation="8"
           >
             {{ Math.round(match_score) }}% Overall
           </v-chip>
@@ -161,7 +163,7 @@
               <!-- Safety Score -->
               <v-col cols="12" class="mb-2">
                 <div class="d-flex align-center mb-1">
-                  <v-icon size="small" :color="getScoreColor(safetyScore)" class="me-1"
+                  <v-icon size="25" :color="getScoreColor(safetyScore)" class="me-1"
                     >mdi-shield-home</v-icon
                   >
                   <span class="text-body-2">Safety</span>
@@ -181,7 +183,7 @@
               <!-- Cleanliness Score -->
               <v-col cols="12" class="mb-2">
                 <div class="d-flex align-center mb-1">
-                  <v-icon size="small" :color="getScoreColor(cleanlinessScore)" class="me-1"
+                  <v-icon size="25" :color="getScoreColor(cleanlinessScore)" class="me-1"
                     >mdi-broom</v-icon
                   >
                   <span class="text-body-2">Cleanliness</span>
@@ -201,7 +203,7 @@
               <!-- Accessibility Score -->
               <v-col cols="12" class="mb-2">
                 <div class="d-flex align-center mb-1">
-                  <v-icon size="small" :color="getScoreColor(accessibilityScore)" class="me-1"
+                  <v-icon size="25" :color="getScoreColor(accessibilityScore)" class="me-1"
                     >mdi-wheelchair-accessibility</v-icon
                   >
                   <span class="text-body-2">Accessibility</span>
@@ -221,7 +223,7 @@
               <!-- Noise Level -->
               <v-col cols="12" class="mb-2">
                 <div class="d-flex align-center mb-1">
-                  <v-icon size="small" :color="getScoreColor(10 - noiseScore)" class="me-1"
+                  <v-icon size="25" :color="getScoreColor(10 - noiseScore)" class="me-1"
                     >mdi-volume-medium</v-icon
                   >
                   <span class="text-body-2">Noise Level</span>
@@ -241,7 +243,7 @@
               <!-- Amenity Match -->
               <v-col cols="12" class="mb-2">
                 <div class="d-flex align-center mb-1">
-                  <v-icon size="small" :color="getScoreColor(amenityScore / 10)" class="me-1"
+                  <v-icon size="25" :color="getScoreColor(amenityScore / 10)" class="me-1"
                     >mdi-check-circle</v-icon
                   >
                   <span class="text-body-2">Amenity Match</span>
@@ -283,7 +285,7 @@
               <!-- Price Value -->
               <v-col cols="12">
                 <div class="d-flex align-center mb-1">
-                  <v-icon size="small" :color="getScoreColor(priceValueScore / 10)" class="me-1"
+                  <v-icon size="25" :color="getScoreColor(priceValueScore / 10)" class="me-1"
                     >mdi-currency-usd</v-icon
                   >
                   <span class="text-body-2">Price Value</span>
@@ -332,7 +334,7 @@
         <div v-if="room.total_ratings > 0" class="mt-2">
           <!-- Safety Rating -->
           <div class="d-flex align-center mb-2">
-            <v-icon size="small" :color="getScoreColor(room.safety_score)" class="me-1"
+            <v-icon size="22" :color="getScoreColor(room.safety_score)" class="me-1"
               >mdi-shield-home</v-icon
             >
             <span class="text-body-2">Safety:</span>
@@ -350,7 +352,7 @@
 
           <!-- Cleanliness Rating -->
           <div class="d-flex align-center mb-2">
-            <v-icon size="small" :color="getScoreColor(room.cleanliness_score)" class="me-1"
+            <v-icon size="22" :color="getScoreColor(room.cleanliness_score)" class="me-1"
               >mdi-broom</v-icon
             >
             <span class="text-body-2">Cleanliness:</span>
@@ -368,7 +370,7 @@
 
           <!-- Accessibility Rating -->
           <div class="d-flex align-center mb-2">
-            <v-icon size="small" :color="getScoreColor(room.accessibility_score)" class="me-1"
+            <v-icon size="22" :color="getScoreColor(room.accessibility_score)" class="me-1"
               >mdi-wheelchair-accessibility</v-icon
             >
             <span class="text-body-2">Accessibility:</span>
@@ -386,7 +388,7 @@
 
           <!-- Noise Level Rating -->
           <div class="d-flex align-center mb-2">
-            <v-icon size="small" :color="getScoreColor(10 - room.noise_level)" class="me-1"
+            <v-icon size="22" :color="getScoreColor(10 - room.noise_level)" class="me-1"
               >mdi-volume-medium</v-icon
             >
             <span class="text-body-2">Noise Level:</span>
@@ -463,6 +465,7 @@
                       :zoom="15"
                       class="rounded-lg overflow-hidden"
                       style="height: 300px"
+                      
                     />
                   </div>
                 </div>
