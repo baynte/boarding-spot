@@ -127,65 +127,51 @@ def search_rooms():
     if user.user_type != 'tenant':
         return jsonify({'error': 'Unauthorized'}), 403
     
-    # Get filter parameters -- Start
+    # Get request parameters directly without preference fallbacks
     max_price = request.args.get('max_price', type=float)
     min_capacity = request.args.get('min_capacity', type=int)
     location = request.args.get('location', '')
-    amenities = json.loads(request.args.get('amenities', '[]'))
-    living_space_type = request.args.get('living_space_type')  # Add living space type filter
+    living_space_type = request.args.get('living_space_type')
     
-    # Get score filter parameters
+    # Handle amenities from request
+    amenities_str = request.args.get('amenities', '')
+    amenities = []
+    if amenities_str:
+        try:
+            amenities = json.loads(amenities_str)
+        except json.JSONDecodeError:
+            amenities = []
+    
+    # Get score filter parameters with sensible defaults
     min_safety_score = request.args.get('min_safety_score', type=float, default=1)
     max_noise_level = request.args.get('max_noise_level', type=float, default=10)
     min_accessibility_score = request.args.get('min_accessibility_score', type=float, default=1)
     min_cleanliness_score = request.args.get('min_cleanliness_score', type=float, default=1)
-    # Get filter parameters -- End
 
-
-    # dili pansinon
-    current_app.logger.info(f"Filter parameters received: max_price={max_price}, min_capacity={min_capacity}, location='{location}', amenities={amenities}, living_space_type={living_space_type}")
+    # Log the parameters for debugging
+    current_app.logger.info(f"Search parameters: max_price={max_price}, min_capacity={min_capacity}, location='{location}', amenities={amenities}, living_space_type={living_space_type}")
     current_app.logger.info(f"Score filters: safety>={min_safety_score}, noise<={max_noise_level}, accessibility>={min_accessibility_score}, cleanliness>={min_cleanliness_score}")
-    
-    # Get tenant preferences for TOPSIS weights
-    preference = TenantPreference.query.filter_by(tenant_id=current_user_id).first()
-    if not preference:
-        return jsonify({'error': 'Please set your preferences first'}), 400
-    
-    # dili pansinon
-    current_app.logger.info(f"Tenant preferences: max_price={preference.max_price}, min_capacity={preference.min_capacity}, location='{preference.preferred_location}', amenities={preference.required_amenities}, living_space_type={preference.living_space_type}")
     
     # Filter rooms based on basic criteria
     query = Room.query.filter_by(availability=True)
     
-    # Apply basic filters if provided
-    if max_price:
+    # Apply basic filters only if provided
+    if max_price is not None:
         query = query.filter(Room.price <= max_price)
         current_app.logger.debug(f"Filtering by max price: {max_price}")
-    elif preference.max_price:
-        query = query.filter(Room.price <= preference.max_price)
-        current_app.logger.debug(f"Filtering by preference max price: {preference.max_price}")
         
-    if min_capacity:
+    if min_capacity is not None:
         query = query.filter(Room.capacity >= min_capacity)
         current_app.logger.debug(f"Filtering by min capacity: {min_capacity}")
-    elif preference.min_capacity:
-        query = query.filter(Room.capacity >= preference.min_capacity)
-        current_app.logger.debug(f"Filtering by preference min capacity: {preference.min_capacity}")
         
     if location:
         query = query.filter(Room.location.ilike(f'%{location}%'))
         current_app.logger.debug(f"Filtering by location: '{location}'")
-    elif preference.preferred_location:
-        query = query.filter(Room.location.ilike(f'%{preference.preferred_location}%'))
-        current_app.logger.debug(f"Filtering by preference location: '{preference.preferred_location}'")
 
-    # Apply living space type filter
+    # Apply living space type filter if provided
     if living_space_type:
         query = query.filter(Room.living_space_type == living_space_type)
         current_app.logger.debug(f"Filtering by living space type: {living_space_type}")
-    elif preference.living_space_type:
-        query = query.filter(Room.living_space_type == preference.living_space_type)
-        current_app.logger.debug(f"Filtering by preference living space type: {preference.living_space_type}")
 
     # Apply score filters
     query = query.filter(Room.safety_score >= min_safety_score)
@@ -202,26 +188,15 @@ def search_rooms():
     
     # Filter by amenities if provided
     if amenities:
-        current_app.logger.debug(f"Filtering by provided amenities: {amenities}")
+        current_app.logger.debug(f"Filtering by amenities: {amenities}")
         filtered_rooms = []
         for room in rooms:
-            room_amenities = json.loads(room.amenities)
+            room_amenities = json.loads(room.amenities) if room.amenities else []
             current_app.logger.debug(f"Room {room.id} amenities: {room_amenities}")
             if all(amenity in room_amenities for amenity in amenities):
                 filtered_rooms.append(room)
         rooms = filtered_rooms
         current_app.logger.info(f"After amenities filtering: {len(rooms)} rooms remaining")
-    elif preference.required_amenities:
-        required_amenities = json.loads(preference.required_amenities)
-        current_app.logger.debug(f"Filtering by preference amenities: {required_amenities}")
-        filtered_rooms = []
-        for room in rooms:
-            room_amenities = json.loads(room.amenities)
-            current_app.logger.debug(f"Room {room.id} amenities: {room_amenities}")
-            if all(amenity in room_amenities for amenity in required_amenities):
-                filtered_rooms.append(room)
-        rooms = filtered_rooms
-        current_app.logger.info(f"After preference amenities filtering: {len(rooms)} rooms remaining")
     
     if not rooms:
         return jsonify({'message': 'No rooms found matching your criteria'})
@@ -233,15 +208,12 @@ def search_rooms():
     try:
         # Convert room scores to float arrays, handling None values
         decision_matrix = []
-        required_amenities = json.loads(preference.required_amenities) if preference.required_amenities else []
         
         # Define criteria ranges for normalization
-        max_price = max(room.price for room in rooms)
-        # min_price = min(room.price for room in rooms)
-        # max_capacity = max(room.capacity for room in rooms)
-        min_capacity = min(room.capacity for room in rooms)
+        max_price_value = max(room.price for room in rooms) if rooms else 0
+        min_capacity_value = min(room.capacity for room in rooms) if rooms else 0
         
-        # Gikan sa gi filter sa Ibabaw
+        # Process each room for the decision matrix
         for room in rooms:
             # Normalize scores to 0-1 range and handle None values
             safety = (float(room.safety_score) if room.safety_score is not None else 5.0) / 10.0
@@ -249,36 +221,47 @@ def search_rooms():
             accessibility = (float(room.accessibility_score) if room.accessibility_score is not None else 5.0) / 10.0
             noise = 1 - ((float(room.noise_level) if room.noise_level is not None else 5.0) / 10.0)  # Invert noise so higher is better
             
-            # Calculate price match score (1 if within budget, decreasing score if over budget)
-            if room.price <= preference.max_price:
-                price_score = 1.0
+            # Calculate price match score based only on request parameters
+            if max_price is not None:
+                price_score = 1.0 if room.price <= max_price else max(0, 1 - ((room.price - max_price) / max_price))
             else:
-                price_diff = (room.price - preference.max_price) / preference.max_price
-                price_score = max(0, 1 - price_diff)
+                # If no max price specified, use a relative score based on the range of prices
+                price_score = 1.0 - (room.price / max_price_value) if max_price_value > 0 else 0.5
             
-            # Calculate capacity match score (1 if meets or exceeds requirement, 0 if below)
-            capacity_score = 1.0 if room.capacity >= preference.min_capacity else 0.0
+            # Calculate capacity match score based only on request parameters
+            if min_capacity is not None:
+                capacity_score = 1.0 if room.capacity >= min_capacity else 0.0
+            else:
+                # If no min capacity specified, use a relative score based on the range of capacities
+                capacity_score = room.capacity / 10.0  # Assuming max reasonable capacity is 10
             
-            # Calculate amenity match score with more weight on required amenities
+            # Calculate amenity match score
             room_amenities = json.loads(room.amenities) if room.amenities else []
-            if required_amenities:
-                matched_amenities = sum(1 for amenity in required_amenities if amenity in room_amenities)
-                amenity_score = matched_amenities / len(required_amenities)
+            
+            if amenities:
+                matched_amenities = sum(1 for amenity in amenities if amenity in room_amenities)
+                amenity_score = matched_amenities / len(amenities)
             else:
-                amenity_score = 1.0
+                # If no amenities specified, score based on total amenities
+                amenity_score = min(1.0, len(room_amenities) / 10.0)  # Assuming 10 amenities is "complete"
             
             # Calculate location match score
-            location_score = 1.0 if preference.preferred_location.lower() in room.location.lower() else 0.0
+            if location:
+                location_score = 1.0 if location.lower() in room.location.lower() else 0.0
+            else:
+                location_score = 0.5  # Neutral score if no location preference
             
             # Calculate living space type match score
-            living_space_match = 1.0 if (not preference.living_space_type or 
-                                      room.living_space_type == preference.living_space_type) else 0.0
+            if living_space_type:
+                living_space_match = 1.0 if room.living_space_type == living_space_type else 0.0
+            else:
+                living_space_match = 0.5  # Neutral score if no type preference
             
-            # Create row with normalized values and adjusted weights
+            # Create row with normalized values
             row = [
                 safety,              # Safety score (0-1)
                 cleanliness,         # Cleanliness score (0-1)
-                accessibility,        # Accessibility score (0-1)
+                accessibility,       # Accessibility score (0-1)
                 noise,               # Noise score (0-1)
                 amenity_score,       # Amenity match (0-1)
                 price_score,         # Price match (0-1)
@@ -294,17 +277,17 @@ def search_rooms():
         if len(decision_matrix) == 0:
             return jsonify({'message': 'No rooms available for ranking'})
         
-        # Adjust weights to give more importance to exact matches
+        # Define equal weights for all criteria since we don't have user preferences
         weights = np.array([
-            float(preference.safety_weight),         # Safety weight
-            float(preference.cleanliness_weight),    # Cleanliness weight
-            float(preference.accessibility_weight),  # Accessibility weight
-            float(preference.noise_level_weight),    # Noise weight
-            0.15,  # Amenity weight
-            0.20,  # Price weight
-            0.15,  # Capacity weight
-            0.15,  # Location weight
-            0.15   # Living space type weight
+            0.15,  # Safety weight
+            0.15,  # Cleanliness weight
+            0.15,  # Accessibility weight
+            0.15,  # Noise weight
+            0.10,  # Amenity weight
+            0.10,  # Price weight
+            0.10,  # Capacity weight
+            0.05,  # Location weight
+            0.05   # Living space type weight
         ], dtype=np.float64)
         
         # Normalize weights to sum to 1
@@ -330,11 +313,11 @@ def search_rooms():
             room_amenities = json.loads(room.amenities) if room.amenities else []
             
             # Check for perfect matches
-            perfect_price = room.price <= preference.max_price
-            perfect_capacity = room.capacity >= preference.min_capacity
-            perfect_amenities = all(amenity in room_amenities for amenity in required_amenities)
-            perfect_location = preference.preferred_location.lower() in room.location.lower()
-            perfect_type = not preference.living_space_type or room.living_space_type == preference.living_space_type
+            perfect_price = room.price <= max_price
+            perfect_capacity = room.capacity >= min_capacity
+            perfect_amenities = all(amenity in room_amenities for amenity in amenities)
+            perfect_location = location.lower() in room.location.lower()
+            perfect_type = not living_space_type or room.living_space_type == living_space_type
             
             # Apply bonuses for perfect matches
             if perfect_price and perfect_capacity and perfect_amenities and perfect_location and perfect_type:
@@ -372,25 +355,25 @@ def search_rooms():
             
             # Calculate amenity match percentage for this room
             room_amenities = json.loads(room.amenities) if room.amenities else []
-            if required_amenities:
-                matched_amenities = sum(1 for amenity in required_amenities if amenity in room_amenities)
-                amenity_match_percentage = (matched_amenities / len(required_amenities)) * 100
+            if amenities:
+                matched_amenities = sum(1 for amenity in amenities if amenity in room_amenities)
+                amenity_match_percentage = (matched_amenities / len(amenities)) * 100
             else:
                 amenity_match_percentage = 100.0
 
             # Calculate location match score
             location_match_score = 0
-            if preference.preferred_location.lower() in room.location.lower():
+            if location.lower() in room.location.lower():
                 # Exact neighborhood match
                 location_match_score = 100
-            elif any(loc in room.location.lower() for loc in preference.preferred_location.lower().split()):
+            elif any(loc in room.location.lower() for loc in location.lower().split()):
                 # Partial area match
                 location_match_score = 70
 
             # Calculate price value score
             price_value_score = 100
-            if room.price > preference.max_price:
-                price_diff_percentage = ((room.price - preference.max_price) / preference.max_price) * 100
+            if room.price > max_price:
+                price_diff_percentage = ((room.price - max_price) / max_price) * 100
                 price_value_score = max(0, 100 - price_diff_percentage)
 
             # Calculate comprehensive match score
@@ -456,17 +439,17 @@ def search_rooms():
                         'score': float(amenity_match_percentage),
                         'weight': float(weights[4]),
                         'weighted_score': float(round(amenity_match_percentage * float(weights[4]) / 10, 1)),
-                        'matched': [amenity for amenity in required_amenities if amenity in room_amenities],
-                        'missing': [amenity for amenity in required_amenities if amenity not in room_amenities]
+                        'matched': [amenity for amenity in amenities if amenity in room_amenities],
+                        'missing': [amenity for amenity in amenities if amenity not in room_amenities]
                     },
                     'location': {
                         'score': float(location_match_score),
-                        'preferred_location': preference.preferred_location,
+                        'preferred_location': location,
                         'actual_location': room.location
                     },
                     'price_value': {
                         'score': float(price_value_score),
-                        'preferred_max': float(preference.max_price),
+                        'preferred_max': float(max_price),
                         'actual_price': float(room.price)
                     }
                 }
@@ -484,6 +467,7 @@ def search_rooms():
             else:
                 other_matches.append(room_data)
         
+        print("There are", total_rooms)
         return jsonify({
             'summary': {
                 'total_rooms': total_rooms,
@@ -516,4 +500,4 @@ def search_rooms():
         
     except Exception as e:
         current_app.logger.error(f"Error in TOPSIS calculation or room processing: {str(e)}")
-        return jsonify({'error': 'Error in ranking calculation'}), 500 
+        return jsonify({'error': 'Error in ranking calculation'}), 500
