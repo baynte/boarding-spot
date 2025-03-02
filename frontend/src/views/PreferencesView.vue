@@ -65,7 +65,7 @@
                 <v-select
                   v-model="preferences.living_space_type"
                   :items="livingSpaceTypes"
-                  label="Living Space Type"
+                  label="Rental type"
                   hint="Select your preferred type"
                   persistent-hint
                   clearable

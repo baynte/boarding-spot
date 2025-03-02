@@ -186,12 +186,12 @@
             ></v-text-field>
           </v-col>
 
-          <!-- Living Space Type Field -->
+          <!-- Rental type Field -->
           <v-col cols="12" sm="6">
             <v-select
               v-model="editedItem.living_space_type"
               :items="livingSpaceTypes"
-              label="Living Space Type"
+              label="Rental type"
               :rules="[rules.required]"
               hint="Type of living space"
               persistent-hint
@@ -638,7 +638,7 @@ const headers = [
   { title: 'Price', key: 'price' },
   { title: 'Capacity', key: 'capacity' },
   { title: 'Location', key: 'location' },
-  { title: 'Living Space Type', key: 'living_space_type' },
+  { title: 'Rental type', key: 'living_space_type' },
   { title: 'Amenities', key: 'amenities' },
   { title: 'Availability', key: 'availability' },
   { title: 'Actions', key: 'actions', sortable: false },

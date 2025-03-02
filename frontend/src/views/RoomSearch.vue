@@ -123,7 +123,7 @@
               <v-select
                 v-model="filters.livingSpaceType"
                 :items="livingSpaceTypes"
-                label="Living Space Type"
+                label="Rental type"
                 density="comfortable"
                 variant="outlined"
                 hide-details="auto"

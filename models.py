@@ -54,7 +54,7 @@ class TenantPreference(db.Model):
     min_capacity = db.Column(db.Integer, nullable=False, server_default='1')
     preferred_location = db.Column(db.String(200), nullable=False)
     required_amenities = db.Column(db.Text, nullable=False)  # JSON string of required amenities
-    living_space_type = db.Column(db.String(50))  # Add living space type preference
+    living_space_type = db.Column(db.String(50))  # Add Rental type preference
     
     # Weights for TOPSIS criteria (0-1)
     safety_weight = db.Column(db.Float, nullable=False, default=0.25)

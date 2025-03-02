@@ -168,10 +168,10 @@ def search_rooms():
         query = query.filter(Room.location.ilike(f'%{location}%'))
         current_app.logger.debug(f"Filtering by location: '{location}'")
 
-    # Apply living space type filter if provided
+    # Apply Rental type filter if provided
     if living_space_type:
         query = query.filter(Room.living_space_type == living_space_type)
-        current_app.logger.debug(f"Filtering by living space type: {living_space_type}")
+        current_app.logger.debug(f"Filtering by Rental type: {living_space_type}")
 
     # Apply score filters
     query = query.filter(Room.safety_score >= min_safety_score)
@@ -251,7 +251,7 @@ def search_rooms():
             else:
                 location_score = 0.5  # Neutral score if no location preference
             
-            # Calculate living space type match score
+            # Calculate Rental type match score
             if living_space_type:
                 living_space_match = 1.0 if room.living_space_type == living_space_type else 0.0
             else:
@@ -267,7 +267,7 @@ def search_rooms():
                 price_score,         # Price match (0-1)
                 capacity_score,      # Capacity match (0-1)
                 location_score,      # Location match (0-1)
-                living_space_match   # Living space type match (0-1)
+                living_space_match   # Rental type match (0-1)
             ]
             decision_matrix.append(row)
         
@@ -287,7 +287,7 @@ def search_rooms():
             0.10,  # Price weight
             0.10,  # Capacity weight
             0.05,  # Location weight
-            0.05   # Living space type weight
+            0.05   # Rental type weight
         ], dtype=np.float64)
         
         # Normalize weights to sum to 1
