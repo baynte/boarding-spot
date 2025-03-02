@@ -307,17 +307,17 @@
       </div>
 
       <!-- Card Footer -->
-      <!-- <v-card-item class="pa-3 bg-grey-lighten-4">
+      <v-card-item class="bg-grey-lighten-4 mb-2">
         <div class="d-flex align-center justify-space-between">
           <div class="text-subtitle-1">
-            ₱{{ formatPrice(room.price) }}<span class="text-caption">/month</span>
+            Total Distance:
           </div>
           <div class="d-flex align-center">
-            <v-icon size="small" class="me-1">mdi-map-marker</v-icon>
-            <span class="text-body-2">{{ room.location }}</span>
+            <v-icon size="small" class="me-1">mdi-map-marker-distance</v-icon>
+            <span class="text-body-2">{{ calculateDistance }} km from SMCC</span>
           </div>
         </div>
-      </v-card-item> -->
+      </v-card-item>
 
       <!-- Non-clickable rating section -->
       <v-card-text @click.stop>
@@ -465,8 +465,51 @@
                       :zoom="15"
                       class="rounded-lg overflow-hidden"
                       style="height: 300px"
-                      
                     />
+                  </div>
+                  
+                  <!-- Map Details Section -->
+                  <div class="map-details mt-3 bg-grey-lighten-4 pa-3 rounded-lg">
+                    <div class="d-flex justify-space-between align-center mb-2">
+                      <div class="text-subtitle-1 font-weight-medium">Map Details</div>
+                      <v-chip
+                        size="small"
+                        color="primary"
+                        variant="elevated"
+                        class="font-weight-medium"
+                      >
+                        <v-icon start size="small">mdi-map-marker-distance</v-icon>
+                        {{ calculateDistance }} km
+                      </v-chip>
+                    </div>
+                    
+                    <v-divider class="mb-2"></v-divider>
+                    
+                    <!-- SMCC Coordinates -->
+                    <div class="d-flex align-center mb-2">
+                      <v-avatar size="24" color="amber" class="me-2">
+                        <v-icon size="16" color="white">mdi-school</v-icon>
+                      </v-avatar>
+                      <div>
+                        <div class="text-caption text-medium-emphasis">SMCC Location</div>
+                        <div class="text-body-2">
+                          Lat: {{ SMCC_COORDINATES[0] }}, Long: {{ SMCC_COORDINATES[1] }}
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <!-- Room Coordinates -->
+                    <div class="d-flex align-center">
+                      <v-avatar size="24" color="primary" class="me-2">
+                        <v-icon size="16" color="white">mdi-home</v-icon>
+                      </v-avatar>
+                      <div>
+                        <div class="text-caption text-medium-emphasis">Room Location</div>
+                        <div class="text-body-2">
+                          Lat: {{ room.latitude }}, Long: {{ room.longitude }}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <!-- Price Information -->
@@ -665,6 +708,36 @@ const locationScore = computed(() => props.room.match_details?.location?.score |
 const priceValueScore = computed(() => props.room.match_details?.price_value?.score || 0)
 const matchedAmenities = computed(() => props.room.match_details?.amenities?.matched || [])
 const missingAmenities = computed(() => props.room.match_details?.amenities?.missing || [])
+
+// SMCC coordinates (base point)
+const SMCC_COORDINATES = [8.9882671, 125.3404024]
+
+// Calculate distance between room and SMCC
+const calculateDistance = computed(() => {
+  if (!props.room.latitude || !props.room.longitude) return 'N/A'
+  
+  // Haversine formula to calculate distance between two points on Earth
+  const toRad = (value) => (value * Math.PI) / 180
+  const R = 6371 // Earth's radius in km
+  
+  const lat1 = SMCC_COORDINATES[0]
+  const lon1 = SMCC_COORDINATES[1]
+  const lat2 = props.room.latitude
+  const lon2 = props.room.longitude
+  
+  const dLat = toRad(lat2 - lat1)
+  const dLon = toRad(lon2 - lon1)
+  
+  const a = 
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * 
+    Math.sin(dLon / 2) * Math.sin(dLon / 2)
+  
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+  const distance = R * c
+  
+  return distance.toFixed(2)
+})
 
 const router = useRouter()
 
