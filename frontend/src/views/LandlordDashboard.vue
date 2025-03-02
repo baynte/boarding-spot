@@ -75,7 +75,7 @@
       </v-btn>
     </div>
 
-    <!-- Add/Edit Room Dialog -->
+    <!-- Add/Edit Rental Property Dialog -->
     <v-dialog v-model="dialog" max-width="800px" persistent>
       <v-card class="rounded-lg">
       <v-card-title class="d-flex align-center pa-3 bg-primary">
@@ -175,9 +175,9 @@
           <v-col cols="12" sm="6">
             <v-text-field
               v-model="editedItem.location"
-              label="Location"
+              label="Address or Complete Address"
               :rules="[rules.required]"
-              hint="Location of the room"
+              hint="Location of the rental property"
               persistent-hint
               variant="outlined"
               density="comfortable"
@@ -487,7 +487,7 @@
           rounded="pill"
         >
           <v-icon>mdi-pencil</v-icon>
-          <v-tooltip activator="parent" location="top">Edit Room</v-tooltip>
+          <v-tooltip activator="parent" location="top">Edit Rental Property</v-tooltip>
         </v-btn>
 
         <v-btn
@@ -561,7 +561,7 @@ const editedItem = ref({
   longitude: null,
 })
 
-const formTitle = computed(() => (editedItem.value.id ? 'Edit Room' : 'Add Rental type'))
+const formTitle = computed(() => (editedItem.value.id ? 'Edit Rental Property' : 'Add Rental Property'))
 
 const availableRooms = computed(() => rooms.value.filter((room) => room.availability).length)
 const averagePrice = computed(() => {

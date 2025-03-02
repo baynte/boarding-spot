@@ -107,7 +107,7 @@
             <v-col cols="12" sm="6" md="3">
               <v-text-field
                 v-model="filters.location"
-                label="Location"
+                label="Address"
                 clearable
                 :loading="loading"
                 :disabled="loading"
