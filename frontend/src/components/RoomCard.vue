@@ -56,16 +56,16 @@
           </div>
         </div>
 
-        <v-card-text>
-          <div class="d-flex align-center mb-2 px-1">
+        <!-- <v-card-text> -->
+          <!-- <div class="d-flex align-center mb-2 px-1">
             <div class="text-h5 white--text font-weight-bold">₱{{ formatPrice(room.price) }}</div>
             <div class="text-subtitle-2 white--text ms-1">/month</div>
-          </div>
+          </div> -->
 
-          <div class="d-flex align-center mb-3">
-        <v-icon size="22" color="primary" class="me-2">mdi-map-marker</v-icon>
-        <span class="text-body-1 text-truncate">{{ room.location }}</span>
-      </div>
+            <!-- <div class="d-flex align-center mb-3">
+              <v-icon size="22" color="primary" class="me-2">mdi-map-marker</v-icon>
+              <span class="text-body-1 text-truncate">{{ room.location }}</span>
+            </div> -->
 
           <!-- Location Map Preview -->
           <!-- <div v-if="room.latitude && room.longitude" class="mb-2">
@@ -78,27 +78,27 @@
             </div>
           </div> -->
 
-          <div class="d-flex align-center mb-2">
+          <!-- <div class="d-flex align-center mb-2">
             <v-icon size="25" class="me-2">mdi-account-group</v-icon>
             <span class="text-body-2"
               >{{ room.capacity }} tenant{{ room.capacity > 1 ? 's' : '' }}</span
             >
-          </div>
+          </div> -->
 
-          <div class="d-flex align-center mb-2">
+          <!-- <div class="d-flex align-center mb-2">
             <v-icon size="25" class="me-2">mdi-account</v-icon>
             <span class="text-body-2"
               >Contact: {{ room.landlord?.contact_number || 'Not available' }}</span
             >
-          </div>
+          </div> -->
 
-          <div class="d-flex align-center mb-2">
+          <!-- <div class="d-flex align-center mb-2">
             <v-icon size="25" class="me-2">mdi-email</v-icon>
             <span class="text-body-2">{{ room.landlord?.email || 'Email not available' }}</span>
-          </div>
+          </div> -->
 
           <!-- Description -->
-          <div class="text-body-2 description-box mb-4">
+          <!-- <div class="text-body-2 description-box mb-4">
         <v-tooltip location="bottom" max-width="300">
           <template v-slot:activator="{ props }">
             <div v-bind="props" class="text-truncate-2">
@@ -108,10 +108,10 @@
           </template>
           <span>{{ room.description }}</span>
         </v-tooltip>
-      </div>
+      </div> -->
 
           <!-- Amenities -->
-          <v-chip-group class="mb-3" shows-arrows="always">
+          <!-- <v-chip-group class="mb-3" shows-arrows="always">
             <template v-if="match_details?.amenities?.matched?.length">
               <v-chip
                 v-for="amenity in match_details.amenities.matched"
@@ -139,29 +139,29 @@
                 {{ amenity }}
               </v-chip>
             </template>
-          </v-chip-group>
+          </v-chip-group> -->
 
-          <v-divider class="mb-3"></v-divider>
+          <!-- <v-divider class="mb-3"></v-divider> -->
 
           <!-- Match Score Details -->
-          <div class="match-details">
-        <div class="d-flex align-center justify-space-between mb-3">
-          <div class="text-subtitle-1 font-weight-medium">Match Score</div>
-          <v-chip
-            :color="getMatchColor(match_score)"
-            size="small"
-            variant="elevated"
-            label
-            class="font-weight-medium"
-            elevation="8"
-          >
-            {{ Math.round(match_score) }}% Overall
-          </v-chip>
-        </div>
+          <!-- <div class="match-details"> -->
+          <!-- <div class="d-flex align-center justify-space-between mb-3">
+            <div class="text-subtitle-1 font-weight-medium">Match Score</div>
+            <v-chip
+              :color="getMatchColor(match_score)"
+              size="small"
+              variant="elevated"
+              label
+              class="font-weight-medium"
+              elevation="8"
+            >
+              {{ Math.round(match_score) }}% Overall
+            </v-chip>
+          </div> -->
 
-            <v-row dense>
+            <!-- <v-row dense> -->
               <!-- Safety Score -->
-              <v-col cols="12" class="mb-2">
+              <!-- <v-col cols="12" class="mb-2">
                 <div class="d-flex align-center mb-1">
                   <v-icon size="25" :color="getScoreColor(safetyScore)" class="me-1"
                     >mdi-shield-home</v-icon
@@ -178,10 +178,10 @@
                   height="8"
                   rounded
                 ></v-progress-linear>
-              </v-col>
+              </v-col> -->
 
               <!-- Cleanliness Score -->
-              <v-col cols="12" class="mb-2">
+              <!-- <v-col cols="12" class="mb-2">
                 <div class="d-flex align-center mb-1">
                   <v-icon size="25" :color="getScoreColor(cleanlinessScore)" class="me-1"
                     >mdi-broom</v-icon
@@ -198,10 +198,10 @@
                   height="8"
                   rounded
                 ></v-progress-linear>
-              </v-col>
+              </v-col> -->
 
               <!-- Accessibility Score -->
-              <v-col cols="12" class="mb-2">
+              <!-- <v-col cols="12" class="mb-2">
                 <div class="d-flex align-center mb-1">
                   <v-icon size="25" :color="getScoreColor(accessibilityScore)" class="me-1"
                     >mdi-wheelchair-accessibility</v-icon
@@ -218,10 +218,10 @@
                   height="8"
                   rounded
                 ></v-progress-linear>
-              </v-col>
+              </v-col> -->
 
               <!-- Noise Level -->
-              <v-col cols="12" class="mb-2">
+              <!-- <v-col cols="12" class="mb-2">
                 <div class="d-flex align-center mb-1">
                   <v-icon size="25" :color="getScoreColor(10 - noiseScore)" class="me-1"
                     >mdi-volume-medium</v-icon
@@ -238,10 +238,10 @@
                   height="8"
                   rounded
                 ></v-progress-linear>
-              </v-col>
+              </v-col> -->
 
               <!-- Amenity Match -->
-              <v-col cols="12" class="mb-2">
+              <!-- <v-col cols="12" class="mb-2">
                 <div class="d-flex align-center mb-1">
                   <v-icon size="25" :color="getScoreColor(amenityScore / 10)" class="me-1"
                     >mdi-check-circle</v-icon
@@ -258,7 +258,7 @@
                   height="8"
                   rounded
                 ></v-progress-linear>
-              </v-col>
+              </v-col> -->
 
               <!-- Location Match -->
               <!-- <v-col cols="12" class="mb-2">
@@ -283,7 +283,7 @@
               </v-col> -->
 
               <!-- Price Value -->
-              <v-col cols="12">
+              <!-- <v-col cols="12">
                 <div class="d-flex align-center mb-1">
                   <v-icon size="25" :color="getScoreColor(priceValueScore / 10)" class="me-1"
                     >mdi-currency-usd</v-icon
@@ -300,14 +300,14 @@
                   height="8"
                   rounded
                 ></v-progress-linear>
-              </v-col>
-            </v-row>
+              </v-col> -->
+            <!-- </v-row>
           </div>
-        </v-card-text>
+        </v-card-text> -->
       </div>
 
       <!-- Card Footer -->
-      <v-card-item class="pa-3 bg-grey-lighten-4">
+      <!-- <v-card-item class="pa-3 bg-grey-lighten-4">
         <div class="d-flex align-center justify-space-between">
           <div class="text-subtitle-1">
             ₱{{ formatPrice(room.price) }}<span class="text-caption">/month</span>
@@ -317,11 +317,11 @@
             <span class="text-body-2">{{ room.location }}</span>
           </div>
         </div>
-      </v-card-item>
+      </v-card-item> -->
 
       <!-- Non-clickable rating section -->
       <v-card-text @click.stop>
-        <v-divider class="mb-3"></v-divider>
+        <!-- <v-divider class="mb-3"></v-divider> -->
         <div class="d-flex align-center justify-space-between">
           <div class="text-subtitle-1">Tenant Ratings ({{ room.total_ratings || 0 }})</div>
           <rating-dialog
