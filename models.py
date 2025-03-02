@@ -28,7 +28,7 @@ class Room(db.Model):
     location = db.Column(db.String(200))
     latitude = db.Column(db.Float, nullable=True)  # Map pin latitude
     longitude = db.Column(db.Float, nullable=True)  # Map pin longitude
-    living_space_type = db.Column(db.String(50), nullable=False, server_default='Boarding House')  # Type of living space
+    living_space_type = db.Column(db.String(50), nullable=False, server_default='Boarding House')  # Type of Rental type
     amenities = db.Column(db.Text)  # JSON string of amenities
     availability = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)

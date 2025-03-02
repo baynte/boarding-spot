@@ -5,20 +5,20 @@
         color="primary"
         v-bind="props"
         :disabled="!canRate"
-        :title="!canRate ? 'Only tenants can rate living spaces' : ''"
+        :title="!canRate ? 'Only tenants can rate Rental types' : ''"
         @click.stop
         variant="elevated"
         prepend-icon="mdi-star"
         class="px-4 py-2"
         elevation="10"
       >
-        {{ hasRated ? 'Update Rating' : 'Rate Living Space' }}
+        {{ hasRated ? 'Update Rating' : 'Rate Rental type' }}
       </v-btn>
     </template>
 
     <v-card elevation="8" class="rounded-lg">
       <v-card-title class="py-4 px-6 bg-primary text-white">
-        <span class="text-h5 font-weight-medium">{{ hasRated ? 'Update Rating' : 'Rate Living Space' }}</span>
+        <span class="text-h5 font-weight-medium">{{ hasRated ? 'Update Rating' : 'Rate Rental type' }}</span>
       </v-card-title>
 
       <v-card-text class="pt-5">

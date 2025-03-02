@@ -1,6 +1,6 @@
 <template>
   <div class="preferences-container pa-4">
-    <h1 class="text-h4 mb-6 mt-6 text-left primary--text">Living Space Preferences</h1>
+    <h1 class="text-h4 mb-6 mt-6 text-left primary--text">Rental type Preferences</h1>
 
     <v-card elevation="3" class="rounded-lg">
       <v-card-text>

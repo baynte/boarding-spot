@@ -142,8 +142,8 @@
           class="mb-4"
           icon="mdi-home-search"
         ></v-icon>
-        <h3 class="text-h6 font-weight-bold mb-3">Search Living Spaces</h3>
-        <p class="text-body-1 text-grey-darken-1 mb-6">Find your perfect living space based on your preferences</p>
+        <h3 class="text-h6 font-weight-bold mb-3">Search Rental types</h3>
+        <p class="text-body-1 text-grey-darken-1 mb-6">Find your perfect Rental type based on your preferences</p>
         <v-btn
           color="primary"
           size="large"

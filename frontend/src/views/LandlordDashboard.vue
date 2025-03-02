@@ -71,7 +71,7 @@
     <!-- Add Room Button -->
     <div class="d-flex justify-end mb-4">
       <v-btn color="primary" prepend-icon="mdi-plus" @click="dialog = true">
-        Add Living Space
+        Add Rental type
       </v-btn>
     </div>
 
@@ -193,7 +193,7 @@
               :items="livingSpaceTypes"
               label="Rental type"
               :rules="[rules.required]"
-              hint="Type of living space"
+              hint="Type of Rental type"
               persistent-hint
               variant="outlined"
               density="comfortable"
@@ -366,7 +366,7 @@
         <v-col cols="12" sm="5">
         <div class="d-flex align-center">
           <v-icon size="24" color="primary" class="mr-2">mdi-format-list-bulleted</v-icon>
-          <span class="text-h6 font-weight-medium">Living Spaces</span>
+          <span class="text-h6 font-weight-medium">Rental types</span>
         </div>
         </v-col>
         <v-col cols="12" sm="6">
@@ -561,7 +561,7 @@ const editedItem = ref({
   longitude: null,
 })
 
-const formTitle = computed(() => (editedItem.value.id ? 'Edit Room' : 'Add Living Space'))
+const formTitle = computed(() => (editedItem.value.id ? 'Edit Room' : 'Add Rental type'))
 
 const availableRooms = computed(() => rooms.value.filter((room) => room.availability).length)
 const averagePrice = computed(() => {

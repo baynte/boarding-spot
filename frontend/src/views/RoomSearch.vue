@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1 class="text-h4 mb-4 mt-10">Living Space Search</h1>
+    <h1 class="text-h4 mb-4 mt-10">Rental type Search</h1>
 
     <!-- Warning if preferences not set -->
     <v-alert v-if="!hasPreferences" type="warning" class="mb-4">
