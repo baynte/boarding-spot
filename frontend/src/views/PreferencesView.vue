@@ -6,149 +6,258 @@
       <v-card-text>
         <v-form @submit.prevent="savePreferences" ref="form">
           <v-container>
-            <!-- Basic Information Section -->
-            <v-row>
-              <v-col cols="12">
-                <div class="text-h6 mb-4 primary--text">
-                  <v-icon icon="mdi-information" class="mr-2"></v-icon>
-                  Basic Information
-                </div>
-              </v-col>
+        <!-- Basic Information Section -->
+        <v-row>
+          <v-col cols="12">
+            <h2 class="text-h6 d-flex align-center primary--text font-weight-medium">
+          <v-icon icon="mdi-information-outline" class="mr-2"></v-icon>
+          Basic Information
+            </h2>
+            <v-divider class="mt-2 mb-4"></v-divider>
+          </v-col>
 
-              <v-col cols="12" md="6">
-                <v-text-field
-                  v-model="preferences.max_price"
-                  label="Maximum Price"
-                  type="number"
-                  prefix="₱"
-                  :rules="[rules.required, rules.positive]"
-                  hint="Your maximum budget for rent"
-                  persistent-hint
-                  validate-on="blur"
-                  :error-messages="errors.max_price"
-                  variant="outlined"
-                  density="comfortable"
-                ></v-text-field>
-              </v-col>
+          <v-col cols="12" md="6">
+            <v-text-field
+          v-model="preferences.max_price"
+          label="Maximum Price"
+          type="number"
+          prefix="₱"
+          :rules="[rules.required, rules.positive]"
+          hint="Your maximum budget for rent"
+          persistent-hint
+          validate-on="blur"
+          :error-messages="errors.max_price"
+          variant="outlined"
+          density="comfortable"
+          class="custom-input"
+          bg-color="grey-lighten-4"
+            ></v-text-field>
+          </v-col>
 
-              <v-col cols="12" md="6">
-                <v-text-field
-                  v-model="preferences.min_capacity"
-                  label="Minimum Capacity"
-                  type="number"
-                  :rules="[rules.required, rules.positive]"
-                  hint="Minimum number of people"
-                  persistent-hint
-                  validate-on="blur"
-                  :error-messages="errors.min_capacity"
-                  variant="outlined"
-                  density="comfortable"
-                ></v-text-field>
-              </v-col>
+          <v-col cols="12" md="6">
+            <v-text-field
+          v-model="preferences.min_capacity"
+          label="Minimum Capacity"
+          type="number"
+          :rules="[rules.required, rules.positive]"
+          hint="Minimum number of people"
+          persistent-hint
+          validate-on="blur"
+          :error-messages="errors.min_capacity"
+          variant="outlined"
+          density="comfortable"
+          bg-color="grey-lighten-4"
+          prepend-inner-icon="mdi-account-group"
+            ></v-text-field>
+          </v-col>
 
-              <v-col cols="12" md="6">
-                <v-text-field
-                  v-model="preferences.preferred_location"
-                  label="Preferred Location"
-                  :rules="[rules.required]"
-                  hint="Your preferred area or neighborhood"
-                  persistent-hint
-                  validate-on="blur"
-                  :error-messages="errors.preferred_location"
-                  variant="outlined"
-                  density="comfortable"
-                  prepend-inner-icon="mdi-map-marker"
-                ></v-text-field>
-              </v-col>
+          <v-col cols="12" md="6">
+            <v-text-field
+          v-model="preferences.preferred_location"
+          label="Preferred Location"
+          :rules="[rules.required]"
+          hint="Your preferred area or neighborhood"
+          persistent-hint
+          validate-on="blur"
+          :error-messages="errors.preferred_location"
+          variant="outlined"
+          density="comfortable"
+          bg-color="grey-lighten-4"
+          prepend-inner-icon="mdi-map-marker"
+            ></v-text-field>
+          </v-col>
 
-              <v-col cols="12" md="6">
-                <v-select
-                  v-model="preferences.living_space_type"
-                  :items="livingSpaceTypes"
-                  label="Rental type"
-                  hint="Select your preferred type"
-                  persistent-hint
-                  clearable
-                  :error-messages="errors.living_space_type"
-                  variant="outlined"
-                  density="comfortable"
-                  prepend-inner-icon="mdi-home"
-                ></v-select>
-              </v-col>
+          <v-col cols="12" md="6">
+            <v-select
+          v-model="preferences.living_space_type"
+          :items="livingSpaceTypes"
+          label="Rental type"
+          hint="Select your preferred type"
+          persistent-hint
+          clearable
+          :error-messages="errors.living_space_type"
+          variant="outlined"
+          density="comfortable"
+          bg-color="grey-lighten-4"
+          prepend-inner-icon="mdi-home-outline"
+            ></v-select>
+          </v-col>
 
-              <v-col cols="12">
-                <v-combobox
-                  v-model="preferences.required_amenities"
-                  :items="commonAmenities"
-                  label="Required Amenities"
-                  multiple
-                  chips
-                  closable-chips
-                  clearable
-                  :rules="[rules.required, rules.amenities]"
-                  hint="Select important amenities"
-                  persistent-hint
-                  validate-on="blur"
-                  :error-messages="errors.required_amenities"
-                  variant="outlined"
-                  density="comfortable"
-                ></v-combobox>
-              </v-col>
-            </v-row>
+          <v-col cols="12">
+            <v-combobox
+          v-model="preferences.required_amenities"
+          :items="commonAmenities"
+          label="Required Amenities"
+          multiple
+          chips
+          closable-chips
+          clearable
+          :rules="[rules.required, rules.amenities]"
+          hint="Select important amenities"
+          persistent-hint
+          validate-on="blur"
+          :error-messages="errors.required_amenities"
+          variant="outlined"
+          density="comfortable"
+          bg-color="grey-lighten-4"
+          prepend-inner-icon="mdi-star-outline"
+            ></v-combobox>
+          </v-col>
+        </v-row>
 
-            <!-- Importance Weights Section -->
-            <v-row class="mt-6">
-              <v-col cols="12">
-                <div class="text-h6 primary--text d-flex align-center">
-                  <v-icon icon="mdi-scale-balance" class="mr-2"></v-icon>
-                  Importance Weights
-                  <v-tooltip location="right">
-                    <template v-slot:activator="{ props }">
-                      <v-icon v-bind="props" icon="mdi-help-circle" class="ml-2" size="small"></v-icon>
-                    </template>
-                    <span>Adjust these values to prioritize your preferences. Total must equal 100%.</span>
-                  </v-tooltip>
-                </div>
-                <div class="text-caption mb-4">All weights must sum to 100%</div>
-              </v-col>
+        <!-- Importance Weights Section -->
+        <v-row class="mt-8">
+          <v-col cols="12">
+            <h2 class="text-h6 d-flex align-center primary--text font-weight-medium">
+          <v-icon icon="mdi-scale-balance" class="mr-2"></v-icon>
+          Importance Weights
+          <v-tooltip location="right">
+            <template v-slot:activator="{ props }">
+              <v-icon
+            v-bind="props"
+            icon="mdi-help-circle-outline"
+            class="ml-2"
+            size="small"
+            color="grey"
+              ></v-icon>
+            </template>
+            <span>Adjust these values to prioritize your preferences. Total must equal 100%.</span>
+          </v-tooltip>
+            </h2>
+            <v-divider class="mt-2 mb-4"></v-divider>
+          </v-col>
 
-              <v-col cols="12" sm="6" v-for="(value, key) in weights" :key="key">
-                <v-card flat class="pa-7">
-                  <v-slider
-                    v-model="weights[key]"
-                    :label="key.charAt(0).toUpperCase() + key.slice(1)"
-                    thumb-label="always"
-                    :min="0"
-                    :max="100"
-                    :step="5"
-                    @update:model-value="normalizeWeights(key)"
-                    class="ml-2"
-                  >
-                    <template v-slot:append>
-                      <v-text-field
-                        v-model="weights[key]"
-                        type="number"
-                        style="width: 70px"
-                        density="compact"
-                        hide-details
-                        variant="outlined"
-                        @update:model-value="normalizeWeights(key)"
-                      ></v-text-field>
-                    </template>
-                  </v-slider>
-                </v-card>
-              </v-col>
+          <v-col cols="12" md="6" class="pb-0">
+            <v-card flat class="pa-4 rounded-lg bg-grey-lighten-4">
+          <div class="d-flex align-center mb-2">
+            <v-icon icon="mdi-shield-check" color="success" class="mr-2"></v-icon>
+            <span class="text-subtitle-1">Safety</span>
+          </div>
+          <v-slider
+            v-model="weights.safety"
+            :min="0"
+            :max="100"
+            :step="5"
+            @update:model-value="normalizeWeights('safety')"
+            color="success"
+          >
+            <template v-slot:append>
+              <v-text-field
+            v-model="weights.safety"
+            type="number"
+            style="width: 70px"
+            density="compact"
+            hide-details
+            variant="outlined"
+            @update:model-value="normalizeWeights('safety')"
+              ></v-text-field>
+            </template>
+          </v-slider>
+            </v-card>
+          </v-col>
 
-              <v-col cols="12">
-                <v-alert
-                  :type="totalWeight === 100 ? 'success' : 'warning'"
-                  variant="tonal"
-                  class="mt-2"
-                >
-                  Total Weight: {{ totalWeight }}%
-                </v-alert>
-              </v-col>
-            </v-row>
+          <v-col cols="12" md="6" class="pb-0">
+            <v-card flat class="pa-4 rounded-lg bg-grey-lighten-4">
+          <div class="d-flex align-center mb-2">
+            <v-icon icon="mdi-broom" color="info" class="mr-2"></v-icon>
+            <span class="text-subtitle-1">Cleanliness</span>
+          </div>
+          <v-slider
+            v-model="weights.cleanliness"
+            :min="0"
+            :max="100"
+            :step="5"
+            @update:model-value="normalizeWeights('cleanliness')"
+            color="info"
+          >
+            <template v-slot:append>
+              <v-text-field
+            v-model="weights.cleanliness"
+            type="number"
+            style="width: 70px"
+            density="compact"
+            hide-details
+            variant="outlined"
+            @update:model-value="normalizeWeights('cleanliness')"
+              ></v-text-field>
+            </template>
+          </v-slider>
+            </v-card>
+          </v-col>
+
+          <v-col cols="12" md="6">
+            <v-card flat class="pa-4 rounded-lg bg-grey-lighten-4">
+          <div class="d-flex align-center mb-2">
+            <v-icon icon="mdi-map-marker-path" color="warning" class="mr-2"></v-icon>
+            <span class="text-subtitle-1">Accessibility</span>
+          </div>
+          <v-slider
+            v-model="weights.accessibility"
+            :min="0"
+            :max="100"
+            :step="5"
+            @update:model-value="normalizeWeights('accessibility')"
+            color="warning"
+          >
+            <template v-slot:append>
+              <v-text-field
+            v-model="weights.accessibility"
+            type="number"
+            style="width: 70px"
+            density="compact"
+            hide-details
+            variant="outlined"
+            @update:model-value="normalizeWeights('accessibility')"
+              ></v-text-field>
+            </template>
+          </v-slider>
+            </v-card>
+          </v-col>
+
+          <v-col cols="12" md="6">
+            <v-card flat class="pa-4 rounded-lg bg-grey-lighten-4">
+          <div class="d-flex align-center mb-2">
+            <v-icon icon="mdi-volume-medium" color="error" class="mr-2"></v-icon>
+            <span class="text-subtitle-1">Noise Level</span>
+          </div>
+          <v-slider
+            v-model="weights.noise"
+            :min="0"
+            :max="100"
+            :step="5"
+            @update:model-value="normalizeWeights('noise')"
+            color="error"
+          >
+            <template v-slot:append>
+              <v-text-field
+            v-model="weights.noise"
+            type="number"
+            style="width: 70px"
+            density="compact"
+            hide-details
+            variant="outlined"
+            @update:model-value="normalizeWeights('noise')"
+              ></v-text-field>
+            </template>
+          </v-slider>
+            </v-card>
+          </v-col>
+
+          <v-col cols="12">
+            <v-alert
+          :type="totalWeight === 100 ? 'success' : 'warning'"
+          variant="tonal"
+          :icon="totalWeight === 100 ? 'mdi-check-circle' : 'mdi-alert'"
+          class="mt-4"
+          density="comfortable"
+            >
+          <strong>Total Weight: {{ totalWeight }}%</strong>
+          <div v-if="totalWeight !== 100" class="text-caption mt-1">
+            Please adjust the weights to sum up to 100%
+          </div>
+            </v-alert>
+          </v-col>
+        </v-row>
           </v-container>
         </v-form>
       </v-card-text>
@@ -192,14 +301,14 @@ const preferences = ref({
   min_capacity: null,
   preferred_location: '',
   required_amenities: [],
-  living_space_type: null
+  living_space_type: null,
 })
 
 const weights = ref({
   safety: 25,
   cleanliness: 25,
   accessibility: 25,
-  noise: 25
+  noise: 25,
 })
 
 const errors = ref({
@@ -208,7 +317,7 @@ const errors = ref({
   preferred_location: '',
   required_amenities: '',
   weights: '',
-  living_space_type: ''
+  living_space_type: '',
 })
 
 const totalWeight = computed(() => {
@@ -216,50 +325,62 @@ const totalWeight = computed(() => {
 })
 
 const isFormValid = computed(() => {
-  return totalWeight.value === 100 &&
-         preferences.value.max_price > 0 &&
-         preferences.value.min_capacity > 0 &&
-         preferences.value.preferred_location.trim() !== '' &&
-         preferences.value.required_amenities.length > 0 &&
-         preferences.value.living_space_type !== null
+  return (
+    totalWeight.value === 100 &&
+    preferences.value.max_price > 0 &&
+    preferences.value.min_capacity > 0 &&
+    preferences.value.preferred_location.trim() !== '' &&
+    preferences.value.required_amenities.length > 0 &&
+    preferences.value.living_space_type !== null
+  )
 })
 
 const commonAmenities = [
-  'WiFi',
-  'Air Conditioning',
+'Air Conditioning',
+  'Appliances',
+  'Backyard or garden',
+  'CCTV',
+  'Closet',
+  'Common CR',
+  'Convenient Store',
+  'Curfew policy',
+  'Double-Deck Bed',
+  'Electricity Included',
+  'Elevator',
+  'Fan',
+  'Fire Exits',
+  'Fire Extinguisher',
+  'Furnished',
+  'Function room',
+  'Gated property',
+  'Gas/Induction Stove',
+  'Gym/Fitness Gym',
   'Heating',
   'Kitchen',
   'Laundry',
-  'Parking',
-  'TV',
-  'Private Bathroom',
-  'Study Desk',
-  'Closet',
-  'CCTV',
-  'Fire Exits',
-  'Common CR',
-  'Appliances',
-  'Receiving Area',
-  'Furnished',
-  'Single bed',
-  'Double-Deck Bed',
-  'Refrigerator',
-  'Washing Machine',
+  'Living room area',
   'Microwave',
-  'Fan',
-  'Gas/Induction Stove',
-  'Rice cooker',
+  'Outdoor space',
+  'Parking',
   'Pet-friendly',
-  'Security Keycard',
+  'Phone',
+  'Private Bathroom',
+  'Private garage',
+  'Receiving Area',
+  'Refrigerator',
+  'Rice cooker',
   'Security Fingerprint',
   'Security Guard',
-  'Elevator',
-  'Convenient Store',
-  'Phone',
-  'Electricity Included',
-  'Water included',
-  'Gym/Fitness Gym',
+  'Security Keycard',
+  'Single bed',
+  'Storage room',
+  'Study Desk',
   'Swimming Pool',
+  'TV',
+  'Unfurnished',
+  'Washing Machine',
+  'Water included',
+  'WiFi',
 ]
 
 const livingSpaceTypes = [
@@ -267,13 +388,17 @@ const livingSpaceTypes = [
   'Apartment',
   'House',
   'Dormitory',
-  'Condo Unit'
+  'Condo Unit',
+  'Inn',
+  'Hotel',
+  'Resort',
+  'Others',
 ]
 
 const rules = {
-  required: v => !!v || 'Field is required',
-  positive: v => v > 0 || 'Must be greater than 0',
-  amenities: v => v && v.length > 0 || 'At least one amenity is required'
+  required: (v) => !!v || 'Field is required',
+  positive: (v) => v > 0 || 'Must be greater than 0',
+  amenities: (v) => (v && v.length > 0) || 'At least one amenity is required',
 }
 
 onMounted(async () => {
@@ -289,13 +414,13 @@ const fetchPreferences = async () => {
         min_capacity: response.data.min_capacity,
         preferred_location: response.data.preferred_location,
         required_amenities: response.data.required_amenities,
-        living_space_type: response.data.living_space_type
+        living_space_type: response.data.living_space_type,
       }
       weights.value = {
         safety: response.data.safety_weight * 100,
         cleanliness: response.data.cleanliness_weight * 100,
         accessibility: response.data.accessibility_weight * 100,
-        noise: response.data.noise_level_weight * 100
+        noise: response.data.noise_level_weight * 100,
       }
     }
   } catch (error) {
@@ -307,21 +432,21 @@ const fetchPreferences = async () => {
 
 const normalizeWeights = (changedWeight) => {
   // Convert all weights to numbers first
-  Object.keys(weights.value).forEach(key => {
+  Object.keys(weights.value).forEach((key) => {
     weights.value[key] = Number(weights.value[key]) || 0
   })
 
   const total = Object.values(weights.value).reduce((sum, weight) => sum + weight, 0)
   if (total === 0) {
     // Reset to default equal weights if total is 0
-    Object.keys(weights.value).forEach(key => {
+    Object.keys(weights.value).forEach((key) => {
       weights.value[key] = 25
     })
     return
   }
 
   const factor = 100 / total
-  Object.keys(weights.value).forEach(key => {
+  Object.keys(weights.value).forEach((key) => {
     if (key !== changedWeight) {
       weights.value[key] = Math.round(weights.value[key] * factor)
     }
@@ -368,7 +493,7 @@ const savePreferences = async () => {
       safety_weight: weights.value.safety / 100,
       cleanliness_weight: weights.value.cleanliness / 100,
       accessibility_weight: weights.value.accessibility / 100,
-      noise_level_weight: weights.value.noise / 100
+      noise_level_weight: weights.value.noise / 100,
     })
 
     snackbarText.value = 'Preferences saved successfully'

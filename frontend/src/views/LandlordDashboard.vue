@@ -76,7 +76,7 @@
     </div>
 
     <!-- Add/Edit Rental Property Dialog -->
-    <v-dialog v-model="dialog" max-width="800px" persistent>
+    <v-dialog v-model="dialog" max-width="800px" @click:outside="close">
       <v-card class="rounded-lg">
       <v-card-title class="d-flex align-center pa-3 bg-primary">
         <v-icon size="25" color="white" class="mr-2">
@@ -90,6 +90,7 @@
         size="small"
         color="white"
         @click="close"
+        
         ></v-btn>
       </v-card-title>
 
@@ -411,7 +412,7 @@
           :class="{ 'img-hover': isHovering }"
           >
           <template v-slot:placeholder>
-            <v-row class="fill-height ma-0" align="center" justify="center">
+            <v-row class="fill-height ma-0" align-items ="center" justify="center">
             <v-progress-circular indeterminate color="primary"></v-progress-circular>
             </v-row>
           </template>
@@ -441,25 +442,44 @@
       <!-- Amenities Column -->
       <template v-slot:item.amenities="{ item }">
         <div class="d-flex flex-wrap gap-1">
-        <v-chip
-          v-for="(amenity, index) in item.amenities.slice(0, 2)"
+          <v-chip
+        v-for="(amenity, index) in item.amenities.slice(0, 2)"
+        :key="index"
+        size="x-small"
+        variant="flat"
+        color="primary"
+        class="ma-1"
+          >
+        {{ amenity }}
+          </v-chip>
+          <v-menu
+        v-if="item.amenities.length > 2"
+        location="bottom"
+          >
+        <template v-slot:activator="{ props }">
+          <v-chip
+            v-bind="props"
+            size="x-small"
+            variant="outlined"
+            color="success"
+            class="ma-1"
+            style="cursor: pointer"
+          >
+            +{{ item.amenities.length - 2 }} more
+          </v-chip>
+        </template>
+        <v-card min-width="200" class="pa-2">
+          <v-list density="compact">
+            <v-list-item
+          v-for="(amenity, index) in item.amenities.slice(2)"
           :key="index"
-          size="x-small"
-          variant="flat"
-          color="primary"
-          class="ma-1"
-        >
-          {{ amenity }}
-        </v-chip>
-        <v-chip
-          v-if="item.amenities.length > 2"
-          size="x-small"
-          variant="outlined"
-          color="grey"
-          class="ma-1"
-        >
-          +{{ item.amenities.length - 2 }} more
-        </v-chip>
+          :title="amenity"
+          color="success"
+          prepend-icon="mdi-check-circle"
+            ></v-list-item>
+          </v-list>
+        </v-card>
+          </v-menu>
         </div>
       </template>
 
@@ -480,7 +500,7 @@
         <div class="d-flex gap-2">
         <v-btn
           variant="flat"
-          size="small"
+          size="38"
           color="primary"
           @click="editItem(item)"
           class="action-btn"
@@ -492,10 +512,10 @@
 
         <v-btn
           variant="flat" 
-          size="small"
+          size="38"
           :color="item.availability ? 'error' : 'success'"
           @click="toggleAvailability(item)"
-          class="action-btn"
+          class="action-btn ml-1"
           rounded="pill"
         >
           <v-icon>{{ item.availability ? 'mdi-close' : 'mdi-check' }}</v-icon>
@@ -506,10 +526,10 @@
 
         <v-btn
           variant="flat"
-          size="small"
+          size="38"
           color="error"
           @click="deleteItem(item)"
-          class="action-btn"
+          class="action-btn ml-1"
           rounded="pill"
         >
           <v-icon>mdi-delete</v-icon>
@@ -544,7 +564,7 @@ const mapRef = ref(null)
 
 const markerPosition = ref(null)
 
-const livingSpaceTypes = ['Boarding House', 'Apartment', 'House', 'Dormitory', 'Condo Unit']
+const livingSpaceTypes = ['Boarding House', 'Apartment', 'House', 'Dormitory', 'Condo Unit', 'Inn', 'Hotel', 'Resort', 'Others']
 
 const editedItem = ref({
   id: null,
@@ -571,41 +591,51 @@ const averagePrice = computed(() => {
 })
 
 const commonAmenities = [
-  'WiFi',
   'Air Conditioning',
+  'Appliances',
+  'Backyard or garden',
+  'CCTV',
+  'Closet',
+  'Common CR',
+  'Convenient Store',
+  'Curfew policy',
+  'Double-Deck Bed',
+  'Electricity Included',
+  'Elevator',
+  'Fan',
+  'Fire Exits',
+  'Fire Extinguisher',
+  'Furnished',
+  'Function room',
+  'Gated property',
+  'Gas/Induction Stove',
+  'Gym/Fitness Gym',
   'Heating',
   'Kitchen',
   'Laundry',
-  'Parking',
-  'TV',
-  'Private Bathroom',
-  'Study Desk',
-  'Closet',
-  'CCTV',
-  'Fire Exits',
-  'Common CR',
-  'Appliances',
-  'Receiving Area',
-  'Furnished',
-  'Single bed',
-  'Double-Deck Bed',
-  'Refrigerator',
-  'Washing Machine',
+  'Living room area',
   'Microwave',
-  'Fan',
-  'Gas/Induction Stove',
-  'Rice cooker',
+  'Outdoor space',
+  'Parking',
   'Pet-friendly',
-  'Security Keycard',
+  'Phone',
+  'Private Bathroom',
+  'Private garage',
+  'Receiving Area',
+  'Refrigerator',
+  'Rice cooker',
   'Security Fingerprint',
   'Security Guard',
-  'Elevator',
-  'Convenient Store',
-  'Phone',
-  'Electricity Included',
-  'Water included',
-  'Gym/Fitness Gym',
+  'Security Keycard',
+  'Single bed',
+  'Storage room',
+  'Study Desk',
   'Swimming Pool',
+  'TV',
+  'Unfurnished',
+  'Washing Machine',
+  'Water included',
+  'WiFi',
 ]
 
 const rules = {

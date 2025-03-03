@@ -186,7 +186,7 @@
       </v-col>
 
       <v-col cols="12" sm="6" md="4">
-      <v-card elevation="2" rounded="lg" class="action-card">
+      <v-card elevation="12" rounded="lg" class="action-card">
         <v-card-text class="text-center pa-6">
         <v-icon
           color="primary"

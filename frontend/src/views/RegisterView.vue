@@ -70,6 +70,7 @@
                   density="comfortable"
                   class="mt-6"
                   required
+                   @keyup.enter="handleSubmit"
                 ></v-select>
               </v-form>
             </v-card-text>

@@ -57,15 +57,15 @@
         </div>
 
         <!-- <v-card-text> -->
-          <!-- <div class="d-flex align-center mb-2 px-1">
-            <div class="text-h5 white--text font-weight-bold">₱{{ formatPrice(room.price) }}</div>
+           <div class="d-flex align-center mb-2 px-1">
+            <div class="text-h5 white--text font-weight-bold px-3">₱{{ formatPrice(room.price) }}</div>
             <div class="text-subtitle-2 white--text ms-1">/month</div>
-          </div> -->
+          </div> 
 
-            <!-- <div class="d-flex align-center mb-3">
+            <div class="d-flex align-center mb-3 px-3"> 
               <v-icon size="22" color="primary" class="me-2">mdi-map-marker</v-icon>
               <span class="text-body-1 text-truncate">{{ room.location }}</span>
-            </div> -->
+            </div> 
 
           <!-- Location Map Preview -->
           <!-- <div v-if="room.latitude && room.longitude" class="mb-2">
@@ -143,102 +143,107 @@
 
           <!-- <v-divider class="mb-3"></v-divider> -->
 
-          <!-- Match Score Details -->
-          <!-- <div class="match-details"> -->
-          <!-- <div class="d-flex align-center justify-space-between mb-3">
-            <div class="text-subtitle-1 font-weight-medium">Match Score</div>
-            <v-chip
-              :color="getMatchColor(match_score)"
-              size="small"
-              variant="elevated"
-              label
-              class="font-weight-medium"
-              elevation="8"
-            >
-              {{ Math.round(match_score) }}% Overall
-            </v-chip>
-          </div> -->
-
-            <!-- <v-row dense> -->
-              <!-- Safety Score -->
-              <!-- <v-col cols="12" class="mb-2">
-                <div class="d-flex align-center mb-1">
-                  <v-icon size="25" :color="getScoreColor(safetyScore)" class="me-1"
-                    >mdi-shield-home</v-icon
-                  >
-                  <span class="text-body-2">Safety</span>
-                  <v-spacer></v-spacer>
+          <!-- Match Score Details Dropdown -->
+            <v-expansion-panels class="mb-4" @click.stop>
+            <v-expansion-panel>
+              <v-expansion-panel-title>
+              <div class="d-flex align-center justify-space-between w-100">
+                <div class="d-flex align-center">
+                <v-icon icon="mdi-chart-bar" class="me-2"></v-icon>
+                <span class="text-subtitle-1">Match Score Details</span>
+                </div>
+              </div>
+              </v-expansion-panel-title>
+              
+              <v-expansion-panel-text>
+              <v-list class="pa-0">
+                <!-- Safety Score -->
+                <v-list-item>
+                <div class="w-100">
+                  <div class="d-flex align-center justify-space-between mb-1">
+                  <div class="d-flex align-center">
+                    <v-icon size="20" :color="getScoreColor(safetyScore)" class="me-2">mdi-shield-home</v-icon>
+                    <span class="text-body-2">Safety Score</span>
+                  </div>
                   <v-chip size="x-small" :color="getScoreColor(safetyScore)" label>
                     {{ safetyScore }}/10
                   </v-chip>
-                </div>
-                <v-progress-linear
+                  </div>
+                  <v-progress-linear
                   :model-value="safetyScore * 10"
                   :color="getScoreColor(safetyScore)"
-                  height="8"
+                  height="6"
                   rounded
-                ></v-progress-linear>
-              </v-col> -->
+                  ></v-progress-linear>
+                </div>
+                </v-list-item>
 
-              <!-- Cleanliness Score -->
-              <!-- <v-col cols="12" class="mb-2">
-                <div class="d-flex align-center mb-1">
-                  <v-icon size="25" :color="getScoreColor(cleanlinessScore)" class="me-1"
-                    >mdi-broom</v-icon
-                  >
-                  <span class="text-body-2">Cleanliness</span>
-                  <v-spacer></v-spacer>
+                <!-- Cleanliness Score -->
+                <v-list-item>
+                <div class="w-100">
+                  <div class="d-flex align-center justify-space-between mb-1">
+                  <div class="d-flex align-center">
+                    <v-icon size="20" :color="getScoreColor(cleanlinessScore)" class="me-2">mdi-broom</v-icon>
+                    <span class="text-body-2">Cleanliness Score</span>
+                  </div>
                   <v-chip size="x-small" :color="getScoreColor(cleanlinessScore)" label>
                     {{ cleanlinessScore }}/10
                   </v-chip>
-                </div>
-                <v-progress-linear
+                  </div>
+                  <v-progress-linear
                   :model-value="cleanlinessScore * 10"
                   :color="getScoreColor(cleanlinessScore)"
-                  height="8"
+                  height="6"
                   rounded
-                ></v-progress-linear>
-              </v-col> -->
+                  ></v-progress-linear>
+                </div>
+                </v-list-item>
 
-              <!-- Accessibility Score -->
-              <!-- <v-col cols="12" class="mb-2">
-                <div class="d-flex align-center mb-1">
-                  <v-icon size="25" :color="getScoreColor(accessibilityScore)" class="me-1"
-                    >mdi-wheelchair-accessibility</v-icon
-                  >
-                  <span class="text-body-2">Accessibility</span>
-                  <v-spacer></v-spacer>
+                <!-- Accessibility Score -->
+                <v-list-item>
+                <div class="w-100">
+                  <div class="d-flex align-center justify-space-between mb-1">
+                  <div class="d-flex align-center">
+                    <v-icon size="20" :color="getScoreColor(accessibilityScore)" class="me-2">mdi-wheelchair-accessibility</v-icon>
+                    <span class="text-body-2">Accessibility Score</span>
+                  </div>
                   <v-chip size="x-small" :color="getScoreColor(accessibilityScore)" label>
                     {{ accessibilityScore }}/10
                   </v-chip>
-                </div>
-                <v-progress-linear
+                  </div>
+                  <v-progress-linear
                   :model-value="accessibilityScore * 10"
                   :color="getScoreColor(accessibilityScore)"
-                  height="8"
+                  height="6"
                   rounded
-                ></v-progress-linear>
-              </v-col> -->
+                  ></v-progress-linear>
+                </div>
+                </v-list-item>
 
-              <!-- Noise Level -->
-              <!-- <v-col cols="12" class="mb-2">
-                <div class="d-flex align-center mb-1">
-                  <v-icon size="25" :color="getScoreColor(10 - noiseScore)" class="me-1"
-                    >mdi-volume-medium</v-icon
-                  >
-                  <span class="text-body-2">Noise Level</span>
-                  <v-spacer></v-spacer>
+                <!-- Noise Level -->
+                <v-list-item>
+                <div class="w-100">
+                  <div class="d-flex align-center justify-space-between mb-1">
+                  <div class="d-flex align-center">
+                    <v-icon size="20" :color="getScoreColor(10 - noiseScore)" class="me-2">mdi-volume-medium</v-icon>
+                    <span class="text-body-2">Noise Level</span>
+                  </div>
                   <v-chip size="x-small" :color="getScoreColor(10 - noiseScore)" label>
                     {{ noiseScore }}/10
                   </v-chip>
-                </div>
-                <v-progress-linear
+                  </div>
+                  <v-progress-linear
                   :model-value="(10 - noiseScore) * 10"
                   :color="getScoreColor(10 - noiseScore)"
-                  height="8"
+                  height="6"
                   rounded
-                ></v-progress-linear>
-              </v-col> -->
+                  ></v-progress-linear>
+                </div>
+                </v-list-item>
+              </v-list>
+              </v-expansion-panel-text>
+            </v-expansion-panel>
+            </v-expansion-panels>
 
               <!-- Amenity Match -->
               <!-- <v-col cols="12" class="mb-2">
@@ -520,7 +525,7 @@
 
                 <!-- Location and Capacity -->
                 <v-divider class="my-4"></v-divider>
-                <div class="bg-grey-lighten-3 rounded-lg py-2 px-2">
+                <div class="rounded-lg py-2 px-2">
                   <div class="d-flex flex-column gap-2">
                     <div class="d-flex align-center">
                       <v-icon size="25" class="me-3">mdi-map-marker</v-icon>

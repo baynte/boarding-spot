@@ -10,47 +10,47 @@
 
             <v-card-text class="pa-6">
               <v-form @submit.prevent="handleSubmit" ref="form">
-                <v-text-field
-                  v-model="email"
-                  :rules="[rules.required, rules.email]"
-                  label="Email"
-                  prepend-icon="mdi-email"
-                  type="email"
-                  required
-                  variant="outlined"
-                  density="comfortable"
-                  class="mb-4"
-                ></v-text-field>
+              <v-text-field
+                v-model="email"
+                :rules="[rules.required, rules.email]"
+                label="Email"
+                prepend-icon="mdi-email"
+                type="email"
+                required
+                variant="outlined"
+                density="comfortable"
+                class="mb-4"
+              ></v-text-field>
 
-                <v-text-field
-                  v-model="password"
-                  :rules="[rules.required, rules.min]"
-                  label="Password"
-                  prepend-icon="mdi-lock"
-                  :type="showPassword ? 'text' : 'password'"
-                  :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
-                  @click:append="showPassword = !showPassword"
-                  required
-                  variant="outlined"
-                  density="comfortable"
-                ></v-text-field>
+              <v-text-field
+                v-model="password"
+                :rules="[rules.required, rules.min]"
+                label="Password"
+                prepend-icon="mdi-lock"
+                :type="showPassword ? 'text' : 'password'"
+                :append-icon="showPassword ? 'mdi-eye' : 'mdi-eye-off'"
+                @click:append="showPassword = !showPassword"
+                required
+                variant="outlined"
+                density="comfortable"
+                @keyup.enter="handleSubmit"
+              ></v-text-field>
               </v-form>
             </v-card-text>
 
             <v-card-actions class="pa-6 pt-0">
               <v-btn
-                color="primary"
-                @click="handleSubmit"
-                :loading="loading"
-                :disabled="loading"
-                variant="elevated"
-                size="large"
-                block
-                type="submit"
-                class="mb-1"
+              color="primary"
+              @click="handleSubmit"
+              :loading="loading"
+              variant="elevated"
+              size="large"
+              type="submit"
+              block
+              class="mb-1"
               >
-                <v-icon left class="mr-2">mdi-login</v-icon>
-                Login
+              <v-icon left class="mr-2">mdi-login</v-icon>
+              Login
               </v-btn>
             </v-card-actions>
 

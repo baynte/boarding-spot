@@ -1,6 +1,14 @@
 <template class="bg-grey-lighten-5">
-  <v-container class="text-center py-12 hero-container" >
-    <v-card class="pa-12 rounded-xl elevation-8 hero-card" dark>
+  <v-container class="text-center py-12 hero-container">
+    <v-hover v-slot="{ isHovering, props }">
+    <v-card
+      class="pa-12 rounded-xl hero-card transition-swing"
+      dark
+      elevation="12"
+      v-bind="props"
+      :elevation="isHovering ? 12 : 3"
+      :class="{ 'on-hover': isHovering }"
+    >
       <v-scale-transition>
         <h1 class="text-h2 font-weight-bold mb-4">Welcome to BoardingSpot</h1>
       </v-scale-transition>
@@ -8,6 +16,7 @@
         Find your perfect boarding room with our smart matching system
       </p>
     </v-card>
+  </v-hover>
 
     <!-- Sections for Tenants & Landlords with hover effects -->
     <v-row class="mt-16">
@@ -29,7 +38,7 @@
               color="primary"
               size="x-large"
               rounded="pill"
-              elevation="4"
+              elevation="12"
             >
               Register as Tenant
             </v-btn>

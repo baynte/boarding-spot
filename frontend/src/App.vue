@@ -3,10 +3,12 @@
     <v-main>
       <div class="container">
         <v-app-bar
-          elevation="5"
+          elevation="7"
           variant="elevated"
           class="px-6"
-          style="height: 70px;"
+          style="height: 75px;"
+          color="bg-base"
+          transparent="true"
         >
             <router-link to="/" class="text-decoration-none d-flex align-center">
               <div class="d-flex align-center brand-container">
