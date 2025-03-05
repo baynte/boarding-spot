@@ -5,13 +5,15 @@ export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null,
     token: localStorage.getItem('token') || null,
-    userType: localStorage.getItem('userType') || null
+    userType: localStorage.getItem('userType') || null,
+    isAdmin: localStorage.getItem('isAdmin') === 'true' || false
   }),
   
   getters: {
     isAuthenticated: (state) => !!state.token,
     isLandlord: (state) => state.userType === 'landlord',
-    isTenant: (state) => state.userType === 'tenant'
+    isTenant: (state) => state.userType === 'tenant',
+    isAdminUser: (state) => state.isAdmin
   },
   
   actions: {
@@ -24,9 +26,11 @@ export const useAuthStore = defineStore('auth', {
         
         this.token = response.data.access_token
         this.userType = response.data.user_type
+        this.isAdmin = response.data.is_admin
         
         localStorage.setItem('token', this.token)
         localStorage.setItem('userType', this.userType)
+        localStorage.setItem('isAdmin', this.isAdmin)
         
         return true
       } catch (error) {
@@ -53,8 +57,10 @@ export const useAuthStore = defineStore('auth', {
       this.token = null
       this.userType = null
       this.user = null
+      this.isAdmin = false
       localStorage.removeItem('token')
       localStorage.removeItem('userType')
+      localStorage.removeItem('isAdmin')
     }
   }
 }) 

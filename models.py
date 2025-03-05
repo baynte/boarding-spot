@@ -9,6 +9,7 @@ class User(db.Model):
     user_type = db.Column(db.String(20), nullable=False)  # 'tenant' or 'landlord'
     contact_number = db.Column(db.String(20))  # New field for contact number
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    is_admin = db.Column(db.Boolean, default=False)  # New field to indicate admin status
     # Add rooms relationship
     rooms = db.relationship('Room', backref='landlord', lazy=True)
 

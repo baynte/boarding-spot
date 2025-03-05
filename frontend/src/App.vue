@@ -53,6 +53,16 @@
                 Dashboard
               </v-btn>
               <v-btn
+                v-if="auth.isAdminUser"
+                to="/admin/dashboard"
+                color="success"
+                variant="elevated"
+                prepend-icon="mdi-shield-account"
+                class="mr-4"
+              >
+                Admin
+              </v-btn>
+              <v-btn
                 @click="logout"
                 color="error"
                 variant="elevated"
@@ -67,6 +77,16 @@
 
         <div class="text-center py-4 text-caption">
           © {{ new Date().getFullYear() }} - Boarding Spot
+          <v-btn
+            v-if="!auth.isAuthenticated"
+            to="/admin/login"
+            variant="text"
+            size="small"
+            color="grey"
+            class="ml-2"
+          >
+            Admin
+          </v-btn>
         </div>
       </div>
     </v-main>
