@@ -326,7 +326,7 @@
 
       <!-- Non-clickable rating section -->
       <v-card-text @click.stop>
-        <!-- <v-divider class="mb-3"></v-divider> -->
+        <v-divider class="mb-3"></v-divider>
         <div class="d-flex align-center justify-space-between">
           <div class="text-subtitle-1">Tenant Ratings ({{ room.total_ratings || 0 }})</div>
           <rating-dialog
@@ -463,7 +463,7 @@
             <v-col cols="12" md="5" class="h-100 details-column">
               <div class="details-content">
                 <div v-if="room.latitude && room.longitude" class="mb-5">
-                  <div style="height: 300px; border-radius: 8px; overflow: hidden">
+                  <div style="height: 300px; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1)">
                     <leaflet-map
                       :marker-lat-lng="[room.latitude, room.longitude]"
                       :popup-content="room.title"
@@ -492,12 +492,12 @@
                     
                     <!-- SMCC Coordinates -->
                     <div class="d-flex align-center mb-2">
-                      <v-avatar size="24" color="amber" class="me-2">
-                        <v-icon size="16" color="white">mdi-school</v-icon>
+                      <v-avatar size="25" color="amber" class="me-2">
+                        <v-icon size="20" color="white">mdi-school</v-icon>
                       </v-avatar>
                       <div>
                         <div class="text-caption text-medium-emphasis">SMCC Location</div>
-                        <div class="text-body-2">
+                        <div class="text-body-5">
                           Lat: {{ SMCC_COORDINATES[0] }}, Long: {{ SMCC_COORDINATES[1] }}
                         </div>
                       </div>
@@ -505,11 +505,11 @@
                     
                     <!-- Room Coordinates -->
                     <div class="d-flex align-center">
-                      <v-avatar size="24" color="primary" class="me-2">
-                        <v-icon size="16" color="white">mdi-home</v-icon>
+                      <v-avatar size="25" color="primary" class="me-2">
+                        <v-icon size="20" color="white">mdi-home</v-icon>
                       </v-avatar>
                       <div>
-                        <div class="text-caption text-medium-emphasis">Room Location</div>
+                        <div class="text-caption text-medium -emphasis">Room Location</div>
                         <div class="text-body-2">
                           Lat: {{ room.latitude }}, Long: {{ room.longitude }}
                         </div>
@@ -519,8 +519,12 @@
                 </div>
                 <!-- Price Information -->
                 <div class="price-section d-flex align-center mb-4 px-1">
-                  <div class="text-h5 primary--text">₱{{ formatPrice(room.price) }}</div>
-                  <div class="text-subtitle-1 ms-1 text-medium-emphasis">/month</div>
+                  <div>
+                    <div class="text-h4 font-weight-bold primary--text">
+                    ₱{{ formatPrice(room.price) }}
+                    </div>
+                    <div class="text-subtitle-2 text-medium-emphasis">per month</div>
+                  </div>
                 </div>
 
                 <!-- Location and Capacity -->
