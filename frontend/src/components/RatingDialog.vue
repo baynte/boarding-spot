@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="dialog" max-width="600px" transition="fade-transition">
+  <v-dialog v-model="dialog" max-width="700px" transition="fade-transition">
     <template v-slot:activator="{ props }">
       <v-btn
         color="primary"
@@ -9,112 +9,64 @@
         @click.stop
         variant="elevated"
         prepend-icon="mdi-star"
-        class="px-4 py-2"
-        elevation="10"
+        class="px-6 py-2 text-capitalize font-weight-medium"
+        elevation="3"
+        rounded
       >
         {{ hasRated ? 'Update Rating' : 'Rate Rental type' }}
       </v-btn>
     </template>
 
-    <v-card elevation="8" class="rounded-lg">
-      <v-card-title class="py-4 px-6 bg-primary text-white">
-        <span class="text-h5 font-weight-medium">{{ hasRated ? 'Update Rating' : 'Rate Rental type' }}</span>
+    <v-card elevation="4" class="rounded-lg">
+      <v-card-title class="py-6 px-8 bg-primary text-white d-flex align-center">
+        <v-icon size="28" class="mr-3">mdi-star-circle</v-icon>
+        <span class="text-h5 font-weight-bold">{{ hasRated ? 'Update Rating' : 'Rate Rental type' }}</span>
       </v-card-title>
 
-      <v-card-text class="pt-5">
+      <v-card-text class="pt-6 px-8">
         <v-container>
           <v-row>
-            <v-col cols="12" class="pb-0">
-              <h3 class="text-subtitle-1 font-weight-bold mb-5">How would you rate your experience?</h3>
+            <v-col cols="12" class="pb-2">
+              <h3 class="text-h6 font-weight-bold mb-6">How would you rate your experience?</h3>
             </v-col>
 
+            <template v-for="(item, index) in [
+              { label: 'Safety', model: 'safety_rating', icon: 'mdi-shield-check' },
+              { label: 'Cleanliness', model: 'cleanliness_rating', icon: 'mdi-broom' },
+              { label: 'Accessibility', model: 'accessibility_rating', icon: 'mdi-door' },
+              { label: 'Noise Level', model: 'noise_level_rating', icon: 'mdi-volume-high' }
+            ]" :key="index">
+              <v-col cols="12" class="py-2">
+                <div class="d-flex align-center justify-space-between mb-2">
+                  <div class="d-flex align-center">
+                    <v-icon :icon="item.icon" class="mr-2" size="20"></v-icon>
+                    <span class="text-subtitle-1 font-weight-medium">{{ item.label }}</span>
+                  </div>
+                  <v-chip
+                    size="small"
+                    :color="getScoreColor(item.model === 'noise_level_rating' ? 10 - rating[item.model] : rating[item.model])"
+                    class="font-weight-bold px-2"
+                    variant="elevated"
+                  >
+                    {{ rating[item.model] }}/10
+                  </v-chip>
+                </div>
+                <v-slider
+                  v-model="rating[item.model]"
+                  :min="1"
+                  :max="10"
+                  :step="0.5"
+                  :color="getScoreColor(item.model === 'noise_level_rating' ? 10 - rating[item.model] : rating[item.model])"
+                  track-color="grey-lighten-3"
+                  show-ticks="always"
+                  :tick-size="3"
+                  thumb-label="always"
+                  class="mt-1"
+                ></v-slider>
+              </v-col>
+            </template>
 
-      
-            <v-col cols="12" class="py-1">
-              <div class="d-flex align-center justify-space-between mb-1">
-                <span class="text-body-1 font-weight-medium">Safety</span>
-                <v-chip size="small" :color="getScoreColor(rating.safety_rating)" class="font-weight-bold">
-                  {{ rating.safety_rating }}/10
-                </v-chip>
-              </div>
-              <v-slider
-                v-model="rating.safety_rating"
-                :min="1"
-                :max="10"
-                :step="0.5"
-                :color="getScoreColor(rating.safety_rating)"
-                track-color="grey-lighten-2"
-                show-ticks="always"
-                :tick-size="4"
-                thumb-label="always"
-                class="mt-1"
-              ></v-slider>
-            </v-col>
-
-            <v-col cols="12" class="py-1">
-              <div class="d-flex align-center justify-space-between mb-1">
-                <span class="text-body-1 font-weight-medium">Cleanliness</span>
-                <v-chip size="small" :color="getScoreColor(rating.cleanliness_rating)" class="font-weight-bold">
-                  {{ rating.cleanliness_rating }}/10
-                </v-chip>
-              </div>
-              <v-slider
-                v-model="rating.cleanliness_rating"
-                :min="1"
-                :max="10"
-                :step="0.5"
-                :color="getScoreColor(rating.cleanliness_rating)"
-                track-color="grey-lighten-2"
-                show-ticks="always"
-                :tick-size="4"
-                thumb-label="always"
-                class="mt-1"
-              ></v-slider>
-            </v-col>
-
-            <v-col cols="12" class="py-1">
-              <div class="d-flex align-center justify-space-between mb-1">
-                <span class="text-body-1 font-weight-medium">Accessibility</span>
-                <v-chip size="small" :color="getScoreColor(rating.accessibility_rating)" class="font-weight-bold">
-                  {{ rating.accessibility_rating }}/10
-                </v-chip>
-              </div>
-              <v-slider
-                v-model="rating.accessibility_rating"
-                :min="1"
-                :max="10"
-                :step="0.5"
-                :color="getScoreColor(rating.accessibility_rating)"
-                track-color="grey-lighten-2"
-                show-ticks="always"
-                :tick-size="4"
-                thumb-label="always"
-                class="mt-1"
-              ></v-slider>
-            </v-col>
-
-            <v-col cols="12" class="py-1">
-              <div class="d-flex align-center justify-space-between mb-1">
-                <span class="text-body-1 font-weight-medium">Noise Level</span>
-                <v-chip size="small" :color="getScoreColor(10 - rating.noise_level_rating)" class="font-weight-bold">
-                  {{ rating.noise_level_rating }}/10
-                </v-chip>
-              </div>
-              <v-slider
-                v-model="rating.noise_level_rating"
-                :min="1"
-                :max="10"
-                :step="0.5"
-                :color="getScoreColor(10 - rating.noise_level_rating)"
-                track-color="grey-lighten-2"
-                show-ticks="always"
-                :tick-size="4"
-                thumb-label="always"
-                class="mt-1"
-              ></v-slider>
-            </v-col>
-
-            <v-col cols="12" class="pt-3">
+            <v-col cols="12" class="pt-4">
               <v-textarea
                 v-model="rating.comment"
                 label="Share your experience (optional)"
@@ -124,6 +76,8 @@
                 maxlength="500"
                 auto-grow
                 class="mt-2"
+                density="comfortable"
+                bg-color="grey-lighten-4"
               ></v-textarea>
             </v-col>
           </v-row>
@@ -132,13 +86,14 @@
 
       <v-divider></v-divider>
 
-      <v-card-actions class="pa-4">
+      <v-card-actions class="pa-6">
         <v-spacer></v-spacer>
         <v-btn 
-          color="error" 
+          color="grey-darken-1" 
           variant="text" 
           @click="dialog = false"
-          class="px-4"
+          class="px-6 text-capitalize"
+          :disabled="loading"
         >
           Cancel
         </v-btn>
@@ -148,8 +103,10 @@
           @click="submitRating"
           :loading="loading"
           :disabled="loading"
-          class="px-6"
+          class="px-8 text-capitalize ml-4"
+          elevation="2"
         >
+          <v-icon left class="mr-2">mdi-check</v-icon>
           Submit Rating
         </v-btn>
       </v-card-actions>

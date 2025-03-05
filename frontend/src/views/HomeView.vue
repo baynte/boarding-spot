@@ -146,8 +146,9 @@
 
 <style scoped>
 .hero-card {
-  background: url('/src/assets/bg-image.webp') no-repeat center center/cover;
-  transition: all 0.3s ease;
+  background: url('/src/assets/logo.jpg') no-repeat center center/cover;
+  background-size: cover;
+  transition: all 0.4s ease;
 }
 
 .feature-card {

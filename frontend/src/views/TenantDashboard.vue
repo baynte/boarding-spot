@@ -1,7 +1,24 @@
 <template>
   <div>
-    <h1 class="text-h4 mb-4 mt-10">Tenant Dashboard</h1>
-
+      <v-row align-items ="center" justify="d-flex justify-space-between" class="mb-5 mt-12">
+        <v-col cols="auto">
+          <h1 class="text-h3 font-weight-bold primary--text">Tenant Dashboard</h1>
+          <div class="text-subtitle-1 text-medium-emphasis mt-1">
+           Search Rooms according to your preferences
+          </div>
+        </v-col>
+        <v-col cols="auto">
+          <v-btn
+            color="primary"
+            variant="elevated"
+            prepend-icon="mdi-account-cog"
+            to="/tenant/profile"
+            class="elevation-2 mt-10"
+          >
+            Profile Settings
+          </v-btn>
+        </v-col>
+      </v-row>
     <!-- Current Preferences Card -->
     <v-card class="mb-6" elevation="10" rounded="lg">
       <v-card-title class="d-flex align-center pa-6 bg-primary-lighten-5">
@@ -23,7 +40,7 @@
       <v-row>
         <v-col cols="12" sm="6" md="3">
         <v-card variant="flat" class="pa-4 bg-grey-lighten-4" rounded="lg" elevation="5">
-          <div class="text-subtitle-2 text-grey-darken-5 font-weight-bold mb-2">Maximum Price</div>
+          <div class="text-subtitle-2  font-weight-bold mb-2">Maximum Price</div>
           <div class="text-h5 font-weight-bold text-primary">₱{{ preferences.max_price.toLocaleString() }}</div>
         </v-card>
         </v-col>

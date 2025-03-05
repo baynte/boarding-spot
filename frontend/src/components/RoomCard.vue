@@ -317,16 +317,18 @@
           <div class="text-subtitle-1">
             Total Distance:
           </div>
-          <div class="d-flex align-center">
-            <v-icon size="small" class="me-1">mdi-map-marker-distance</v-icon>
+          <div class="d-flex align-center" elevation="2">
+            <v-chip class="" color="success" variant="elevated">
+            <v-icon size="30" class="me-1">mdi-map-marker-distance</v-icon>
             <span class="text-body-2">{{ calculateDistance }} km from SMCC</span>
+          </v-chip>
           </div>
         </div>
       </v-card-item>
 
       <!-- Non-clickable rating section -->
       <v-card-text @click.stop>
-        <!-- <v-divider class="mb-3"></v-divider> -->
+        <v-divider class="mb-3"></v-divider> 
         <div class="d-flex align-center justify-space-between">
           <div class="text-subtitle-1">Tenant Ratings ({{ room.total_ratings || 0 }})</div>
           <rating-dialog

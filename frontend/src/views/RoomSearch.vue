@@ -191,7 +191,7 @@
                 <v-icon size="22" color="primary">mdi-shield-check</v-icon>
                 <span class="text-body-2 font-weight-bold">Min Safety Score</span>
                 <v-chip size="x-small" :color="getScoreColor(filters.minSafetyScore)"
-                  >{{ filters.minSafetyScore }}/10</v-chip
+                  variant="elevated">{{ filters.minSafetyScore }}/10</v-chip
                 >
               </div>
               <v-slider
@@ -215,7 +215,7 @@
                 <v-icon size="20" color="primary">mdi-broom</v-icon>
                 <span class="text-body-2 font-weight-bold">Cleanliness</span>
                 <v-chip size="x-small" :color="getScoreColor(filters.minCleanlinessScore)"
-                  >{{ filters.minCleanlinessScore }}/10</v-chip
+                variant="elevated">{{ filters.minCleanlinessScore }}/10</v-chip
                 >
               </div>
               <v-slider
@@ -239,7 +239,7 @@
                 <v-icon size="22" color="primary">mdi-account-box</v-icon>
                 <span class="text-body-2 font-weight-bold">Min Accessibility</span>
                 <v-chip size="x-small" :color="getScoreColor(filters.minAccessibilityScore)"
-                  >{{ filters.minAccessibilityScore }}/10</v-chip
+                variant="elevated">{{ filters.minAccessibilityScore }}/10</v-chip
                 >
               </div>
               <v-slider
@@ -263,7 +263,7 @@
                 <v-icon size="22" color="primary">mdi-volume-high</v-icon>
                 <span class="text-body-2 font-weight-bold">Max Noise Level</span>
                 <v-chip size="x-small" :color="getScoreColor(10 - filters.maxNoiseLevel)"
-                  >{{ filters.maxNoiseLevel }}/10</v-chip
+                variant="elevated">{{ filters.maxNoiseLevel }}/10</v-chip
                 >
               </div>
               <v-slider
