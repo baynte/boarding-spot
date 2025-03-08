@@ -107,7 +107,7 @@
             <v-col cols="12" sm="6" md="3">
               <v-text-field
                 v-model="filters.location"
-                label="Address"
+                label="Barangay"
                 clearable
                 :loading="loading"
                 :disabled="loading"
@@ -190,7 +190,7 @@
               <div class="d-flex align-center justify-space-between mb-1">
                 <v-icon size="22" color="primary">mdi-shield-check</v-icon>
                 <span class="text-body-2 font-weight-bold">Min Safety Score</span>
-                <v-chip size="x-small" :color="getScoreColor(filters.minSafetyScore)"
+                <v-chip size="x-small" :color="getScoreColor(filters.minSafetyScore)" variant="elevated"
                   >{{ filters.minSafetyScore }}/10</v-chip
                 >
               </div>
@@ -214,7 +214,7 @@
               <div class="d-flex align-center justify-space-between mb-1">
                 <v-icon size="20" color="primary">mdi-broom</v-icon>
                 <span class="text-body-2 font-weight-bold">Cleanliness</span>
-                <v-chip size="x-small" :color="getScoreColor(filters.minCleanlinessScore)"
+                <v-chip size="x-small" :color="getScoreColor(filters.minCleanlinessScore)" variant="elevated"
                   >{{ filters.minCleanlinessScore }}/10</v-chip
                 >
               </div>
@@ -238,7 +238,7 @@
               <div class="d-flex align-center justify-space-between mb-1">
                 <v-icon size="22" color="primary">mdi-account-box</v-icon>
                 <span class="text-body-2 font-weight-bold">Min Accessibility</span>
-                <v-chip size="x-small" :color="getScoreColor(filters.minAccessibilityScore)"
+                <v-chip size="x-small" :color="getScoreColor(filters.minAccessibilityScore)"variant="elevated"
                   >{{ filters.minAccessibilityScore }}/10</v-chip
                 >
               </div>
@@ -262,7 +262,7 @@
               <div class="d-flex align-center justify-space-between mb-1">
                 <v-icon size="22" color="primary">mdi-volume-high</v-icon>
                 <span class="text-body-2 font-weight-bold">Max Noise Level</span>
-                <v-chip size="x-small" :color="getScoreColor(10 - filters.maxNoiseLevel)"
+                <v-chip size="x-small" :color="getScoreColor(10 - filters.maxNoiseLevel)" variant="elevated"
                   >{{ filters.maxNoiseLevel }}/10</v-chip
                 >
               </div>
@@ -564,13 +564,13 @@ const activeFiltersCount = computed(() => {
 })
 
 const commonAmenities = [
-'Air Conditioning',
+  'Air Conditioning',
   'Appliances',
   'Backyard or garden',
   'CCTV',
   'Closet',
   'Common CR',
-  'Convenient Store',
+  'Convenience Store',
   'Curfew policy',
   'Double-Deck Bed',
   'Electricity Included',
@@ -611,7 +611,7 @@ const commonAmenities = [
   'WiFi',
 ]
 
-const livingSpaceTypes = ['Boarding House', 'Apartment', 'House', 'Dormitory', 'Condo Unit', 'Inn', 'Hotel', 'Resort', 'Others']
+const livingSpaceTypes = ['Boarding House', 'Apartment', 'House', 'Condo', 'Lodge', 'Hotel', 'Resort',]
 
 // Methods
 const getScoreColor = (score) => {

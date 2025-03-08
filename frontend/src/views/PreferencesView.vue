@@ -1,7 +1,6 @@
 <template>
   <div class="preferences-container pa-4">
     <h1 class="text-h4 mb-6 mt-6 text-left primary--text">Rental type Preferences</h1>
-
     <v-card elevation="3" class="rounded-lg">
       <v-card-text>
         <v-form @submit.prevent="savePreferences" ref="form">
@@ -342,7 +341,7 @@ const commonAmenities = [
   'CCTV',
   'Closet',
   'Common CR',
-  'Convenient Store',
+  'Convenience Store',
   'Curfew policy',
   'Double-Deck Bed',
   'Electricity Included',
@@ -387,12 +386,10 @@ const livingSpaceTypes = [
   'Boarding House',
   'Apartment',
   'House',
-  'Dormitory',
-  'Condo Unit',
-  'Inn',
+  'Condo',
+  'Lodge',
   'Hotel',
   'Resort',
-  'Others',
 ]
 
 const rules = {

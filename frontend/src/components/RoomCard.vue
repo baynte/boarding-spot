@@ -46,7 +46,7 @@
             <v-chip
               class="rank-chip font-weight-medium"
               :color="getMatchColor(match_score)"
-              size="small"
+              size="x-large"
               variant="elevated"
               elevation="3"
               label
@@ -59,7 +59,7 @@
         <!-- <v-card-text> -->
            <div class="d-flex align-center mb-2 px-1">
             <div class="text-h5 white--text font-weight-bold px-3">₱{{ formatPrice(room.price) }}</div>
-            <div class="text-subtitle-2 white--text ms-1">/month</div>
+            <div class="text-subtitle-2 white--text ms-1">/month/day</div>
           </div> 
 
             <div class="d-flex align-center mb-3 px-3"> 
@@ -318,8 +318,10 @@
             Total Distance:
           </div>
           <div class="d-flex align-center">
+            <v-chip variant="elevated" color="success"> 
             <v-icon size="small" class="me-1">mdi-map-marker-distance</v-icon>
             <span class="text-body-2">{{ calculateDistance }} km from SMCC</span>
+          </v-chip>
           </div>
         </div>
       </v-card-item>
