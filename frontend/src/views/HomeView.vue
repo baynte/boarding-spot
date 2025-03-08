@@ -10,9 +10,9 @@
       >
         <div class="hero-content">
           <v-scale-transition>
-            <h1 class="text-h1 font-weight-black mb-6">Welcome to BoardingSpot</h1>
+            <h1 class="text-h1 font-weight-black text-white mb-6">Welcome to BoardingSpot</h1>
           </v-scale-transition>
-          <p class="text-h5 mb-8 font-weight-light hero-subtitle">
+          <p class="text-h5 mb-8 font-weight-light text-white hero-subtitle">
             Find your perfect boarding room with our smart matching system
           </p>
         </div>
@@ -126,8 +126,7 @@
 
 <style scoped>
 .hero-card {
-  background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.7)),
-    url('/src/assets/bg-image.webp') no-repeat center center/cover;
+  background: rgba(47,72,164,255);
   transition: all 0.4s ease;
   overflow: hidden;
 }

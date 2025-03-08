@@ -279,15 +279,15 @@ def search_rooms():
         
         # Define equal weights for all criteria since we don't have user preferences
         weights = np.array([
-            0.15,  # Safety weight
-            0.15,  # Cleanliness weight
-            0.15,  # Accessibility weight
-            0.15,  # Noise weight
-            0.10,  # Amenity weight
-            0.10,  # Price weight
-            0.10,  # Capacity weight
-            0.05,  # Location weight
-            0.05   # Rental type weight
+            0.15,  # Safety weight         ------  #Distance - 0.15
+            0.15,  # Cleanliness weight    ------  #Price - 0.15
+            0.15,  # Accessibility weight  ------  #Safety - 0.15
+            0.15,  # Noise weight          ------  #Amenities - 0.15
+            0.10,  # Amenity weight        ------  #Cleanliness - 0.10
+            0.10,  # Price weight          ------  #Accessibility - 0.10
+            0.10,  # Capacity weight       ------  #Noise - 0.10
+            0.05,  # Location weight       ------  #Capacity - 0.05
+            0.05   # Rental type weight    ------  #Rental type - 0.05
         ], dtype=np.float64)
         
         # Normalize weights to sum to 1
