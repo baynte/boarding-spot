@@ -67,6 +67,23 @@
           </v-col>
 
           <v-col cols="12" md="6">
+            <v-text-field
+          v-model="preferences.preferred_distance"
+          label="Maximum Distance from SMCC (km)"
+          type="number"
+          :rules="[rules.positive]"
+          hint="Maximum distance in kilometers from SMCC"
+          persistent-hint
+          validate-on="blur"
+          :error-messages="errors.preferred_distance"
+          variant="outlined"
+          density="comfortable"
+          bg-color="grey-lighten-4"
+          prepend-inner-icon="mdi-map-marker-distance"
+            ></v-text-field>
+          </v-col>
+
+          <v-col cols="12" md="6">
             <v-select
           v-model="preferences.living_space_type"
           :items="livingSpaceTypes"
@@ -301,6 +318,7 @@ const preferences = ref({
   preferred_location: '',
   required_amenities: [],
   living_space_type: null,
+  preferred_distance: null,
 })
 
 const weights = ref({
@@ -317,6 +335,7 @@ const errors = ref({
   required_amenities: '',
   weights: '',
   living_space_type: '',
+  preferred_distance: '',
 })
 
 const totalWeight = computed(() => {
@@ -330,7 +349,8 @@ const isFormValid = computed(() => {
     preferences.value.min_capacity > 0 &&
     preferences.value.preferred_location.trim() !== '' &&
     preferences.value.required_amenities.length > 0 &&
-    preferences.value.living_space_type !== null
+    preferences.value.living_space_type !== null &&
+    preferences.value.preferred_distance > 0
   )
 })
 
@@ -412,6 +432,7 @@ const fetchPreferences = async () => {
         preferred_location: response.data.preferred_location,
         required_amenities: response.data.required_amenities,
         living_space_type: response.data.living_space_type,
+        preferred_distance: response.data.preferred_distance,
       }
       weights.value = {
         safety: response.data.safety_weight * 100,
@@ -487,6 +508,7 @@ const savePreferences = async () => {
       preferred_location: preferences.value.preferred_location.trim(),
       required_amenities: preferences.value.required_amenities,
       living_space_type: preferences.value.living_space_type,
+      preferred_distance: Number(preferences.value.preferred_distance),
       safety_weight: weights.value.safety / 100,
       cleanliness_weight: weights.value.cleanliness / 100,
       accessibility_weight: weights.value.accessibility / 100,
@@ -496,7 +518,15 @@ const savePreferences = async () => {
     snackbarText.value = 'Preferences saved successfully'
     snackbarColor.value = 'success'
     snackbar.value = true
-    router.push('/search')
+    
+    // Force a refresh of the search page to ensure it loads with the new preferences
+    router.push({ 
+      path: '/search', 
+      query: { 
+        refresh: Date.now(),
+        maxDistance: Number(preferences.value.preferred_distance)
+      } 
+    })
   } catch (error) {
     console.error('Error saving preferences:', error)
     snackbarText.value = error.response?.data?.error || 'Error saving preferences'
