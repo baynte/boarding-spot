@@ -870,7 +870,8 @@ const deleteItem = async (item) => {
     await fetchRooms()
   } catch (error) {
     console.error('Error deleting room:', error)
-    snackbarText.value = error.response?.data?.error || 'Error deleting room'
+    const errorMessage = error.response?.data?.error || 'Error deleting room'
+    snackbarText.value = errorMessage
     snackbarColor.value = 'error'
     snackbar.value = true
   } finally {

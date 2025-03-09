@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, current_app, url_for
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
 from app import db
-from models import User, Room
+from models import User, Room, TenantRating
 import json
 import os
 from datetime import datetime
@@ -225,6 +225,9 @@ def delete_room(room_id):
                 if os.path.exists(old_path):
                     os.remove(old_path)
         
+        # Delete related tenant ratings first
+        TenantRating.query.filter_by(room_id=room_id).delete()
+        
         # Delete the room from database
         db.session.delete(room)
         db.session.commit()
@@ -233,7 +236,7 @@ def delete_room(room_id):
     except Exception as e:
         print(f"Error deleting room: {str(e)}")
         db.session.rollback()
-        return jsonify({'error': 'Failed to delete room'}), 500 
+        return jsonify({'error': 'Failed to delete room: ' + str(e)}), 500
 
 @bp.route('/profile', methods=['GET'])
 @jwt_required()
