@@ -68,13 +68,17 @@ def create_room():
         cleanliness_score=5.0,
         accessibility_score=5.0,
         noise_level=5.0,
-        image_urls=json.dumps(image_urls)
+        image_urls=json.dumps(image_urls),
+        approval_status='pending'
     )
     
     db.session.add(room)
     db.session.commit()
     
-    return jsonify({'message': 'Room created successfully', 'room_id': room.id}), 201
+    return jsonify({
+        'message': 'Room created successfully and is pending approval by admin',
+        'room_id': room.id
+    }), 201
 
 @bp.route('/rooms', methods=['GET'])
 @jwt_required()
@@ -102,7 +106,9 @@ def get_rooms():
         'cleanliness_score': room.cleanliness_score,
         'accessibility_score': room.accessibility_score,
         'noise_level': room.noise_level,
-        'image_urls': json.loads(room.image_urls)
+        'image_urls': json.loads(room.image_urls),
+        'approval_status': room.approval_status,
+        'admin_notes': room.admin_notes
     } for room in rooms]
     return jsonify(rooms_data)
 

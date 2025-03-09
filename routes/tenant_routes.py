@@ -7,6 +7,8 @@ import numpy as np
 from topsispy import topsis
 from sqlalchemy.exc import SQLAlchemyError
 import math
+import os
+from werkzeug.utils import secure_filename
 
 # List of high-value amenities that tenants might want even if not explicitly requested
 HIGH_VALUE_AMENITIES = [
@@ -35,6 +37,20 @@ def calculate_distance(lat1, lon1, lat2, lon2):
     c = 2 * math.asin(math.sqrt(a))
     r = 6371  # Radius of earth in kilometers
     return c * r
+
+# Helper function to check if file extension is allowed
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in {'png', 'jpg', 'jpeg', 'gif'}
+
+# Helper function to ensure upload folder exists
+def ensure_upload_folder():
+    upload_folder = os.path.join(current_app.static_folder, 'uploads', 'avatars')
+    os.makedirs(upload_folder, exist_ok=True)
+    return upload_folder
+
+# Helper function to get image URL
+def get_image_url(filename):
+    return f"/static/uploads/avatars/{filename}"
 
 @bp.route('/preferences', methods=['POST'])
 @jwt_required()
@@ -193,8 +209,8 @@ def search_rooms():
     current_app.logger.info(f"Search parameters: max_price={max_price}, min_capacity={min_capacity}, location='{location}', amenities={amenities}, living_space_type={living_space_type}")
     current_app.logger.info(f"Score filters: safety>={min_safety_score}, noise<={max_noise_level}, accessibility>={min_accessibility_score}, cleanliness>={min_cleanliness_score}")
     
-    # Filter rooms based on basic criteria
-    query = Room.query.filter_by(availability=True)
+    # Start with a base query that only includes approved rooms
+    query = Room.query.filter(Room.approval_status == 'approved').filter_by(availability=True)
     
     # Apply basic filters only if provided
     if max_price is not None:
@@ -639,3 +655,101 @@ def search_rooms():
     except Exception as e:
         current_app.logger.error(f"Error in TOPSIS calculation or room processing: {str(e)}")
         return jsonify({'error': 'Error in ranking calculation'}), 500
+
+@bp.route('/profile', methods=['GET'])
+@jwt_required()
+def get_profile():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    
+    if user.user_type != 'tenant':
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    return jsonify({
+        'email': user.email,
+        'full_name': user.full_name,
+        'contact_number': user.contact_number,
+        'bio': user.bio,
+        'avatar_url': user.avatar_url
+    })
+
+@bp.route('/profile', methods=['PUT'])
+@jwt_required()
+def update_profile():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    
+    if user.user_type != 'tenant':
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    try:
+        data = request.get_json()
+        
+        # Verify current password
+        if not data.get('current_password'):
+            return jsonify({'error': 'Current password is required'}), 400
+            
+        if not user.check_password(data['current_password']):
+            return jsonify({'error': 'Current password is incorrect'}), 400
+        
+        # Update profile fields
+        if 'full_name' in data:
+            user.full_name = data['full_name']
+            
+        if 'contact_number' in data:
+            user.contact_number = data['contact_number']
+            
+        if 'bio' in data:
+            user.bio = data['bio']
+        
+        # Update password if provided
+        if data.get('new_password'):
+            user.set_password(data['new_password'])
+        
+        db.session.commit()
+        return jsonify({'message': 'Profile updated successfully'})
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': 'Failed to update profile'}), 500
+
+@bp.route('/profile/avatar', methods=['POST'])
+@jwt_required()
+def update_avatar():
+    current_user_id = get_jwt_identity()
+    user = User.query.get(current_user_id)
+    
+    if user.user_type != 'tenant':
+        return jsonify({'error': 'Unauthorized'}), 403
+    
+    if 'avatar' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+        
+    file = request.files['avatar']
+    
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+        
+    if file and allowed_file(file.filename):
+        try:
+            filename = secure_filename(f"user_{current_user_id}_{file.filename}")
+            upload_folder = ensure_upload_folder()
+            file_path = os.path.join(upload_folder, filename)
+            
+            # Save the file
+            file.save(file_path)
+            
+            # Update user's avatar URL
+            user.avatar_url = get_image_url(filename)
+            db.session.commit()
+            
+            return jsonify({
+                'message': 'Avatar updated successfully',
+                'avatar_url': user.avatar_url
+            })
+            
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
+    else:
+        return jsonify({'error': 'File type not allowed'}), 400

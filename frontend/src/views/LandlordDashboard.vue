@@ -22,6 +22,26 @@
         </v-col>
       </v-row>
 
+      <!-- Approval Process Notification -->
+      <v-row v-if="hasPendingRooms">
+        <v-col cols="12">
+          <v-alert
+            color="warning"
+            icon="mdi-clock-alert"
+            variant="tonal"
+            border="start"
+            elevation="2"
+            class="mb-6"
+            closable
+          >
+            <div class="text-subtitle-1 font-weight-bold">Room Approval Process</div>
+            <p class="mb-0">
+              You have {{ pendingRoomsCount }} room(s) pending approval. All rooms must be reviewed by an administrator before they become visible to tenants. This process typically takes 24-48 hours.
+            </p>
+          </v-alert>
+        </v-col>
+      </v-row>
+
       <!-- Stats Cards -->
       <v-row class="mt-4 mb-3">
         <v-col cols="12" sm="4">
@@ -483,6 +503,24 @@
         </div>
       </template>
 
+      <!-- Approval Status Column -->
+      <template v-slot:item.approval_status="{ item }">
+        <v-chip
+          :color="getApprovalStatusColor(item.approval_status)"
+          size="small"
+          variant="flat"
+          class="font-weight-medium"
+        >
+          {{ getApprovalStatusText(item.approval_status) }}
+        </v-chip>
+        <v-tooltip v-if="item.admin_notes" activator="parent" location="top">
+          <div class="pa-2">
+            <div class="text-subtitle-2 mb-1">Admin Notes:</div>
+            <div>{{ item.admin_notes }}</div>
+          </div>
+        </v-tooltip>
+      </template>
+
       <!-- Availability Column -->
       <template v-slot:item.availability="{ item }">
         <v-chip
@@ -670,6 +708,7 @@ const headers = [
   { title: 'Location', key: 'location' },
   { title: 'Rental type', key: 'living_space_type' },
   { title: 'Amenities', key: 'amenities' },
+  { title: 'Approval Status', key: 'approval_status' },
   { title: 'Availability', key: 'availability' },
   { title: 'Actions', key: 'actions', sortable: false },
 ]
@@ -759,11 +798,19 @@ const save = async () => {
     }
 
     if (editedItem.value.id) {
-      await axios.put(`/landlord/rooms/${editedItem.value.id}`, formData)
+      await axios.put(`/landlord/rooms/${editedItem.value.id}`, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
       snackbarText.value = 'Room updated successfully'
     } else {
-      await axios.post('/landlord/rooms', formData)
-      snackbarText.value = 'Room added successfully'
+      await axios.post('/landlord/rooms', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      })
+      snackbarText.value = 'Room created successfully and is pending approval by admin'
     }
 
     snackbarColor.value = 'success'
@@ -830,6 +877,41 @@ const deleteItem = async (item) => {
     loading.value = false
   }
 }
+
+const getApprovalStatusColor = (status) => {
+  switch (status) {
+    case 'approved':
+      return 'success'
+    case 'pending':
+      return 'warning'
+    case 'rejected':
+      return 'error'
+    default:
+      return 'info'
+  }
+}
+
+const getApprovalStatusText = (status) => {
+  switch (status) {
+    case 'approved':
+      return 'Approved'
+    case 'pending':
+      return 'Pending'
+    case 'rejected':
+      return 'Rejected'
+    default:
+      return 'Unknown'
+  }
+}
+
+// Computed properties for pending rooms notification
+const hasPendingRooms = computed(() => {
+  return rooms.value.some(room => room.approval_status === 'pending')
+})
+
+const pendingRoomsCount = computed(() => {
+  return rooms.value.filter(room => room.approval_status === 'pending').length
+})
 </script>
 
 <style scoped>
