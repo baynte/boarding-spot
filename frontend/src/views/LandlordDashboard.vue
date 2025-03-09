@@ -2,7 +2,7 @@
   <div class="dashboard-container pa-6" elevation="12">
     <!-- Header Section -->
     <v-container fluid class="header-section pb-6">
-      <v-row align-items ="center" justify="space-between">
+      <v-row align-items ="center" justify="d-flex justify-space-between">
         <v-col cols="auto">
           <h1 class="text-h3 font-weight-bold primary--text">Landlord Dashboard</h1>
           <div class="text-subtitle-1 text-medium-emphasis mt-1">
@@ -815,6 +815,7 @@ const deleteItem = async (item) => {
   if (!confirmed) return
 
   try {
+    loading.value = true
     await axios.delete(`/landlord/rooms/${item.id}`)
     snackbarText.value = 'Room deleted successfully'
     snackbarColor.value = 'success'
@@ -825,6 +826,8 @@ const deleteItem = async (item) => {
     snackbarText.value = error.response?.data?.error || 'Error deleting room'
     snackbarColor.value = 'error'
     snackbar.value = true
+  } finally {
+    loading.value = false
   }
 }
 </script>

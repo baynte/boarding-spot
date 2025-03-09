@@ -355,7 +355,7 @@ const isFormValid = computed(() => {
 })
 
 const commonAmenities = [
-'Air Conditioning',
+  'Air Conditioning',
   'Appliances',
   'Backyard or garden',
   'CCTV',
