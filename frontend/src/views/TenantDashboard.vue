@@ -32,7 +32,7 @@
         rounded
         elevation="7"
       >
-        Edit Preferences
+        Add Preferences
       </v-btn>
       </v-card-title>
 

@@ -3,7 +3,7 @@ from datetime import timedelta
 import os
 from extensions import db, jwt, cors
 from flask_migrate import Migrate
-from routes import auth_routes, landlord_routes, tenant_routes, rating_routes
+from routes import auth_routes, landlord_routes, tenant_routes, rating_routes, admin_routes
 
 def create_app():
     app = Flask(__name__, static_url_path='/static', static_folder='static')
@@ -32,6 +32,7 @@ def create_app():
     app.register_blueprint(landlord_routes.bp)
     app.register_blueprint(tenant_routes.bp)
     app.register_blueprint(rating_routes.bp)
+    app.register_blueprint(admin_routes.bp)
 
     return app
 

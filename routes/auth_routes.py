@@ -53,7 +53,8 @@ def login():
     access_token = create_access_token(identity=str(user.id))
     return jsonify({
         'access_token': access_token,
-        'user_type': user.user_type
+        'user_type': user.user_type,
+        'is_admin': user.is_admin
     })
 
 @bp.route('/user-type', methods=['GET'])

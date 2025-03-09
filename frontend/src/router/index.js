@@ -10,6 +10,8 @@ import LandlordProfile from '@/views/LandlordProfile.vue'
 import TenantDashboard from '@/views/TenantDashboard.vue'
 import RoomSearch from '@/views/RoomSearch.vue'
 import PreferencesView from '@/views/PreferencesView.vue'
+import AdminLoginView from '@/views/AdminLoginView.vue'
+import AdminDashboard from '@/views/AdminDashboard.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -58,6 +60,17 @@ const router = createRouter({
       name: 'preferences',
       component: PreferencesView,
       meta: { requiresAuth: true, requiresTenant: true }
+    },
+    {
+      path: '/admin/login',
+      name: 'adminLogin',
+      component: AdminLoginView
+    },
+    {
+      path: '/admin/dashboard',
+      name: 'adminDashboard',
+      component: AdminDashboard,
+      meta: { requiresAuth: true, requiresAdmin: true }
     }
   ]
 })
@@ -72,6 +85,8 @@ router.beforeEach((to, from, next) => {
     next('/')
   } else if (to.meta.requiresTenant && !auth.isTenant) {
     next('/')
+  } else if (to.meta.requiresAdmin && !auth.isAdminUser) {
+    next('/admin/login')
   } else {
     next()
   }

@@ -46,12 +46,12 @@
             <v-chip
               class="rank-chip font-weight-medium"
               :color="getMatchColor(match_score)"
-              size="small"
+              size="x-large"
               variant="elevated"
               elevation="3"
               label
             >
-              #{{ room.rank }}
+              #{{ index + 1 }}
             </v-chip>
           </div>
         </div>
@@ -59,13 +59,55 @@
         <!-- <v-card-text> -->
            <div class="d-flex align-center mb-2 px-1">
             <div class="text-h5 white--text font-weight-bold px-3">₱{{ formatPrice(room.price) }}</div>
-            <div class="text-subtitle-2 white--text ms-1">/month</div>
+            <div class="text-subtitle-2 white--text ms-1">/month/day</div>
           </div> 
 
             <div class="d-flex align-center mb-3 px-3"> 
               <v-icon size="22" color="primary" class="me-2">mdi-map-marker</v-icon>
               <span class="text-body-1 text-truncate">{{ room.location }}</span>
+              <v-spacer></v-spacer>
+              <v-chip
+                v-if="room.distance_from_smcc !== null"
+                size="x-small"
+                color="primary"
+                variant="outlined"
+                class="ml-2"
+              >
+                <v-icon size="x-small" start>mdi-map-marker-distance</v-icon>
+                {{ formatDistance(room.distance_from_smcc) }} km
+              </v-chip>
+              <v-btn
+                v-if="room.latitude && room.longitude"
+                icon="mdi-map-marker"
+                size="x-small"
+                color="primary"
+                variant="text"
+                class="ml-2"
+                @click.stop="$emit('show-on-map')"
+                title="Show on map"
+              ></v-btn>
             </div> 
+
+            <!-- Highlighted Amenities -->
+            <div v-if="highlight_amenities && highlight_amenities.length > 0" class="px-3 mb-3">
+              <v-chip-group>
+                <v-chip
+                  v-for="amenity in highlight_amenities"
+                  :key="amenity"
+                  size="small"
+                  color="deep-purple"
+                  variant="elevated"
+                  class="font-weight-medium"
+                >
+                  <v-icon start size="x-small">mdi-star-plus</v-icon>
+                  {{ amenity }}
+                </v-chip>
+              </v-chip-group>
+              <div class="text-caption text-deep-purple mt-1">
+                <v-icon size="x-small" color="deep-purple">mdi-information</v-icon>
+                Additional valuable amenities
+              </div>
+            </div>
 
           <!-- Location Map Preview -->
           <!-- <div v-if="room.latitude && room.longitude" class="mb-2">
@@ -317,9 +359,9 @@
           <div class="text-subtitle-1">
             Total Distance:
           </div>
-          <div class="d-flex align-center" elevation="2">
-            <v-chip class="" color="success" variant="elevated">
-            <v-icon size="30" class="me-1">mdi-map-marker-distance</v-icon>
+          <div class="d-flex align-center">
+            <v-chip variant="elevated" color="success"> 
+            <v-icon size="small" class="me-1">mdi-map-marker-distance</v-icon>
             <span class="text-body-2">{{ calculateDistance }} km from SMCC</span>
           </v-chip>
           </div>
@@ -328,7 +370,7 @@
 
       <!-- Non-clickable rating section -->
       <v-card-text @click.stop>
-        <v-divider class="mb-3"></v-divider> 
+        <v-divider class="mb-3"></v-divider>
         <div class="d-flex align-center justify-space-between">
           <div class="text-subtitle-1">Tenant Ratings ({{ room.total_ratings || 0 }})</div>
           <rating-dialog
@@ -465,7 +507,7 @@
             <v-col cols="12" md="5" class="h-100 details-column">
               <div class="details-content">
                 <div v-if="room.latitude && room.longitude" class="mb-5">
-                  <div style="height: 300px; border-radius: 8px; overflow: hidden">
+                  <div style="height: 300px; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1)">
                     <leaflet-map
                       :marker-lat-lng="[room.latitude, room.longitude]"
                       :popup-content="room.title"
@@ -494,12 +536,12 @@
                     
                     <!-- SMCC Coordinates -->
                     <div class="d-flex align-center mb-2">
-                      <v-avatar size="24" color="amber" class="me-2">
-                        <v-icon size="16" color="white">mdi-school</v-icon>
+                      <v-avatar size="25" color="amber" class="me-2">
+                        <v-icon size="20" color="white">mdi-school</v-icon>
                       </v-avatar>
                       <div>
                         <div class="text-caption text-medium-emphasis">SMCC Location</div>
-                        <div class="text-body-2">
+                        <div class="text-body-5">
                           Lat: {{ SMCC_COORDINATES[0] }}, Long: {{ SMCC_COORDINATES[1] }}
                         </div>
                       </div>
@@ -507,11 +549,11 @@
                     
                     <!-- Room Coordinates -->
                     <div class="d-flex align-center">
-                      <v-avatar size="24" color="primary" class="me-2">
-                        <v-icon size="16" color="white">mdi-home</v-icon>
+                      <v-avatar size="25" color="primary" class="me-2">
+                        <v-icon size="20" color="white">mdi-home</v-icon>
                       </v-avatar>
                       <div>
-                        <div class="text-caption text-medium-emphasis">Room Location</div>
+                        <div class="text-caption text-medium -emphasis">Room Location</div>
                         <div class="text-body-2">
                           Lat: {{ room.latitude }}, Long: {{ room.longitude }}
                         </div>
@@ -521,8 +563,12 @@
                 </div>
                 <!-- Price Information -->
                 <div class="price-section d-flex align-center mb-4 px-1">
-                  <div class="text-h5 primary--text">₱{{ formatPrice(room.price) }}</div>
-                  <div class="text-subtitle-1 ms-1 text-medium-emphasis">/month</div>
+                  <div>
+                    <div class="text-h4 font-weight-bold primary--text">
+                    ₱{{ formatPrice(room.price) }}
+                    </div>
+                    <div class="text-subtitle-2 text-medium-emphasis">per month</div>
+                  </div>
                 </div>
 
                 <!-- Location and Capacity -->
@@ -532,6 +578,28 @@
                     <div class="d-flex align-center">
                       <v-icon size="25" class="me-3">mdi-map-marker</v-icon>
                       <span class="text-body-1">{{ room.location }}</span>
+                      <v-spacer></v-spacer>
+                      <v-chip
+                        v-if="room.distance_from_smcc !== null"
+                        size="small"
+                        color="primary"
+                        variant="outlined"
+                        class="ml-2"
+                      >
+                        <v-icon size="x-small" start>mdi-map-marker-distance</v-icon>
+                        {{ formatDistance(room.distance_from_smcc) }} km from SMCC
+                      </v-chip>
+                      <v-btn
+                        v-if="room.latitude && room.longitude"
+                        size="small"
+                        color="primary"
+                        variant="text"
+                        class="ml-2"
+                        @click="$emit('show-on-map'); dialog = false"
+                        prepend-icon="mdi-map-marker"
+                      >
+                        Show on Map
+                      </v-btn>
                     </div>
                     <div class="d-flex align-center mt-2">
                       <v-icon size="25" class="me-3">mdi-account-group</v-icon>
@@ -549,6 +617,32 @@
                 <!-- Amenities -->
                 <v-divider class="my-4"></v-divider>
                 <h3 class="text-h6 mb-2">Amenities</h3>
+                
+                <!-- Highlighted Amenities -->
+                <div v-if="highlight_amenities && highlight_amenities.length > 0" class="mb-3">
+                  <v-card color="deep-purple-lighten-5" class="pa-3 mb-3">
+                    <div class="d-flex align-center mb-2">
+                      <v-icon color="deep-purple" class="mr-2">mdi-star-plus</v-icon>
+                      <span class="text-subtitle-1 font-weight-medium text-deep-purple">Additional Valuable Amenities</span>
+                    </div>
+                    <v-chip-group>
+                      <v-chip
+                        v-for="amenity in highlight_amenities"
+                        :key="amenity"
+                        size="small"
+                        color="deep-purple"
+                        variant="elevated"
+                        class="font-weight-medium"
+                      >
+                        {{ amenity }}
+                      </v-chip>
+                    </v-chip-group>
+                    <div class="text-caption mt-2">
+                      These valuable amenities weren't in your search criteria but might enhance your living experience.
+                    </div>
+                  </v-card>
+                </div>
+                
                 <v-chip-group class="mb-4">
                   <v-chip
                     v-for="amenity in parseAmenities(room.amenities)"
@@ -642,73 +736,33 @@ const props = defineProps({
   room: {
     type: Object,
     required: true,
-    validator: (room) => {
-      console.log('Room coordinates:', {
-        latitude: room.latitude,
-        longitude: room.longitude,
-      })
-      return [
-        'id',
-        'title',
-        'description',
-        'price',
-        'capacity',
-        'location',
-        'latitude',
-        'longitude',
-        'amenities',
-        'availability',
-        'image_urls',
-        'safety_score',
-        'cleanliness_score',
-        'accessibility_score',
-        'noise_level',
-        'landlord',
-      ].every((prop) => prop in room)
-    },
   },
-  match_score: {
-    type: Number,
-    required: false,
-    default: (props) => props?.room?.comprehensive_score || 0,
-  },
-  match_details: {
-    type: Object,
-    required: false,
-    default: (props) =>
-      props?.room?.match_details || {
-        safety: { score: 0, weight: 0, weighted_score: 0 },
-        cleanliness: { score: 0, weight: 0, weighted_score: 0 },
-        accessibility: { score: 0, weight: 0, weighted_score: 0 },
-        noise: { score: 0, weight: 0, weighted_score: 0 },
-        amenities: { score: 0, weight: 0, weighted_score: 0, matched: [], missing: [] },
-        location: { score: 0, preferred_location: '', actual_location: '' },
-        price_value: { score: 0, preferred_max: 0, actual_price: 0 },
-      },
-  },
-  total_rooms: {
-    type: Number,
-    required: false,
-    default: 1,
-  },
-  userType: {
+  user_type: {
     type: String,
-    required: true,
+    default: 'tenant',
+  },
+  highlight_amenities: {
+    type: Array,
+    default: () => [],
+  },
+  index: {
+    type: Number,
+    default: 0,
   },
 })
 
 // Update computed properties to use match_details from the room object
 const safetyScore = computed(
-  () => props.room.match_details?.safety?.score || props.room.safety_score || 0,
+  () => props.room.match_details?.safety?.score || props.room.safety_score || 5.0,
 )
 const cleanlinessScore = computed(
-  () => props.room.match_details?.cleanliness?.score || props.room.cleanliness_score || 0,
+  () => props.room.match_details?.cleanliness?.score || props.room.cleanliness_score || 5.0,
 )
 const accessibilityScore = computed(
-  () => props.room.match_details?.accessibility?.score || props.room.accessibility_score || 0,
+  () => props.room.match_details?.accessibility?.score || props.room.accessibility_score || 5.0,
 )
 const noiseScore = computed(
-  () => props.room.match_details?.noise?.score || props.room.noise_level || 0,
+  () => props.room.match_details?.noise?.score || props.room.noise_level || 5.0,
 )
 const amenityScore = computed(() => props.room.match_details?.amenities?.score || 0)
 const locationScore = computed(() => props.room.match_details?.location?.score || 0)
@@ -750,8 +804,21 @@ const router = useRouter()
 
 const dialog = ref(false)
 const currentSlide = ref(0)
-
+const hasRated = ref(false)
 const userRating = ref(null)
+
+// Computed properties
+const match_score = computed(() => props.room.comprehensive_score || 0)
+const match_details = computed(() => props.room.match_details || {
+  safety: { score: 0, weight: 0, weighted_score: 0 },
+  cleanliness: { score: 0, weight: 0, weighted_score: 0 },
+  accessibility: { score: 0, weight: 0, weighted_score: 0 },
+  noise: { score: 0, weight: 0, weighted_score: 0 },
+  amenities: { score: 0, weight: 0, weighted_score: 0, matched: [], missing: [] },
+  location: { score: 0, preferred_location: '', actual_location: '' },
+  price_value: { score: 0, preferred_max: 0, actual_price: 0 },
+})
+
 const averageRating = computed(() => {
   if (!props.room.avg_safety_rating) return 0
   return (
@@ -775,7 +842,7 @@ const handleRatingUpdate = async (newRating) => {
 }
 
 onMounted(async () => {
-  if (props.userType === 'tenant') {
+  if (props.user_type === 'tenant') {
     try {
       const response = await axios.get('/rating/user/ratings')
       const ratings = response.data
@@ -798,6 +865,11 @@ const parseImageUrls = (urls) => {
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('en-PH').format(price)
+}
+
+const formatDistance = (distance) => {
+  if (distance === null || distance === undefined) return 'Unknown';
+  return distance.toFixed(1);
 }
 
 const getMatchColor = (score) => {

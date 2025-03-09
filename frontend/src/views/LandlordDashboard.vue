@@ -564,7 +564,7 @@ const mapRef = ref(null)
 
 const markerPosition = ref(null)
 
-const livingSpaceTypes = ['Boarding House', 'Apartment', 'House', 'Dormitory', 'Condo Unit', 'Inn', 'Hotel', 'Resort', 'Others']
+const livingSpaceTypes = ['Boarding House', 'Apartment', 'House', 'Condo', 'Lodge', 'Hotel', 'Resort',]
 
 const editedItem = ref({
   id: null,
@@ -597,7 +597,7 @@ const commonAmenities = [
   'CCTV',
   'Closet',
   'Common CR',
-  'Convenient Store',
+  'Convenience Store',
   'Curfew policy',
   'Double-Deck Bed',
   'Electricity Included',
