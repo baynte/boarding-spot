@@ -125,153 +125,164 @@
         <v-row class="mt-8">
           <v-col cols="12">
             <h2 class="text-h6 d-flex align-center primary--text font-weight-medium">
-          <v-icon icon="mdi-scale-balance" class="mr-2"></v-icon>
-          Importance Weights
-          <v-tooltip location="right">
-            <template v-slot:activator="{ props }">
-              <v-icon
-            v-bind="props"
-            icon="mdi-help-circle-outline"
-            class="ml-2"
-            size="small"
-            color="grey"
-              ></v-icon>
-            </template>
-            <span>Adjust these values to prioritize your preferences. Total must equal 100%.</span>
-          </v-tooltip>
+              <v-icon icon="mdi-scale-balance" class="mr-2"></v-icon>
+              Importance Weights
+              <v-tooltip location="right">
+                <template v-slot:activator="{ props }">
+                  <v-icon
+                    v-bind="props"
+                    icon="mdi-help-circle-outline"
+                    class="ml-2"
+                    size="small"
+                    color="grey"
+                  ></v-icon>
+                </template>
+                <span>Adjust these values to prioritize your preferences. Total must equal 100%.</span>
+              </v-tooltip>
             </h2>
             <v-divider class="mt-2 mb-4"></v-divider>
           </v-col>
 
-          <v-col cols="12" md="6" class="pb-0">
-            <v-card flat class="pa-4 rounded-lg bg-grey-lighten-4">
-          <div class="d-flex align-center mb-2">
-            <v-icon icon="mdi-shield-check" color="success" class="mr-2"></v-icon>
-            <span class="text-subtitle-1">Safety</span>
-          </div>
-          <v-slider
-            v-model="weights.safety"
-            :min="0"
-            :max="100"
-            :step="5"
-            @update:model-value="normalizeWeights('safety')"
-            color="success"
-          >
-            <template v-slot:append>
-              <v-text-field
-            v-model="weights.safety"
-            type="number"
-            style="width: 70px"
-            density="compact"
-            hide-details
-            variant="outlined"
-            @update:model-value="normalizeWeights('safety')"
-              ></v-text-field>
-            </template>
-          </v-slider>
-            </v-card>
-          </v-col>
-
-          <v-col cols="12" md="6" class="pb-0">
-            <v-card flat class="pa-4 rounded-lg bg-grey-lighten-4">
-          <div class="d-flex align-center mb-2">
-            <v-icon icon="mdi-broom" color="info" class="mr-2"></v-icon>
-            <span class="text-subtitle-1">Cleanliness</span>
-          </div>
-          <v-slider
-            v-model="weights.cleanliness"
-            :min="0"
-            :max="100"
-            :step="5"
-            @update:model-value="normalizeWeights('cleanliness')"
-            color="info"
-          >
-            <template v-slot:append>
-              <v-text-field
-            v-model="weights.cleanliness"
-            type="number"
-            style="width: 70px"
-            density="compact"
-            hide-details
-            variant="outlined"
-            @update:model-value="normalizeWeights('cleanliness')"
-              ></v-text-field>
-            </template>
-          </v-slider>
-            </v-card>
-          </v-col>
-
-          <v-col cols="12" md="6">
-            <v-card flat class="pa-4 rounded-lg bg-grey-lighten-4">
-          <div class="d-flex align-center mb-2">
-            <v-icon icon="mdi-map-marker-path" color="warning" class="mr-2"></v-icon>
-            <span class="text-subtitle-1">Accessibility</span>
-          </div>
-          <v-slider
-            v-model="weights.accessibility"
-            :min="0"
-            :max="100"
-            :step="5"
-            @update:model-value="normalizeWeights('accessibility')"
-            color="warning"
-          >
-            <template v-slot:append>
-              <v-text-field
-            v-model="weights.accessibility"
-            type="number"
-            style="width: 70px"
-            density="compact"
-            hide-details
-            variant="outlined"
-            @update:model-value="normalizeWeights('accessibility')"
-              ></v-text-field>
-            </template>
-          </v-slider>
-            </v-card>
-          </v-col>
-
-          <v-col cols="12" md="6">
-            <v-card flat class="pa-4 rounded-lg bg-grey-lighten-4">
-          <div class="d-flex align-center mb-2">
-            <v-icon icon="mdi-volume-medium" color="error" class="mr-2"></v-icon>
-            <span class="text-subtitle-1">Noise Level</span>
-          </div>
-          <v-slider
-            v-model="weights.noise"
-            :min="0"
-            :max="100"
-            :step="5"
-            @update:model-value="normalizeWeights('noise')"
-            color="error"
-          >
-            <template v-slot:append>
-              <v-text-field
-            v-model="weights.noise"
-            type="number"
-            style="width: 70px"
-            density="compact"
-            hide-details
-            variant="outlined"
-            @update:model-value="normalizeWeights('noise')"
-              ></v-text-field>
-            </template>
-          </v-slider>
-            </v-card>
-          </v-col>
-
           <v-col cols="12">
-            <v-alert
-          :type="totalWeight === 100 ? 'success' : 'warning'"
-          variant="tonal"
-          :icon="totalWeight === 100 ? 'mdi-check-circle' : 'mdi-alert'"
-          class="mt-4"
-          density="comfortable"
-            >
-          <strong>Total Weight: {{ totalWeight }}%</strong>
-          <div v-if="totalWeight !== 100" class="text-caption mt-1">
-            Please adjust the weights to sum up to 100%
-          </div>
-            </v-alert>
+            <v-card flat class="pa-6 rounded-lg bg-grey-lighten-5 border">
+              <!-- Safety -->
+              <div class="d-flex align-center mb-4">
+                <v-icon icon="mdi-shield-check" color="success" class="mr-2"></v-icon>
+                <span class="text-subtitle-1 font-weight-medium">Safety</span>
+                <v-spacer></v-spacer>
+                <v-text-field
+                  v-model="weights.safety"
+                  type="number"
+                  style="width: 70px"
+                  density="compact"
+                  hide-details
+                  variant="outlined"
+                  @update:model-value="normalizeWeights('safety')"
+                  class="ml-2"
+                ></v-text-field>
+              </div>
+              <v-slider
+                v-model="weights.safety"
+                :min="0"
+                :max="100"
+                :step="5"
+                @update:model-value="normalizeWeights('safety')"
+                color="success"
+                track-color="success-lighten-3"
+                thumb-label="always"
+                class="mb-6"
+              ></v-slider>
+
+              <!-- Cleanliness -->
+              <div class="d-flex align-center mb-4">
+                <v-icon icon="mdi-broom" color="info" class="mr-2"></v-icon>
+                <span class="text-subtitle-1 font-weight-medium">Cleanliness</span>
+                <v-spacer></v-spacer>
+                <v-text-field
+                  v-model="weights.cleanliness"
+                  type="number"
+                  style="width: 70px"
+                  density="compact"
+                  hide-details
+                  variant="outlined"
+                  @update:model-value="normalizeWeights('cleanliness')"
+                  class="ml-2"
+                ></v-text-field>
+              </div>
+              <v-slider
+                v-model="weights.cleanliness"
+                :min="0"
+                :max="100"
+                :step="5"
+                @update:model-value="normalizeWeights('cleanliness')"
+                color="info"
+                track-color="info-lighten-3"
+                thumb-label="always"
+                class="mb-6"
+              ></v-slider>
+
+              <!-- Accessibility -->
+              <div class="d-flex align-center mb-4">
+                <v-icon icon="mdi-map-marker-path" color="warning" class="mr-2"></v-icon>
+                <span class="text-subtitle-1 font-weight-medium">Accessibility</span>
+                <v-spacer></v-spacer>
+                <v-text-field
+                  v-model="weights.accessibility"
+                  type="number"
+                  style="width: 70px"
+                  density="compact"
+                  hide-details
+                  variant="outlined"
+                  @update:model-value="normalizeWeights('accessibility')"
+                  class="ml-2"
+                ></v-text-field>
+              </div>
+              <v-slider
+                v-model="weights.accessibility"
+                :min="0"
+                :max="100"
+                :step="5"
+                @update:model-value="normalizeWeights('accessibility')"
+                color="warning"
+                track-color="warning-lighten-3"
+                thumb-label="always"
+                class="mb-6"
+              ></v-slider>
+
+              <!-- Noise Level -->
+              <div class="d-flex align-center mb-4">
+                <v-icon icon="mdi-volume-medium" color="error" class="mr-2"></v-icon>
+                <span class="text-subtitle-1 font-weight-medium">Noise Level</span>
+                <v-spacer></v-spacer>
+                <v-text-field
+                  v-model="weights.noise"
+                  type="number"
+                  style="width: 70px"
+                  density="compact"
+                  hide-details
+                  variant="outlined"
+                  @update:model-value="normalizeWeights('noise')"
+                  class="ml-2"
+                ></v-text-field>
+              </div>
+              <v-slider
+                v-model="weights.noise"
+                :min="0"
+                :max="100"
+                :step="5"
+                @update:model-value="normalizeWeights('noise')"
+                color="error"
+                track-color="error-lighten-3"
+                thumb-label="always"
+                class="mb-4"
+              ></v-slider>
+
+              <!-- Total Weight Indicator -->
+              <v-alert
+                :type="totalWeight === 0 ? 'error' : 'info'"
+                variant="tonal"
+                :icon="totalWeight === 0 ? 'mdi-alert' : 'mdi-information'"
+                class="mt-4"
+                density="comfortable"
+              >
+                <div class="d-flex align-center">
+                  <span class="font-weight-medium">Total Weight: {{ totalWeight }}%</span>
+                  <v-spacer></v-spacer>
+                  <v-btn
+                    color="primary"
+                    size="small"
+                    variant="text"
+                    @click="resetWeights"
+                    class="ml-2"
+                  >
+                    Reset to Equal
+                  </v-btn>
+                </div>
+                <div class="text-caption mt-1">
+                  Set any importance values you want for each criterion. The system will automatically adjust these proportionally to sum to 100% when saved.
+                </div>
+              </v-alert>
+            </v-card>
           </v-col>
         </v-row>
           </v-container>
@@ -285,7 +296,6 @@
           variant="elevated"
           @click="savePreferences"
           :loading="loading"
-          :disabled="loading || !isFormValid"
           size="large"
           prepend-icon="mdi-content-save"
         >
@@ -342,16 +352,38 @@ const totalWeight = computed(() => {
   return Object.values(weights.value).reduce((sum, weight) => sum + Number(weight), 0)
 })
 
+const remainingWeight = computed(() => {
+  return 100 - totalWeight.value
+})
+
 const isFormValid = computed(() => {
-  return (
-    totalWeight.value === 100 &&
-    preferences.value.max_price > 0 &&
-    preferences.value.min_capacity > 0 &&
-    preferences.value.preferred_location.trim() !== '' &&
-    preferences.value.required_amenities.length > 0 &&
-    preferences.value.living_space_type !== null &&
-    preferences.value.preferred_distance > 0
-  )
+  // Check if at least one weight is greater than 0
+  const hasPositiveWeight = Object.values(weights.value).some(weight => Number(weight) > 0);
+  
+  // Check other form fields
+  const hasValidPrice = preferences.value.max_price > 0;
+  const hasValidCapacity = preferences.value.min_capacity > 0;
+  const hasValidLocation = preferences.value.preferred_location.trim() !== '';
+  const hasValidAmenities = preferences.value.required_amenities.length > 0;
+  const hasValidType = preferences.value.living_space_type !== null;
+  const hasValidDistance = preferences.value.preferred_distance > 0;
+  
+  // Log validation status for debugging
+  console.log('Form validation status:', {
+    hasPositiveWeight,
+    hasValidPrice,
+    hasValidCapacity,
+    hasValidLocation,
+    hasValidAmenities,
+    hasValidType,
+    hasValidDistance,
+    weights: weights.value,
+    preferences: preferences.value
+  });
+  
+  // Return true to enable the button regardless of validation
+  // This is temporary to help debug the issue
+  return true;
 })
 
 const commonAmenities = [
@@ -449,59 +481,105 @@ const fetchPreferences = async () => {
 }
 
 const normalizeWeights = (changedWeight) => {
-  // Convert all weights to numbers first
-  Object.keys(weights.value).forEach((key) => {
-    weights.value[key] = Number(weights.value[key]) || 0
-  })
-
-  const total = Object.values(weights.value).reduce((sum, weight) => sum + weight, 0)
-  if (total === 0) {
-    // Reset to default equal weights if total is 0
-    Object.keys(weights.value).forEach((key) => {
-      weights.value[key] = 25
-    })
-    return
-  }
-
-  const factor = 100 / total
-  Object.keys(weights.value).forEach((key) => {
-    if (key !== changedWeight) {
-      weights.value[key] = Math.round(weights.value[key] * factor)
-    }
-  })
-
-  // Ensure the changed weight is also a number
+  // Convert the changed weight to a number
   weights.value[changedWeight] = Number(weights.value[changedWeight]) || 0
-
-  // Adjust for rounding errors by putting the remainder in the changed weight
-  const newTotal = Object.values(weights.value).reduce((sum, weight) => sum + weight, 0)
-  if (newTotal !== 100) {
-    const diff = 100 - newTotal
-    weights.value[changedWeight] += diff
+  
+  // Ensure the value is not negative
+  if (weights.value[changedWeight] < 0) {
+    weights.value[changedWeight] = 0
   }
+  
+  // Ensure the value is not greater than 100
+  if (weights.value[changedWeight] > 100) {
+    weights.value[changedWeight] = 100
+  }
+  
+  // Round to nearest integer
+  weights.value[changedWeight] = Math.round(weights.value[changedWeight])
+}
+
+// Reset weights to equal distribution (25% each)
+const resetWeights = () => {
+  Object.keys(weights.value).forEach((key) => {
+    weights.value[key] = 25
+  })
 }
 
 const savePreferences = async () => {
-  const { valid } = await form.value.validate()
-  if (!valid) {
-    snackbarText.value = 'Please fill in all required fields correctly'
-    snackbarColor.value = 'error'
-    snackbar.value = true
-    return
-  }
-
-  // Validate weights total
-  const totalWeight = Object.values(weights.value).reduce((sum, weight) => sum + weight, 0)
-  if (Math.abs(totalWeight - 100) > 0.01) {
-    snackbarText.value = 'Importance weights must sum to 100%'
-    snackbarColor.value = 'error'
-    snackbar.value = true
-    return
-  }
-
-  loading.value = true
-
   try {
+    // Skip form validation for now
+    // const { valid } = await form.value.validate()
+    // if (!valid) {
+    //   snackbarText.value = 'Please fill in all required fields correctly'
+    //   snackbarColor.value = 'error'
+    //   snackbar.value = true
+    //   return
+    // }
+
+    // Check if at least one weight is greater than 0
+    const hasPositiveWeight = Object.values(weights.value).some(weight => Number(weight) > 0);
+    if (!hasPositiveWeight) {
+      snackbarText.value = 'At least one importance weight must be greater than 0'
+      snackbarColor.value = 'error'
+      snackbar.value = true
+      return
+    }
+
+    // Validate required fields manually
+    if (!preferences.value.max_price || preferences.value.max_price <= 0) {
+      snackbarText.value = 'Maximum price must be greater than 0'
+      snackbarColor.value = 'error'
+      snackbar.value = true
+      return
+    }
+
+    if (!preferences.value.min_capacity || preferences.value.min_capacity <= 0) {
+      snackbarText.value = 'Minimum capacity must be greater than 0'
+      snackbarColor.value = 'error'
+      snackbar.value = true
+      return
+    }
+
+    if (!preferences.value.preferred_location || preferences.value.preferred_location.trim() === '') {
+      snackbarText.value = 'Preferred location is required'
+      snackbarColor.value = 'error'
+      snackbar.value = true
+      return
+    }
+
+    if (!preferences.value.required_amenities || preferences.value.required_amenities.length === 0) {
+      snackbarText.value = 'At least one required amenity is needed'
+      snackbarColor.value = 'error'
+      snackbar.value = true
+      return
+    }
+
+    if (!preferences.value.living_space_type) {
+      snackbarText.value = 'Living space type is required'
+      snackbarColor.value = 'error'
+      snackbar.value = true
+      return
+    }
+
+    if (!preferences.value.preferred_distance || preferences.value.preferred_distance <= 0) {
+      snackbarText.value = 'Preferred distance must be greater than 0'
+      snackbarColor.value = 'error'
+      snackbar.value = true
+      return
+    }
+
+    loading.value = true
+
+    // Create a copy of the weights and normalize them to sum to 1.0 for the backend
+    // This doesn't change what the user sees in the UI
+    const normalizedWeights = { ...weights.value }
+    const totalWeightValue = Object.values(normalizedWeights).reduce((sum, weight) => sum + Number(weight), 0)
+    const factor = 100 / totalWeightValue
+    
+    Object.keys(normalizedWeights).forEach(key => {
+      normalizedWeights[key] = normalizedWeights[key] * factor
+    })
+
     const response = await axios.post('/tenant/preferences', {
       max_price: Number(preferences.value.max_price),
       min_capacity: Number(preferences.value.min_capacity),
@@ -509,10 +587,10 @@ const savePreferences = async () => {
       required_amenities: preferences.value.required_amenities,
       living_space_type: preferences.value.living_space_type,
       preferred_distance: Number(preferences.value.preferred_distance),
-      safety_weight: weights.value.safety / 100,
-      cleanliness_weight: weights.value.cleanliness / 100,
-      accessibility_weight: weights.value.accessibility / 100,
-      noise_level_weight: weights.value.noise / 100,
+      safety_weight: normalizedWeights.safety / 100,
+      cleanliness_weight: normalizedWeights.cleanliness / 100,
+      accessibility_weight: normalizedWeights.accessibility / 100,
+      noise_level_weight: normalizedWeights.noise / 100,
     })
 
     snackbarText.value = 'Preferences saved successfully'
@@ -537,3 +615,39 @@ const savePreferences = async () => {
   }
 }
 </script>
+
+<style scoped>
+.preferences-container {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.custom-input :deep(.v-field__input) {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+/* Slider styling */
+:deep(.v-slider .v-slider-thumb) {
+  width: 20px;
+  height: 20px;
+}
+
+:deep(.v-slider .v-slider-thumb__label) {
+  font-weight: bold;
+}
+
+:deep(.v-slider-track__background) {
+  height: 8px;
+  border-radius: 4px;
+}
+
+:deep(.v-slider-track__fill) {
+  height: 8px;
+  border-radius: 4px;
+}
+
+.border {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+}
+</style>
