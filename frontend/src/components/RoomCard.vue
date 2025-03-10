@@ -375,7 +375,7 @@
           <div class="text-subtitle-1">Tenant Ratings ({{ room.total_ratings || 0 }})</div>
           <rating-dialog
             :room-id="room.id"
-            :user-type="userType"
+            :user-type="user_type"
             :existing-rating="userRating"
             @rating-updated="handleRatingUpdate"
           />
