@@ -13,6 +13,7 @@ class User(db.Model):
     avatar_url = db.Column(db.String(255))  # New field for profile picture URL
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     is_admin = db.Column(db.Boolean, default=False)  # New field to indicate admin status
+    is_landlord_approved = db.Column(db.Boolean, default=False)  # Field to track landlord approval status
     # Add rooms relationship
     rooms = db.relationship('Room', backref='landlord', lazy=True)
 

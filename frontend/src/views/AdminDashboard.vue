@@ -490,7 +490,7 @@
                 density="comfortable"
               ></v-select>
             </v-col>
-            <v-col cols="12">
+            <!-- <v-col cols="12">
               <v-switch
                 v-model="editedItem.is_admin"
                 label="Admin Status"
@@ -498,7 +498,7 @@
                 hide-details
                 inset
               ></v-switch>
-            </v-col>
+            </v-col> -->
             <v-col cols="12" >
               <v-switch
                 v-model="editedItem.is_landlord_approved"
@@ -809,7 +809,8 @@ const saveUser = async () => {
   try {
     await axios.put(`/admin/users/${editedItem.value.id}`, {
       user_type: editedItem.value.user_type,
-      is_admin: editedItem.value.is_admin
+      is_admin: editedItem.value.is_admin,
+      is_landlord_approved: editedItem.value.is_landlord_approved
     })
     
     // Update local data
@@ -820,11 +821,46 @@ const saveUser = async () => {
     
     editDialog.value = false
     
+    // Show success message
+    snackbar.value = true
+    snackbarColor.value = 'success'
+    snackbarText.value = 'User updated successfully'
+    
     // Refresh data
     fetchDashboardData()
     fetchUsers()
   } catch (error) {
     console.error('Error updating user:', error)
+    snackbar.value = true
+    snackbarColor.value = 'error'
+    snackbarText.value = 'Failed to update user: ' + (error.response?.data?.error || 'Unknown error')
+  }
+}
+
+// Delete user
+const deleteUser = async (item) => {
+  if (!confirm(`Are you sure you want to delete user ${item.email}? This action cannot be undone.`)) {
+    return
+  }
+  
+  try {
+    await axios.delete(`/admin/users/${item.id}`)
+    
+    // Remove user from local data
+    users.value = users.value.filter(user => user.id !== item.id)
+    
+    // Show success message
+    snackbar.value = true
+    snackbarColor.value = 'success'
+    snackbarText.value = 'User deleted successfully'
+    
+    // Refresh dashboard data
+    fetchDashboardData()
+  } catch (error) {
+    console.error('Error deleting user:', error)
+    snackbar.value = true
+    snackbarColor.value = 'error'
+    snackbarText.value = 'Failed to delete user: ' + (error.response?.data?.error || 'Unknown error')
   }
 }
 

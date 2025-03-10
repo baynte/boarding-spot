@@ -62,6 +62,7 @@ def get_users():
             'email': user.email,
             'user_type': user.user_type,
             'is_admin': user.is_admin,
+            'is_landlord_approved': user.is_landlord_approved if user.user_type == 'landlord' else None,
             'created_at': user.created_at.isoformat()
         } for user in users
     ]
@@ -88,14 +89,48 @@ def update_user(user_id):
         else:
             return jsonify({'error': 'Invalid user type'}), 400
     
+    # Add support for landlord approval
+    if 'is_landlord_approved' in data and user.user_type == 'landlord':
+        user.is_landlord_approved = data['is_landlord_approved']
+    
     db.session.commit()
     
     return jsonify({
         'id': user.id,
         'email': user.email,
         'user_type': user.user_type,
-        'is_admin': user.is_admin
+        'is_admin': user.is_admin,
+        'is_landlord_approved': getattr(user, 'is_landlord_approved', None)
     })
+
+@bp.route('/users/<int:user_id>', methods=['DELETE'])
+@jwt_required()
+@admin_required
+def delete_user(user_id):
+    """Delete a user from the system"""
+    user = User.query.get(user_id)
+    if not user:
+        return jsonify({'error': 'User not found'}), 404
+    
+    # Don't allow deleting yourself
+    current_user_id = get_jwt_identity()
+    if user_id == current_user_id:
+        return jsonify({'error': 'Cannot delete your own account'}), 400
+    
+    try:
+        # If user is a landlord, delete their rooms first
+        if user.user_type == 'landlord':
+            # Delete all rooms associated with this landlord
+            Room.query.filter_by(landlord_id=user.id).delete()
+        
+        # Delete the user
+        db.session.delete(user)
+        db.session.commit()
+        
+        return jsonify({'message': 'User deleted successfully'})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': f'Failed to delete user: {str(e)}'}), 500
 
 @bp.route('/rooms/pending', methods=['GET'])
 @jwt_required()
