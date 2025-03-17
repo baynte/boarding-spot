@@ -28,7 +28,17 @@
                 color="primary"
                 variant="elevated"
                 prepend-icon="mdi-login"
+                class="mr-2"
               >
+                Login
+              </v-btn>
+              <v-btn
+                to="/register"
+                color="secondary"
+                variant="elevated"
+                prepend-icon="mdi-account-plus"
+              >
+                Register
               </v-btn>
             </template>
             <template v-else>
@@ -68,6 +78,7 @@
                 variant="elevated"
                 prepend-icon="mdi-logout"
               >
+                Logout
               </v-btn>
             </template>
           </div>

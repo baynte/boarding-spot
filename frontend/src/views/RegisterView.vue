@@ -12,7 +12,7 @@
               <v-form @submit.prevent="handleSubmit" ref="form">
                 <v-text-field
                   v-model="email"
-                  :rules="[rules.required, rules.email]"
+                  :rules="emailRules"
                   label="Email"
                   prepend-icon="mdi-email"
                   type="email"
@@ -93,9 +93,14 @@
 
             <v-card-text class="text-center pb-3">
               <span class="text-grey">Already have an account? </span>
-              <router-link to="/login" class="text-primary font-weight-bold text-decoration-none">
+              <v-btn
+                to="/login"
+                color="primary"
+                variant="text"
+                class="text-decoration-none font-weight-bold"
+              >
                 Sign in
-              </router-link>
+              </v-btn>
             </v-card-text>
           </v-card>
         </v-col>
@@ -104,14 +109,21 @@
       <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="3000">
         {{ snackbarText }}
       </v-snackbar>
+      
+      <!-- Email Verification Dialog -->
+      <EmailVerification 
+        v-model="showVerificationDialog" 
+        :email="email"
+      />
     </v-container>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import EmailVerification from '@/components/EmailVerification.vue'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -121,11 +133,13 @@ const email = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 const userType = ref('')
+const contactNumber = ref('')
 const showPassword = ref(false)
 const loading = ref(false)
 const snackbar = ref(false)
 const snackbarText = ref('')
 const snackbarColor = ref('success')
+const showVerificationDialog = ref(false)
 
 const userTypes = [
   { title: 'Landlord', value: 'landlord' },
@@ -139,6 +153,23 @@ const rules = {
   passwordMatch: (v) => v === password.value || 'Passwords must match',
 }
 
+// Email validation rules with domain check for tenants
+const emailRules = computed(() => {
+  const baseRules = [
+    rules.required,
+    rules.email
+  ]
+  
+  // Add domain validation for tenant accounts
+  if (userType.value === 'tenant') {
+    baseRules.push(
+      (v) => v.endsWith('@smccnasipit.edu.ph') || 'Tenant accounts must use an @smccnasipit.edu.ph email address'
+    )
+  }
+  
+  return baseRules
+})
+
 const contactNumberRules = [
   (v) => !v || /^\+?[\d\s-]+$/.test(v) || 'Contact number must be valid',
   (v) =>
@@ -148,21 +179,41 @@ const contactNumberRules = [
     'Contact number is required for landlords',
 ]
 
+// Watch for user type changes to revalidate email
+watch(userType, async () => {
+  if (form.value) {
+    await form.value.validate()
+  }
+})
+
 const handleSubmit = async () => {
   const { valid } = await form.value.validate()
 
-  if (!valid) return
+  if (!valid) {
+    snackbarText.value = 'Please fix the form errors before submitting'
+    snackbarColor.value = 'warning'
+    snackbar.value = true
+    return
+  }
 
   loading.value = true
 
   try {
-    await auth.register(email.value, password.value, userType.value)
+    const response = await auth.register(email.value, password.value, userType.value, contactNumber.value)
+    
+    // All accounts are auto-verified now, so we can just show success and redirect to login
     snackbarText.value = 'Registration successful! Please login.'
     snackbarColor.value = 'success'
     snackbar.value = true
     router.push('/login')
   } catch (error) {
-    snackbarText.value = error.response?.data?.error || 'Registration failed'
+    if (error.response) {
+      snackbarText.value = error.response.data.error || 'Registration failed'
+    } else if (error.request) {
+      snackbarText.value = 'Network error. Please check your connection.'
+    } else {
+      snackbarText.value = error.message || 'Registration failed'
+    }
     snackbarColor.value = 'error'
     snackbar.value = true
   } finally {

@@ -25,12 +25,14 @@ const router = createRouter({
     {
       path: '/login',
       name: 'login',
-      component: LoginView
+      component: LoginView,
+      meta: { guest: true }
     },
     {
       path: '/register',
       name: 'register',
-      component: RegisterView
+      component: RegisterView,
+      meta: { guest: true }
     },
     {
       path: '/landlord',
@@ -86,15 +88,37 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const auth = useAuthStore()
   
+  // If route requires authentication and user is not authenticated
   if (to.meta.requiresAuth && !auth.isAuthenticated) {
     next('/login')
-  } else if (to.meta.requiresLandlord && !auth.isLandlord) {
+  } 
+  // If route requires landlord role and user is not a landlord
+  else if (to.meta.requiresLandlord && !auth.isLandlord) {
     next('/')
-  } else if (to.meta.requiresTenant && !auth.isTenant) {
+  } 
+  // If route requires tenant role and user is not a tenant
+  else if (to.meta.requiresTenant && !auth.isTenant) {
     next('/')
-  } else if (to.meta.requiresAdmin && !auth.isAdminUser) {
+  } 
+  // If route requires admin role and user is not an admin
+  else if (to.meta.requiresAdmin && !auth.isAdminUser) {
     next('/admin/login')
-  } else {
+  } 
+  // If route is for guests (login/register) and user is already authenticated
+  else if (to.meta.guest && auth.isAuthenticated) {
+    // Redirect to appropriate dashboard based on user type
+    if (auth.isLandlord) {
+      next('/landlord')
+    } else if (auth.isTenant) {
+      next('/tenant')
+    } else if (auth.isAdminUser) {
+      next('/admin/dashboard')
+    } else {
+      next('/')
+    }
+  } 
+  // Otherwise, proceed to the requested route
+  else {
     next()
   }
 })

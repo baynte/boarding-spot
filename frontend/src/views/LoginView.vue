@@ -56,12 +56,14 @@
 
             <v-card-text class="text-center pb-2">
               <span class="text-medium-emphasis">Don't have an account? </span>
-              <router-link
+              <v-btn
                 to="/register"
-                class="text-primary text-decoration-none font-weight-medium"
+                color="secondary"
+                variant="text"
+                class="text-decoration-none font-weight-medium"
               >
                 Register here
-              </router-link>
+              </v-btn>
             </v-card-text>
           </v-card>
         </v-col>
@@ -70,6 +72,12 @@
       <v-snackbar v-model="snackbar" :color="snackbarColor" timeout="3000">
         {{ snackbarText }}
       </v-snackbar>
+      
+      <!-- Email Verification Dialog -->
+      <EmailVerification 
+        v-model="showVerificationDialog" 
+        :email="email"
+      />
     </v-container>
   </div>
 </template>
@@ -82,6 +90,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import EmailVerification from '@/components/EmailVerification.vue'
 
 const router = useRouter()
 const auth = useAuthStore()
@@ -94,6 +103,7 @@ const loading = ref(false)
 const snackbar = ref(false)
 const snackbarText = ref('')
 const snackbarColor = ref('success')
+const showVerificationDialog = ref(false)
 
 const rules = {
   required: (v) => !!v || 'Field is required',
@@ -121,6 +131,7 @@ const handleSubmit = async () => {
     await router.push(redirectPath)
     window.location.reload()
   } catch (error) {
+    // All accounts are auto-verified now, so we don't need to check for verification errors
     snackbarText.value = error.response?.data?.error || 'Login failed'
     snackbarColor.value = 'error'
     snackbar.value = true

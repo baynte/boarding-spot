@@ -1,6 +1,7 @@
 from extensions import db
 from werkzeug.security import generate_password_hash, check_password_hash
-from datetime import datetime
+from datetime import datetime, timedelta
+import uuid
 
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -14,6 +15,10 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     is_admin = db.Column(db.Boolean, default=False)  # New field to indicate admin status
     is_landlord_approved = db.Column(db.Boolean, default=False)  # Field to track landlord approval status
+    # Email verification fields
+    is_email_verified = db.Column(db.Boolean, default=False)
+    verification_token = db.Column(db.String(100), unique=True, nullable=True)
+    token_expiry = db.Column(db.DateTime, nullable=True)
     # Add rooms relationship
     rooms = db.relationship('Room', backref='landlord', lazy=True)
 
@@ -22,6 +27,12 @@ class User(db.Model):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+    def generate_verification_token(self):
+        self.verification_token = str(uuid.uuid4())
+        # Token expires in 24 hours
+        self.token_expiry = datetime.utcnow() + timedelta(hours=24)
+        return self.verification_token
 
 class Room(db.Model):
     id = db.Column(db.Integer, primary_key=True)
