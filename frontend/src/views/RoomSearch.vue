@@ -1,7 +1,9 @@
 <template>
   <div class="pt-10">
-    <!-- <h1 class="text-h4 mb-4 mt-10">Rental type Search</h1> -->
-
+    <h1 class="text-h4 mb-1">Rental type Search</h1>
+    <div class="text-subtitle-1 text-medium-emphasis mb-4">
+      Find your perfect rental type based on your preferences
+          </div>
     <!-- Warning if preferences not set -->
     <v-alert v-if="!hasPreferences" type="warning" class="mb-4">
       Please set your preferences to get personalized room recommendations.

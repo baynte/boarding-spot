@@ -8,8 +8,12 @@ class User(db.Model):
     password_hash = db.Column(db.String(256), nullable=False)
     user_type = db.Column(db.String(20), nullable=False)  # 'tenant' or 'landlord'
     contact_number = db.Column(db.String(20))  # New field for contact number
+    full_name = db.Column(db.String(100))  # New field for full name
+    bio = db.Column(db.Text)  # New field for bio/about me
+    avatar_url = db.Column(db.String(255))  # New field for profile picture URL
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     is_admin = db.Column(db.Boolean, default=False)  # New field to indicate admin status
+    is_landlord_approved = db.Column(db.Boolean, default=False)  # Field to track landlord approval status
     # Add rooms relationship
     rooms = db.relationship('Room', backref='landlord', lazy=True)
 
@@ -34,6 +38,8 @@ class Room(db.Model):
     availability = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     image_urls = db.Column(db.Text)  # JSON string of image URLs
+    approval_status = db.Column(db.String(20), server_default='pending')  # 'pending', 'approved', 'rejected'
+    admin_notes = db.Column(db.Text)  # Notes from admin regarding approval/rejection
 
     # Criteria for TOPSIS
     safety_score = db.Column(db.Float)  # 1-10

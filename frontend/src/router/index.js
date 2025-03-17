@@ -8,6 +8,7 @@ import RegisterView from '@/views/RegisterView.vue'
 import LandlordDashboard from '@/views/LandlordDashboard.vue'
 import LandlordProfile from '@/views/LandlordProfile.vue'
 import TenantDashboard from '@/views/TenantDashboard.vue'
+import TenantProfile from '@/views/TenantProfile.vue'
 import RoomSearch from '@/views/RoomSearch.vue'
 import PreferencesView from '@/views/PreferencesView.vue'
 import AdminLoginView from '@/views/AdminLoginView.vue'
@@ -47,6 +48,12 @@ const router = createRouter({
       path: '/tenant',
       name: 'tenant',
       component: TenantDashboard,
+      meta: { requiresAuth: true, requiresTenant: true }
+    },
+    {
+      path: '/tenant/profile',
+      name: 'tenantProfile',
+      component: TenantProfile,
       meta: { requiresAuth: true, requiresTenant: true }
     },
     {

@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, current_app, url_for
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
 from app import db
-from models import User, Room
+from models import User, Room, TenantRating
 import json
 import os
 from datetime import datetime
@@ -68,13 +68,17 @@ def create_room():
         cleanliness_score=5.0,
         accessibility_score=5.0,
         noise_level=5.0,
-        image_urls=json.dumps(image_urls)
+        image_urls=json.dumps(image_urls),
+        approval_status='pending'
     )
     
     db.session.add(room)
     db.session.commit()
     
-    return jsonify({'message': 'Room created successfully', 'room_id': room.id}), 201
+    return jsonify({
+        'message': 'Room created successfully and is pending approval by admin',
+        'room_id': room.id
+    }), 201
 
 @bp.route('/rooms', methods=['GET'])
 @jwt_required()
@@ -102,7 +106,9 @@ def get_rooms():
         'cleanliness_score': room.cleanliness_score,
         'accessibility_score': room.accessibility_score,
         'noise_level': room.noise_level,
-        'image_urls': json.loads(room.image_urls)
+        'image_urls': json.loads(room.image_urls),
+        'approval_status': room.approval_status,
+        'admin_notes': room.admin_notes
     } for room in rooms]
     return jsonify(rooms_data)
 
@@ -219,6 +225,9 @@ def delete_room(room_id):
                 if os.path.exists(old_path):
                     os.remove(old_path)
         
+        # Delete related tenant ratings first
+        TenantRating.query.filter_by(room_id=room_id).delete()
+        
         # Delete the room from database
         db.session.delete(room)
         db.session.commit()
@@ -227,7 +236,7 @@ def delete_room(room_id):
     except Exception as e:
         print(f"Error deleting room: {str(e)}")
         db.session.rollback()
-        return jsonify({'error': 'Failed to delete room'}), 500 
+        return jsonify({'error': 'Failed to delete room: ' + str(e)}), 500
 
 @bp.route('/profile', methods=['GET'])
 @jwt_required()
