@@ -293,9 +293,13 @@ def search_rooms():
     # Prepare data for TOPSIS
     current_app.logger.info("Preparing decision matrix...")
 
-# Start of Logic
+# Start of TOPSIS Logic
     try:
-        # Convert room scores to float arrays, handling None values
+        # TOPSIS (Technique for Order of Preference by Similarity to Ideal Solution) Implementation
+        # TOPSIS is a multi-criteria decision making method that compares a set of alternatives based on weighted criteria
+        
+        # Step 1: Create the decision matrix with normalized values for each room's attributes
+        # Each row represents a room, and each column represents a criterion (attribute)
         decision_matrix = []
         
         # Define criteria ranges for normalization
@@ -304,61 +308,65 @@ def search_rooms():
         
         # Process each room for the decision matrix
         for room in rooms:
-            # Normalize scores to 0-1 range and handle None values
+            # Normalize scores to 0-1 range (where 1 is best) and handle None values with sensible defaults
+            # For ratings like safety and cleanliness, higher is better, so we divide by max possible (10)
             safety = (float(room.safety_score) if room.safety_score is not None else 5.0) / 10.0
             cleanliness = (float(room.cleanliness_score) if room.cleanliness_score is not None else 5.0) / 10.0
             accessibility = (float(room.accessibility_score) if room.accessibility_score is not None else 5.0) / 10.0
-            noise = 1 - ((float(room.noise_level) if room.noise_level is not None else 5.0) / 10.0)  # Invert noise so higher is better
+            # For noise, lower is better, so we invert the normalized value
+            noise = 1 - ((float(room.noise_level) if room.noise_level is not None else 5.0) / 10.0)
             
-            # Calculate price match score based on proximity to max_price
+            # Calculate price match score - different calculation depending on whether max_price was specified
             if max_price is not None:
-                # Perfect match if price is exactly at or below max_price
-                # Otherwise, score decreases as price increases above max_price
+                # If price is below max_price, perfect score; otherwise, score decreases as price increases
                 price_score = 1.0 if room.price <= max_price else max(0, 1 - ((room.price - max_price) / max_price))
             else:
-                # If no max price specified, use a relative score based on the range of prices
+                # If no max price specified, score relative to other rooms (lower price = better score)
                 price_score = 1.0 - (room.price / max_price_value) if max_price_value > 0 else 0.5
             
             # Calculate distance score (closer to SMCC is better)
             if room.distance_from_smcc is not None:
-                # Convert distance to a score where closer is better
-                # 0km = 1.0, 10km or more = 0.0
+                # Convert distance to a score where closer is better (0km = 1.0, 10km or more = 0.0)
                 max_reasonable_distance = 10.0  # km
                 distance_score = max(0, 1.0 - (room.distance_from_smcc / max_reasonable_distance))
             else:
                 # If distance is unknown, use a neutral score
                 distance_score = 0.5
             
-            # Calculate capacity match score based only on request parameters
+            # Calculate capacity match score
             if min_capacity is not None:
+                # Binary score: meets minimum (1.0) or doesn't (0.0)
                 capacity_score = 1.0 if room.capacity >= min_capacity else 0.0
             else:
-                # If no min capacity specified, use a relative score based on the range of capacities
+                # If no min capacity specified, score based on relative capacity (higher = better)
                 capacity_score = room.capacity / 10.0  # Assuming max reasonable capacity is 10
             
             # Calculate amenity match score
             room_amenities = json.loads(room.amenities) if room.amenities else []
             
             if amenities:
+                # Score based on percentage of requested amenities that are present
                 matched_amenities = sum(1 for amenity in amenities if amenity in room_amenities)
                 amenity_score = matched_amenities / len(amenities)
             else:
-                # If no amenities specified, score based on total amenities
+                # If no amenities specified, score based on total amenities (more = better)
                 amenity_score = min(1.0, len(room_amenities) / 10.0)  # Assuming 10 amenities is "complete"
             
-            # Calculate location match score
+            # Calculate location match score (exact match = perfect score)
             if location:
                 location_score = 1.0 if location.lower() in room.location.lower() else 0.0
             else:
                 location_score = 0.5  # Neutral score if no location preference
             
-            # Calculate Rental type match score
+            # Calculate Rental type match score (exact match = perfect score)
             if living_space_type:
                 living_space_match = 1.0 if room.living_space_type == living_space_type else 0.0
             else:
                 living_space_match = 0.5  # Neutral score if no type preference
             
-            # Create row with normalized values
+            # Step 2: Create a row in the decision matrix with all the normalized values (0-1 scale)
+            # Naa sa ibabaw ang pag kuha sa row
+            
             row = [
                 distance_score,      # Distance score (0-1) - NEW
                 price_score,         # Price match (0-1)
@@ -372,44 +380,52 @@ def search_rooms():
             ]
             decision_matrix.append(row)
         
-        # Convert to numpy array
+        # Convert list of lists to a NumPy array for matrix operations
         decision_matrix = np.array(decision_matrix, dtype=np.float64)
         
         if len(decision_matrix) == 0:
             return jsonify({'message': 'No rooms available for ranking'})
         
-        # Define equal weights for all criteria since we don't have user preferences
+        # Step 3: Define weights for each criterion (how important each factor is in the decision)
+        # The weights determine how much each criterion influences the final score
         weights = np.array([
-            0.20,  # Distance weight (NEW)
-            0.20,  # Price weight
-            0.15,  # Safety weight
-            0.15,  # Amenity weight
-            0.10,  # Cleanliness weight
-            0.10,  # Accessibility weight
-            0.05,  # Noise weight
-            0.03,  # Capacity weight
-            0.02   # Rental type weight
+            0.20,  # Distance weight - 20% importance
+            0.20,  # Price weight - 20% importance
+            0.15,  # Safety weight - 15% importance
+            0.15,  # Amenity weight - 15% importance
+            0.10,  # Cleanliness weight - 10% importance
+            0.10,  # Accessibility weight - 10% importance
+            0.05,  # Noise weight - 5% importance
+            0.03,  # Capacity weight - 3% importance
+            0.02   # Rental type weight - 2% importance
         ], dtype=np.float64)
         
-        # Normalize weights to sum to 1
+        # Normalize weights to ensure they sum to 1
         weights = weights / np.sum(weights)
         
-        # All criteria are beneficial (1 for beneficial)
+        # Step 4: Define impact direction for each criterion (1 = beneficial, -1 = non-beneficial)
+        # All criteria are beneficial (higher value is better) in this case
         impacts = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1], dtype=np.float64)
         
-        # Calculate TOPSIS scores
+        # Step 5: Calculate TOPSIS scores using the external topsispy library
+        # TOPSIS algorithm:
+        # 1. Normalizes the decision matrix (already done above)
+        # 2. Multiplies normalized values by weights
+        # 3. Determines ideal and anti-ideal solutions for each criterion
+        # 4. Calculates Euclidean distance from each alternative to ideal and anti-ideal
+        # 5. Calculates relative closeness to the ideal solution (final score)
         raw_scores = []
         for i in range(len(decision_matrix)):
             room_scores = topsis([decision_matrix[i].tolist()], weights.tolist(), impacts.tolist())
             raw_scores.append(float(room_scores[0]))
         
-        # Convert to numpy array and scale to percentages
+        # Convert raw scores to numpy array and scale to percentages for better readability
         raw_scores = np.array(raw_scores, dtype=np.float64)
         percentage_scores = raw_scores * 100
 
-# End of Logic
+# End of TOPSIS Logic
         
-        # Apply perfect match bonuses
+        # Apply perfect match bonuses - post-processing to reward rooms that exactly match key criteria
         for i, (room, score) in enumerate(zip(rooms, percentage_scores)):
             room_amenities = json.loads(room.amenities) if room.amenities else []
             
@@ -487,7 +503,8 @@ def search_rooms():
                 price_diff_percentage = ((room.price - max_price) / max_price) * 100
                 price_value_score = max(0, 100 - price_diff_percentage)
 
-            # Calculate comprehensive match score
+            # Calculate comprehensive match score - combines TOPSIS with more specific matching criteria
+            # This provides a more nuanced score that emphasizes factors most important to users
             comprehensive_score = (
                 match_percentage * 0.4 +  # TOPSIS score weight
                 amenity_match_percentage * 0.2 +  # Amenities weight
