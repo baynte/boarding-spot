@@ -12,7 +12,7 @@
               <div class="text-subtitle-1 font-weight-bold text-truncate">{{ room.title }}</div>
             </div>
           </div>
-          <v-chip
+          <!-- <v-chip
             :color="getMatchColor(match_score)"
             size="small"
             label
@@ -22,7 +22,7 @@
           >
             <v-icon start :icon="getMatchIcon(match_score)" size="18" class="me-1"></v-icon>
             <span>{{ Math.round(match_score) }}% Match</span>
-          </v-chip>
+          </v-chip> -->
         </div>
       </v-card-item>
 
