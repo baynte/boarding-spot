@@ -49,6 +49,8 @@ class Room(db.Model):
     availability = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     image_urls = db.Column(db.Text)  # JSON string of image URLs
+    document_url = db.Column(db.String(255))  # URL to the uploaded document
+    document_name = db.Column(db.String(255))  # Original name of the uploaded document
     approval_status = db.Column(db.String(20), server_default='pending')  # 'pending', 'approved', 'rejected'
     admin_notes = db.Column(db.Text)  # Notes from admin regarding approval/rejection
 

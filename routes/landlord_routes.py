@@ -3,6 +3,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from werkzeug.utils import secure_filename
 from app import db
 from models import User, Room, TenantRating
+from utils.document_utils import save_document, delete_document
 import json
 import os
 from datetime import datetime
@@ -48,6 +49,13 @@ def create_room():
                 file.save(os.path.join(UPLOAD_FOLDER, filename))
                 image_urls.append(get_image_url(filename))
     
+    # Handle document upload
+    document_url = None
+    document_name = None
+    if 'document' in request.files:
+        document_file = request.files['document']
+        document_url, document_name = save_document(document_file)
+    
     data = request.form.to_dict()
     # Convert amenities from string to list if present
     if 'amenities' in data:
@@ -69,6 +77,8 @@ def create_room():
         accessibility_score=5.0,
         noise_level=5.0,
         image_urls=json.dumps(image_urls),
+        document_url=document_url,
+        document_name=document_name,
         approval_status='pending'
     )
     
@@ -107,6 +117,8 @@ def get_rooms():
         'accessibility_score': room.accessibility_score,
         'noise_level': room.noise_level,
         'image_urls': json.loads(room.image_urls),
+        'document_url': room.document_url,
+        'document_name': room.document_name,
         'approval_status': room.approval_status,
         'admin_notes': room.admin_notes
     } for room in rooms]
@@ -159,6 +171,20 @@ def update_room(room_id):
                     file.save(os.path.join(UPLOAD_FOLDER, filename))
                     new_image_urls.append(get_image_url(filename))
             room.image_urls = json.dumps(new_image_urls)
+    
+    # Handle document upload
+    if 'document' in request.files:
+        document_file = request.files['document']
+        if document_file:
+            # Delete old document if it exists
+            if room.document_url:
+                delete_document(room.document_url)
+            
+            # Save new document
+            document_url, document_name = save_document(document_file)
+            if document_url and document_name:
+                room.document_url = document_url
+                room.document_name = document_name
     
     # Process form data
     data = request.form.to_dict()
@@ -224,6 +250,10 @@ def delete_room(room_id):
                 old_path = os.path.join(UPLOAD_FOLDER, old_filename)
                 if os.path.exists(old_path):
                     os.remove(old_path)
+        
+        # Delete the room document if it exists
+        if room.document_url:
+            delete_document(room.document_url)
         
         # Delete related tenant ratings first
         TenantRating.query.filter_by(room_id=room_id).delete()

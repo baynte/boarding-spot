@@ -358,6 +358,74 @@
                   </v-card>
                 </v-col>
                 </v-row>
+
+                <!-- Document Upload Section -->
+                <v-col cols="12">
+                  <div class="d-flex align-center mb-4">
+                    <v-icon color="primary" class="mr-2">mdi-file-document</v-icon>
+                    <div class="text-h6 font-weight-medium">Room Documents</div>
+                  </div>
+                  <v-file-input
+                    v-model="roomDocument"
+                    accept=".pdf"
+                    label="Upload Room Document (PDF only)"
+                    hint="Upload a PDF document (max 5MB)"
+                    persistent-hint
+                    show-size
+                    variant="outlined"
+                    density="comfortable"
+                    prepend-inner-icon="mdi-file-pdf"
+                    class="rounded-lg"
+                    truncate-length="25"
+                    :loading="loading"
+                  >
+                    <template v-slot:selection="{ fileNames }">
+                      <v-chip
+                        v-for="fileName in fileNames"
+                        :key="fileName"
+                        size="small"
+                        color="primary"
+                        variant="flat"
+                        class="me-2"
+                        prepend-icon="mdi-file-pdf"
+                      >
+                        {{ fileName }}
+                      </v-chip>
+                    </template>
+                  </v-file-input>
+                  
+                  <!-- Current Document Display -->
+                  <v-card v-if="editedItem.document_url" variant="outlined" class="mt-4 pa-4 rounded-lg">
+                    <div class="d-flex align-center justify-space-between">
+                      <div class="d-flex align-center">
+                        <v-icon color="primary" class="mr-2">mdi-file-pdf</v-icon>
+                        <div>
+                          <div class="text-subtitle-1 font-weight-medium">{{ editedItem.document_name }}</div>
+                          <div class="text-caption text-medium-emphasis">Current document</div>
+                        </div>
+                      </div>
+                      <div class="d-flex gap-2">
+                        <v-btn
+                          color="primary"
+                          variant="text"
+                          prepend-icon="mdi-eye"
+                          @click="openPreview(editedItem.document_url)"
+                        >
+                          Preview
+                        </v-btn>
+                        <!-- <v-btn
+                          color="primary"
+                          variant="text"
+                          prepend-icon="mdi-download"
+                          :href="editedItem.document_url"
+                          target="_blank"
+                        >
+                          Download
+                        </v-btn> -->
+                      </div>
+                    </div>
+                  </v-card>
+                </v-col>
               </v-container>
               </v-form>
             </v-card-text>
@@ -376,6 +444,34 @@
             Save
           </v-btn>
         </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+    <!-- Document Preview Modal -->
+    <v-dialog v-model="previewDialog" max-width="800px" fullscreen>
+      <v-card class="rounded-lg">
+        <v-card-title class="d-flex align-center pa-3 bg-primary">
+          <v-icon size="25" color="white" class="mr-2">mdi-file-pdf</v-icon>
+          <span class="text-h5 font-weight-medium white--text">Document Preview</span>
+          <v-spacer></v-spacer>
+          <v-btn
+            icon="mdi-close"
+            variant="text"
+            size="small"
+            color="white"
+            @click="previewDialog = false"
+          ></v-btn>
+        </v-card-title>
+        <v-card-text class="pa-0">
+          <iframe
+            v-if="previewUrl"
+            :src="previewUrl"
+            width="100%"
+            height="100%"
+            style="height: calc(100vh - 64px);"
+            frameborder="0"
+          ></iframe>
+        </v-card-text>
       </v-card>
     </v-dialog>
 
@@ -503,6 +599,34 @@
         </div>
       </template>
 
+      <!-- Document Column -->
+      <template v-slot:item.document_url="{ item }">
+        <div v-if="item.document_url" class="d-flex align-center gap-2">
+          <v-btn
+            color="primary"
+            variant="text"
+            size="small"
+            prepend-icon="mdi-eye"
+            @click="openPreview(item.document_url)"
+          >
+            Preview
+          </v-btn>
+          <!-- <v-btn
+            color="primary"
+            variant="text"
+            size="small"
+            prepend-icon="mdi-download"
+            :href="item.document_url"
+            target="_blank"
+          >
+            {{ item.document_name }}
+          </v-btn> -->
+        </div>
+        <div v-else class="text-medium-emphasis">
+          No document
+        </div>
+      </template>
+
       <!-- Approval Status Column -->
       <template v-slot:item.approval_status="{ item }">
         <v-chip
@@ -591,9 +715,12 @@ import LeafletMap from '@/components/LeafletMap.vue'
 
 const form = ref(null)
 const dialog = ref(false)
+const previewDialog = ref(false)
+const previewUrl = ref('')
 const loading = ref(false)
 const rooms = ref([])
 const roomImages = ref(null)
+const roomDocument = ref(null)
 const search = ref('')
 const snackbar = ref(false)
 const snackbarText = ref('')
@@ -614,6 +741,8 @@ const editedItem = ref({
   living_space_type: '',
   amenities: [],
   image_urls: null,
+  document_url: null,
+  document_name: null,
   availability: true,
   latitude: null,
   longitude: null,
@@ -708,6 +837,7 @@ const headers = [
   { title: 'Location', key: 'location' },
   { title: 'Rental type', key: 'living_space_type' },
   { title: 'Amenities', key: 'amenities' },
+  { title: 'Document', key: 'document_url' },
   { title: 'Approval Status', key: 'approval_status' },
   { title: 'Availability', key: 'availability' },
   { title: 'Actions', key: 'actions', sortable: false },
@@ -747,6 +877,7 @@ const editItem = (item) => {
 const close = () => {
   dialog.value = false
   roomImages.value = null
+  roomDocument.value = null
   markerPosition.value = null
   editedItem.value = {
     id: null,
@@ -758,6 +889,8 @@ const close = () => {
     living_space_type: '',
     amenities: [],
     image_urls: null,
+    document_url: null,
+    document_name: null,
     availability: true,
     latitude: null,
     longitude: null,
@@ -795,6 +928,11 @@ const save = async () => {
       for (const file of roomImages.value) {
         formData.append('images', file)
       }
+    }
+
+    // Handle document upload
+    if (roomDocument.value) {
+      formData.append('document', roomDocument.value)
     }
 
     if (editedItem.value.id) {
@@ -913,6 +1051,15 @@ const hasPendingRooms = computed(() => {
 const pendingRoomsCount = computed(() => {
   return rooms.value.filter(room => room.approval_status === 'pending').length
 })
+
+const openPreview = (documentUrl) => {
+  if (!documentUrl) return
+  // Get the API base URL from environment variables
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'
+  // Construct the full URL for the document
+  previewUrl.value = `${apiBaseUrl}${documentUrl}`
+  previewDialog.value = true
+}
 </script>
 
 <style scoped>
