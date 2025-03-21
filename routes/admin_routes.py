@@ -170,6 +170,7 @@ def get_pending_rooms():
             'amenities': amenities,
             'image_urls': image_urls,
             'created_at': room.created_at.isoformat(),
+            'document_url': room.document_url,
             'landlord': {
                 'id': landlord.id,
                 'email': landlord.email,

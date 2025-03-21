@@ -583,6 +583,26 @@
                                         {{ detail.value }}
                                       </v-list-item-title>
                                     </v-list-item>
+                                    <v-list-item>
+                                      <template v-slot:prepend>
+                                        <v-icon color="primary" class="mr-2">mdi-file-document</v-icon>
+                                      </template>
+                                      <v-list-item-title>
+                                        <span class="font-weight-medium">Document:</span>
+                                        <div v-if="room.document_url" class="d-flex align-center gap-2 mt-1">
+                                          <v-btn
+                                            color="primary"
+                                            variant="text"
+                                            size="small"
+                                            prepend-icon="mdi-eye"
+                                            @click="openPreview(room.document_url)"
+                                          >
+                                            Preview Document
+                                          </v-btn>
+                                        </div>
+                                        <span v-else class="text-medium-emphasis">No document uploaded</span>
+                                      </v-list-item-title>
+                                    </v-list-item>
                                   </v-list>
                                 </v-card-text>
                               </v-card>
@@ -656,26 +676,22 @@
                                 variant="outlined"
                                 class="mb-4"
                               ></v-textarea>
-
-                              <div class="d-flex justify-end gap-4">
+                              <div class="d-flex justify-end gap-2">
                                 <v-btn
                                   color="error"
-                                  variant="outlined"
+                                  variant="elevated"
                                   prepend-icon="mdi-close"
                                   @click="rejectRoom(room)"
-                                  :disabled="!room.adminNotes"
-                                  size="large"
                                 >
-                                  Reject Listing
+                                  Reject
                                 </v-btn>
                                 <v-btn
                                   color="success"
                                   variant="elevated"
                                   prepend-icon="mdi-check"
                                   @click="approveRoom(room)"
-                                  size="large"
                                 >
-                                  Approve Listing
+                                  Approve
                                 </v-btn>
                               </div>
                             </v-card-text>
@@ -708,6 +724,34 @@
             </v-col>
           </v-row>
         </v-window-item>
+
+        <!-- Document Preview Modal -->
+        <v-dialog v-model="previewDialog" max-width="800px" fullscreen>
+          <v-card class="rounded-lg">
+            <v-card-title class="d-flex align-center pa-3 bg-primary">
+              <v-icon size="25" color="white" class="mr-2">mdi-file-pdf</v-icon>
+              <span class="text-h5 font-weight-medium white--text">Document Preview</span>
+              <v-spacer></v-spacer>
+              <v-btn
+                icon="mdi-close"
+                variant="text"
+                size="small"
+                color="white"
+                @click="previewDialog = false"
+              ></v-btn>
+            </v-card-title>
+            <v-card-text class="pa-0">
+              <iframe
+                v-if="previewUrl"
+                :src="previewUrl"
+                width="100%"
+                height="100%"
+                style="height: calc(100vh - 64px);"
+                frameborder="0"
+              ></iframe>
+            </v-card-text>
+          </v-card>
+        </v-dialog>
 
         <!-- Approved Landlords Tab -->
         <v-window-item value="approved-landlords">
@@ -1520,4 +1564,18 @@ onMounted(() => {
   fetchUsers()
   fetchPendingRooms()
 })
+
+// Add new refs for document preview
+const previewDialog = ref(false)
+const previewUrl = ref('')
+
+// Add openPreview function
+const openPreview = (documentUrl) => {
+  if (!documentUrl) return
+  // Get the API base URL from environment variables
+  const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000'
+  // Construct the full URL for the document
+  previewUrl.value = `${apiBaseUrl}${documentUrl}`
+  previewDialog.value = true
+}
 </script>
