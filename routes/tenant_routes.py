@@ -333,14 +333,6 @@ def search_rooms():
                 # If distance is unknown, use a neutral score
                 distance_score = 0.5
             
-            # Calculate capacity match score
-            if min_capacity is not None:
-                # Binary score: meets minimum (1.0) or doesn't (0.0)
-                capacity_score = 1.0 if room.capacity >= min_capacity else 0.0
-            else:
-                # If no min capacity specified, score based on relative capacity (higher = better)
-                capacity_score = room.capacity / 10.0  # Assuming max reasonable capacity is 10
-            
             # Calculate amenity match score
             room_amenities = json.loads(room.amenities) if room.amenities else []
             
@@ -365,18 +357,14 @@ def search_rooms():
                 living_space_match = 0.5  # Neutral score if no type preference
             
             # Step 2: Create a row in the decision matrix with all the normalized values (0-1 scale)
-            # Naa sa ibabaw ang pag kuha sa row
-            
             row = [
-                distance_score,      # Distance score (0-1) - NEW
+                distance_score,      # Distance score (0-1)
                 price_score,         # Price match (0-1)
                 safety,              # Safety score (0-1)
                 amenity_score,       # Amenity match (0-1)
                 cleanliness,         # Cleanliness score (0-1)
                 accessibility,       # Accessibility score (0-1)
-                noise,               # Noise score (0-1)
-                capacity_score,      # Capacity match (0-1)
-                living_space_match   # Rental type match (0-1)
+                noise                # Noise score (0-1)
             ]
             decision_matrix.append(row)
         
@@ -389,15 +377,13 @@ def search_rooms():
         # Step 3: Define weights for each criterion (how important each factor is in the decision)
         # The weights determine how much each criterion influences the final score
         weights = np.array([
-            0.20,  # Distance weight - 20% importance
-            0.20,  # Price weight - 20% importance
-            0.15,  # Safety weight - 15% importance
-            0.15,  # Amenity weight - 15% importance
-            0.10,  # Cleanliness weight - 10% importance
-            0.10,  # Accessibility weight - 10% importance
-            0.05,  # Noise weight - 5% importance
-            0.03,  # Capacity weight - 3% importance
-            0.02   # Rental type weight - 2% importance
+            0.21,  # Distance weight - 21% importance
+            0.25,  # Price weight - 25% importance
+            0.18,  # Safety weight - 18% importance
+            0.14,  # Amenity weight - 14% importance
+            0.11,  # Cleanliness weight - 11% importance
+            0.07,  # Accessibility weight - 7% importance
+            0.04   # Noise weight - 4% importance
         ], dtype=np.float64)
         
         # Normalize weights to ensure they sum to 1
@@ -405,7 +391,7 @@ def search_rooms():
         
         # Step 4: Define impact direction for each criterion (1 = beneficial, -1 = non-beneficial)
         # All criteria are beneficial (higher value is better) in this case
-        impacts = np.array([1, 1, 1, 1, 1, 1, 1, 1, 1], dtype=np.float64)
+        impacts = np.array([1, 1, 1, 1, 1, 1, 1], dtype=np.float64)
         
         # Step 5: Calculate TOPSIS scores using the external topsispy library
         # TOPSIS algorithm:
