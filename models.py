@@ -65,6 +65,7 @@ class Room(db.Model):
     avg_cleanliness_rating = db.Column(db.Float)  # 1-10
     avg_accessibility_rating = db.Column(db.Float)  # 1-10
     avg_noise_level_rating = db.Column(db.Float)  # 1-10 (lower is better)
+    avg_amenity_rating = db.Column(db.Float)  # 1-10
     total_ratings = db.Column(db.Integer, default=0)  # Count of total ratings
 
 class TenantPreference(db.Model):
@@ -102,6 +103,7 @@ class TenantRating(db.Model):
     cleanliness_rating = db.Column(db.Float, nullable=False)  # 1-10
     accessibility_rating = db.Column(db.Float, nullable=False)  # 1-10
     noise_level_rating = db.Column(db.Float, nullable=False)  # 1-10
+    amenity_rating = db.Column(db.Float, default=5.0, nullable=False)  # 1-10
     comment = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

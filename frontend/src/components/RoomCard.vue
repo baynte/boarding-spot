@@ -282,6 +282,27 @@
                   ></v-progress-linear>
                 </div>
                 </v-list-item>
+
+                <!-- Amenities Score -->
+                <v-list-item>
+                <div class="w-100">
+                  <div class="d-flex align-center justify-space-between mb-1">
+                  <div class="d-flex align-center">
+                    <v-icon size="20" :color="getScoreColor(room.avg_amenity_rating)" class="me-2">mdi-home-group</v-icon>
+                    <span class="text-body-2">Amenities</span>
+                  </div>
+                  <v-chip size="x-small" :color="getScoreColor(room.avg_amenity_rating)" label>
+                    {{ room.avg_amenity_rating?.toFixed(1) || 0 }}/10
+                  </v-chip>
+                  </div>
+                  <v-progress-linear
+                  :model-value="(room.avg_amenity_rating || 0) * 10"
+                  :color="getScoreColor(room.avg_amenity_rating)"
+                  height="6"
+                  rounded
+                  ></v-progress-linear>
+                </div>
+                </v-list-item>
               </v-list>
               </v-expansion-panel-text>
             </v-expansion-panel>
@@ -388,7 +409,7 @@
             >
             <span class="text-body-2">Safety:</span>
             <v-rating
-              :model-value="room.safety_score"
+              :model-value="room.safety_score / 2"
               color="warning"
               half-increments
               readonly
@@ -406,7 +427,7 @@
             >
             <span class="text-body-2">Cleanliness:</span>
             <v-rating
-              :model-value="room.cleanliness_score"
+              :model-value="room.cleanliness_score / 2"
               color="warning"
               half-increments
               readonly
@@ -424,7 +445,7 @@
             >
             <span class="text-body-2">Accessibility:</span>
             <v-rating
-              :model-value="room.accessibility_score"
+              :model-value="room.accessibility_score / 2"
               color="warning"
               half-increments
               readonly
@@ -442,7 +463,7 @@
             >
             <span class="text-body-2">Noise Level:</span>
             <v-rating
-              :model-value="10 - room.noise_level"
+              :model-value="(10 - room.noise_level) / 2"
               color="warning"
               half-increments
               readonly
@@ -451,6 +472,24 @@
               class="ms-2"
             ></v-rating>
             <span class="text-caption ms-2">({{ room.noise_level?.toFixed(1) || 0 }})</span>
+          </div>
+
+          <!-- Amenities Rating -->
+          <div class="d-flex align-center mb-2">
+            <v-icon size="22" :color="getScoreColor(room.avg_amenity_rating)" class="me-1"
+              >mdi-home-group</v-icon
+            >
+            <span class="text-body-2">Amenities:</span>
+            <v-rating
+              :model-value="room.avg_amenity_rating / 2"
+              color="warning"
+              half-increments
+              readonly
+              density="compact"
+              size="small"
+              class="ms-2"
+            ></v-rating>
+            <span class="text-caption ms-2">({{ room.avg_amenity_rating?.toFixed(1) || 0 }})</span>
           </div>
         </div>
         <div v-else class="text-body-2 text-grey">No ratings yet</div>
@@ -697,6 +736,14 @@
                       <span class="text-body-2">Noise Level: {{ room.noise_level }}/10</span>
                     </div>
                   </v-col>
+                  <v-col cols="6">
+                    <div class="d-flex align-center mb-1">
+                      <v-icon size="25" :color="getScoreColor(room.avg_amenity_rating)" class="me-1"
+                        >mdi-home-group</v-icon
+                      >
+                      <span class="text-body-2">Amenities: {{ room.avg_amenity_rating }}/10</span>
+                    </div>
+                  </v-col>
                 </v-row>
 
                 <!-- Contact Information -->
@@ -825,8 +872,9 @@ const averageRating = computed(() => {
     (props.room.avg_safety_rating +
       props.room.avg_cleanliness_rating +
       props.room.avg_accessibility_rating +
-      (10 - props.room.avg_noise_level_rating)) /
-    4
+      (10 - props.room.avg_noise_level_rating) +
+      props.room.avg_amenity_rating) /
+    5
   )
 })
 
@@ -835,7 +883,10 @@ const handleRatingUpdate = async (newRating) => {
   // Refresh room data to get updated average ratings
   try {
     const response = await axios.get(`/rating/room/${props.room.id}`)
+    console.log('Rating update response:', response.data)
+    console.log('Before update:', JSON.stringify(props.room.avg_amenity_rating))
     Object.assign(props.room, response.data.summary)
+    console.log('After update:', JSON.stringify(props.room.avg_amenity_rating))
   } catch (error) {
     console.error('Error refreshing room ratings:', error)
   }

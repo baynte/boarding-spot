@@ -22,7 +22,7 @@ def submit_rating(room_id):
         data = request.get_json()
         
         # Validate rating values
-        required_fields = ['safety_rating', 'cleanliness_rating', 'accessibility_rating', 'noise_level_rating']
+        required_fields = ['safety_rating', 'cleanliness_rating', 'accessibility_rating', 'noise_level_rating', 'amenity_rating']
         for field in required_fields:
             if field not in data:
                 return jsonify({'error': f'Missing required field: {field}'}), 400
@@ -46,6 +46,7 @@ def submit_rating(room_id):
                 cleanliness_rating=data['cleanliness_rating'],
                 accessibility_rating=data['accessibility_rating'],
                 noise_level_rating=data['noise_level_rating'],
+                amenity_rating=data['amenity_rating'],
                 comment=data.get('comment')
             )
             db.session.add(rating)
@@ -56,6 +57,7 @@ def submit_rating(room_id):
             func.avg(TenantRating.cleanliness_rating).label('avg_cleanliness'),
             func.avg(TenantRating.accessibility_rating).label('avg_accessibility'),
             func.avg(TenantRating.noise_level_rating).label('avg_noise'),
+            func.avg(TenantRating.amenity_rating).label('avg_amenity'),
             func.count(TenantRating.id).label('total')
         ).filter(TenantRating.room_id == room_id).first()
 
@@ -71,7 +73,21 @@ def submit_rating(room_id):
         room.avg_cleanliness_rating = room.cleanliness_score
         room.avg_accessibility_rating = room.accessibility_score
         room.avg_noise_level_rating = room.noise_level
-
+        
+        # Handle null amenity_rating values
+        room.avg_amenity_rating = float(avg_ratings.avg_amenity or 0)
+        # If avg_amenity_rating is 0 and there are ratings, it might be because all are NULL
+        # In that case, check for NULL values and calculate manually if needed
+        if room.avg_amenity_rating == 0 and room.total_ratings > 0:
+            ratings_with_amenities = TenantRating.query.filter(
+                TenantRating.room_id == room_id,
+                TenantRating.amenity_rating.isnot(None)
+            ).count()
+            
+            if ratings_with_amenities == 0:
+                # All amenity_ratings are NULL, set a default average
+                room.avg_amenity_rating = 5.0
+            
         db.session.commit()
         
         return jsonify({
@@ -81,6 +97,7 @@ def submit_rating(room_id):
                 'cleanliness_rating': rating.cleanliness_rating,
                 'accessibility_rating': rating.accessibility_rating,
                 'noise_level_rating': rating.noise_level_rating,
+                'amenity_rating': rating.amenity_rating,
                 'comment': rating.comment,
                 'created_at': rating.created_at.isoformat(),
                 'updated_at': rating.updated_at.isoformat()
@@ -90,6 +107,7 @@ def submit_rating(room_id):
                 'cleanliness_score': room.cleanliness_score,
                 'accessibility_score': room.accessibility_score,
                 'noise_level': room.noise_level,
+                'avg_amenity_rating': room.avg_amenity_rating,
                 'total_ratings': room.total_ratings
             }
         })
@@ -113,6 +131,7 @@ def get_room_ratings(room_id):
                 'cleanliness_rating': rating.cleanliness_rating,
                 'accessibility_rating': rating.accessibility_rating,
                 'noise_level_rating': rating.noise_level_rating,
+                'amenity_rating': rating.amenity_rating,
                 'comment': rating.comment,
                 'created_at': rating.created_at.isoformat(),
                 'updated_at': rating.updated_at.isoformat()
@@ -122,6 +141,7 @@ def get_room_ratings(room_id):
                 'avg_cleanliness_rating': Room.query.get(room_id).avg_cleanliness_rating,
                 'avg_accessibility_rating': Room.query.get(room_id).avg_accessibility_rating,
                 'avg_noise_level_rating': Room.query.get(room_id).avg_noise_level_rating,
+                'avg_amenity_rating': Room.query.get(room_id).avg_amenity_rating,
                 'total_ratings': Room.query.get(room_id).total_ratings
             }
         })
@@ -138,11 +158,12 @@ def get_user_ratings():
         return jsonify([{
             'id': rating.id,
             'room_id': rating.room_id,
-            'room_title': rating.room.title,
+            'room_title': rating.room.title if rating.room else None,
             'safety_rating': rating.safety_rating,
             'cleanliness_rating': rating.cleanliness_rating,
             'accessibility_rating': rating.accessibility_rating,
             'noise_level_rating': rating.noise_level_rating,
+            'amenity_rating': rating.amenity_rating,
             'comment': rating.comment,
             'created_at': rating.created_at.isoformat(),
             'updated_at': rating.updated_at.isoformat()

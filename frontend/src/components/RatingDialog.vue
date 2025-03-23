@@ -34,7 +34,8 @@
               { label: 'Safety', model: 'safety_rating', icon: 'mdi-shield-check' },
               { label: 'Cleanliness', model: 'cleanliness_rating', icon: 'mdi-broom' },
               { label: 'Accessibility', model: 'accessibility_rating', icon: 'mdi-door' },
-              { label: 'Noise Level', model: 'noise_level_rating', icon: 'mdi-volume-high' }
+              { label: 'Noise Level', model: 'noise_level_rating', icon: 'mdi-volume-high' },
+              { label: 'Amenities', model: 'amenity_rating', icon: 'mdi-home-group' }
             ]" :key="index">
               <v-col cols="12" class="py-2">
                 <div class="d-flex align-center justify-space-between mb-2">
@@ -143,6 +144,7 @@ const rating = ref({
   cleanliness_rating: props.existingRating?.cleanliness_rating || 5,
   accessibility_rating: props.existingRating?.accessibility_rating || 5,
   noise_level_rating: props.existingRating?.noise_level_rating || 5,
+  amenity_rating: props.existingRating?.amenity_rating || 5,
   comment: props.existingRating?.comment || ''
 })
 

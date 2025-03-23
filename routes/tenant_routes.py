@@ -532,6 +532,7 @@ def search_rooms():
                 'avg_cleanliness_rating': float(room.avg_cleanliness_rating) if room.avg_cleanliness_rating is not None else None,
                 'avg_accessibility_rating': float(room.avg_accessibility_rating) if room.avg_accessibility_rating is not None else None,
                 'avg_noise_level_rating': float(room.avg_noise_level_rating) if room.avg_noise_level_rating is not None else None,
+                'avg_amenity_rating': float(room.avg_amenity_rating) if room.avg_amenity_rating is not None else None,
                 'total_ratings': int(room.total_ratings) if room.total_ratings is not None else 0,
                 'landlord': {
                     'id': room.landlord.id if room.landlord else None,
